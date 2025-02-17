@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FX Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.4.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <h1>FX Chart</h1>
+    <div>
+        <label for="pair">FX Pair: </label>
+        <input type="text" id="pair" value="EURUSD=X" />
+    </div>
+    <div>
+        <label for="period">Period: </label>
+        <select id="period">
+            <option value="1d">1 Day</option>
+            <option value="1mo">1 Month</option>
+            <option value="3mo">3 Months</option>
+            <option value="6mo">6 Months</option>
+            <option value="1y">1 Year</option>
+            <option value="2y">2 Years</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="fibonacci">Show Fibonacci</label>
+        <input type="checkbox" id="fibonacci" />
+    </div>
+    
+    <div>
+        <label for="elliot">Show Elliott Wave</label>
+        <input type="checkbox" id="elliot" />
+    </div>
+
+    <button id="fetchData">Fetch Data</button>
+
+    <div id="chart" style="height: 500px;"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

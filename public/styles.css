@@ -1,0 +1,14 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+#chartContainer {
+    width: 800px;
+    height: 400px;
+    margin: auto;
+}
