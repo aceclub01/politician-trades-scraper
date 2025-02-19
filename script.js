@@ -4,6 +4,7 @@ const periodInput = document.getElementById('period');
 const fibonacciInput = document.getElementById('fibonacci');
 const elliotInput = document.getElementById('elliot');
 const chartDiv = document.getElementById('chart');
+
 let chart;
 let lineSeries;
 let fibonacciLines = [];
