@@ -36,7 +36,6 @@ const createChart = () => {
     });
 
     lineSeries = chart.addCandlestickSeries();
-   
 };
 
 // Function to handle null values (interpolation or previous value)
@@ -61,26 +60,6 @@ const handleNullValue = (data, index, field) => {
     return value;
 };
 
-// Function to prevent extreme data spikes by smoothing out values that are too far apart
-const preventExtremeSpikes = (prevData, currData, nextData) => {
-    if (prevData && currData && nextData) {
-        const maxAllowedChange = 0.1; // Maximum allowed percentage change
-        const prevClose = prevData.close;
-        const currClose = currData.close;
-        const nextClose = nextData.close;
-
-        // Calculate percentage change from previous to current and current to next
-        const changePrev = Math.abs((currClose - prevClose) / prevClose);
-        const changeNext = Math.abs((nextClose - currClose) / currClose);
-
-        // If the change is too large, smooth the current value
-        if (changePrev > maxAllowedChange || changeNext > maxAllowedChange) {
-            currData.close = (prevClose + nextClose) / 2;
-        }
-    }
-    return currData;
-};
-
 // Fetch FX data from the server
 const fetchFXData = async (pair, period) => {
     try {
@@ -92,20 +71,14 @@ const fetchFXData = async (pair, period) => {
             return;
         }
 
-        // Prepare data for chart with null handling and smoothing
-        const chartData = data.chart.result[0].timestamp.map((timestamp, index) => {
-            const prevData = data.chart.result[0].indicators.quote[0][index - 1];
-            const currData = {
-                time: timestamp,
-                open: handleNullValue(data, index, 'open'),
-                high: handleNullValue(data, index, 'high'),
-                low: handleNullValue(data, index, 'low'),
-                close: handleNullValue(data, index, 'close'),
-            };
-            const nextData = data.chart.result[0].indicators.quote[0][index + 1];
-
-            return preventExtremeSpikes(prevData, currData, nextData);
-        });
+        // Prepare data for chart with null handling
+        const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
+            time: timestamp,
+            open: handleNullValue(data, index, 'open'),
+            high: handleNullValue(data, index, 'high'),
+            low: handleNullValue(data, index, 'low'),
+            close: handleNullValue(data, index, 'close'),
+        }));
 
         // Debugging logs
         console.log('Fetched data:', data);
@@ -213,7 +186,7 @@ const drawDiagonalElliotWave = (chartData) => {
 
 // Draw diagonal lines connecting significant highs and lows based on recent data
 const drawHighLowDiagonals = (chartData) => {
-    const interval = parseInt(intervalSlider.value); // Get slider value for interval
+    const interval = 50; // Number of previous data points to consider (adjustable)
     const dataLength = chartData.length;
 
     // Ensure there are enough data points
@@ -225,93 +198,53 @@ const drawHighLowDiagonals = (chartData) => {
     // Focus on the last 'interval' number of points
     const recentData = chartData.slice(dataLength - interval);
 
-    // Divide the interval into 3 sub-intervals
-    const subIntervalLength = Math.floor(recentData.length / 3);
-    const subIntervals = [
-        recentData.slice(0, subIntervalLength), // First sub-interval
-        recentData.slice(subIntervalLength, 2 * subIntervalLength), // Second sub-interval
-        recentData.slice(2 * subIntervalLength), // Third sub-interval
-    ];
+    // Find the highest high and lowest low within this interval
+    const highs = recentData.map(data => data.high);
+    const lows = recentData.map(data => data.low);
 
-    // Remove old lines
-    highLines.forEach(line => chart.removeSeries(line));
-    lowLines.forEach(line => chart.removeSeries(line));
-    highLines = [];
-    lowLines = [];
+    const highestHigh = Math.max(...highs);
+    const lowestLow = Math.min(...lows);
 
-    // Draw diagonal lines for each sub-interval
-    subIntervals.forEach((subInterval, index) => {
-        // Find the most significant high and low within this sub-interval
-        let mostSignificantHigh = { time: subInterval[0].time, value: subInterval[0].high };
-        let mostSignificantLow = { time: subInterval[0].time, value: subInterval[0].low };
+    // Find the corresponding indices for the highest high and lowest low
+    const highestHighIndex = highs.indexOf(highestHigh);
+    const lowestLowIndex = lows.indexOf(lowestLow);
 
-        for (let i = 1; i < subInterval.length; i++) {
-            // Update most significant high
-            if (subInterval[i].high > mostSignificantHigh.value) {
-                mostSignificantHigh = { time: subInterval[i].time, value: subInterval[i].high };
-            }
-
-            // Update most significant low
-            if (subInterval[i].low < mostSignificantLow.value) {
-                mostSignificantLow = { time: subInterval[i].time, value: subInterval[i].low };
-            }
-        }
-
-        // Draw a single diagonal resistance line for this sub-interval
-        if (mostSignificantHigh.value !== subInterval[0].high) {
-            const resistanceLine = chart.addLineSeries({
-                color: `rgba(255, ${100 - index * 40}, 0, 0.8)`, // Different shades of red
-                lineWidth: 1,
-            });
-
-            // Calculate the slope of the resistance line
-            const slopeHigh = (mostSignificantHigh.value - subInterval[0].high) / (mostSignificantHigh.time - subInterval[0].time);
-
-            // Extend the resistance line beyond the last high point
-            const projectedHighTime = chartData[chartData.length - 1].time; // Current time
-            const projectedHighValue = mostSignificantHigh.value + slopeHigh * (projectedHighTime - mostSignificantHigh.time);
-
-            resistanceLine.setData([
-                { time: subInterval[0].time, value: subInterval[0].high }, // Start point
-                { time: mostSignificantHigh.time, value: mostSignificantHigh.value }, // Most significant high
-                { time: projectedHighTime, value: projectedHighValue }, // Projected point
-            ]);
-
-            highLines.push(resistanceLine);
-        }
-
-        // Draw a single diagonal support line for this sub-interval
-        if (mostSignificantLow.value !== subInterval[0].low) {
-            const supportLine = chart.addLineSeries({
-                color: `rgba(0, ${100 + index * 40}, 0, 0.8)`, // Different shades of green
-                lineWidth: 1,
-            });
-
-            // Calculate the slope of the support line
-            const slopeLow = (mostSignificantLow.value - subInterval[0].low) / (mostSignificantLow.time - subInterval[0].time);
-
-            // Extend the support line beyond the last low point
-            const projectedLowTime = chartData[chartData.length - 1].time; // Current time
-            const projectedLowValue = mostSignificantLow.value + slopeLow * (projectedLowTime - mostSignificantLow.time);
-
-            supportLine.setData([
-                { time: subInterval[0].time, value: subInterval[0].low }, // Start point
-                { time: mostSignificantLow.time, value: mostSignificantLow.value }, // Most significant low
-                { time: projectedLowTime, value: projectedLowValue }, // Projected point
-            ]);
-
-            lowLines.push(supportLine);
-        }
+    const highLine = chart.addLineSeries({
+        color: 'rgba(255, 0, 0, 0.8)',
+        lineWidth: 2,
     });
+
+    const lowLine = chart.addLineSeries({
+        color: 'rgba(0, 255, 0, 0.8)',
+        lineWidth: 2,
+    });
+
+    // Draw the diagonal lines connecting the highest high and lowest low
+    highLine.setData([
+        { time: recentData[0].time, value: recentData[highestHighIndex].high },
+        { time: chartData[dataLength - 1].time, value: recentData[highestHighIndex].high }
+    ]);
+
+    lowLine.setData([
+        { time: recentData[0].time, value: recentData[lowestLowIndex].low },
+        { time: chartData[dataLength - 1].time, value: recentData[lowestLowIndex].low }
+    ]);
+
+    highLines.push(highLine);
+    lowLines.push(lowLine);
 };
+
+// Handle the fetch button click
+fetchDataButton.addEventListener('click', () => {
+    const pair = pairInput.value.trim();
+    const period = periodInput.value;
+
+    if (pair) {
+        fetchFXData(pair, period);
+    } else {
+        alert('Please enter a valid FX pair');
+    }
+});
 
 // Initialize chart
 createChart();
-
-// Event listener for the button
-fetchDataButton.addEventListener('click', () => {
-    const pair = pairInput.value;
-    const period = periodInput.value;
-    fetchFXData(pair, period);
-});
-

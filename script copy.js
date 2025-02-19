@@ -225,13 +225,21 @@ const drawHighLowDiagonals = (chartData) => {
     // Focus on the last 'interval' number of points
     const recentData = chartData.slice(dataLength - interval);
 
-    // Divide the interval into 3 sub-intervals
-    const subIntervalLength = Math.floor(recentData.length / 3);
-    const subIntervals = [
-        recentData.slice(0, subIntervalLength), // First sub-interval
-        recentData.slice(subIntervalLength, 2 * subIntervalLength), // Second sub-interval
-        recentData.slice(2 * subIntervalLength), // Third sub-interval
-    ];
+    // Find the most significant high and low within this interval
+    let mostSignificantHigh = { time: recentData[0].time, value: recentData[0].high };
+    let mostSignificantLow = { time: recentData[0].time, value: recentData[0].low };
+
+    for (let i = 1; i < recentData.length; i++) {
+        // Update most significant high
+        if (recentData[i].high > mostSignificantHigh.value) {
+            mostSignificantHigh = { time: recentData[i].time, value: recentData[i].high };
+        }
+
+        // Update most significant low
+        if (recentData[i].low < mostSignificantLow.value) {
+            mostSignificantLow = { time: recentData[i].time, value: recentData[i].low };
+        }
+    }
 
     // Remove old lines
     highLines.forEach(line => chart.removeSeries(line));
@@ -239,70 +247,51 @@ const drawHighLowDiagonals = (chartData) => {
     highLines = [];
     lowLines = [];
 
-    // Draw diagonal lines for each sub-interval
-    subIntervals.forEach((subInterval, index) => {
-        // Find the most significant high and low within this sub-interval
-        let mostSignificantHigh = { time: subInterval[0].time, value: subInterval[0].high };
-        let mostSignificantLow = { time: subInterval[0].time, value: subInterval[0].low };
+    // Draw a single diagonal resistance line connecting the most significant high points
+    if (mostSignificantHigh.value !== recentData[0].high) {
+        const resistanceLine = chart.addLineSeries({
+            color: 'rgba(255, 0, 0, 0.8)', // Red for resistance
+            lineWidth: 2,
+        });
 
-        for (let i = 1; i < subInterval.length; i++) {
-            // Update most significant high
-            if (subInterval[i].high > mostSignificantHigh.value) {
-                mostSignificantHigh = { time: subInterval[i].time, value: subInterval[i].high };
-            }
+        // Calculate the slope of the resistance line
+        const slopeHigh = (mostSignificantHigh.value - recentData[0].high) / (mostSignificantHigh.time - recentData[0].time);
 
-            // Update most significant low
-            if (subInterval[i].low < mostSignificantLow.value) {
-                mostSignificantLow = { time: subInterval[i].time, value: subInterval[i].low };
-            }
-        }
+        // Extend the resistance line beyond the last high point
+        const projectedHighTime = chartData[chartData.length - 1].time; // Current time
+        const projectedHighValue = mostSignificantHigh.value + slopeHigh * (projectedHighTime - mostSignificantHigh.time);
 
-        // Draw a single diagonal resistance line for this sub-interval
-        if (mostSignificantHigh.value !== subInterval[0].high) {
-            const resistanceLine = chart.addLineSeries({
-                color: `rgba(255, ${100 - index * 40}, 0, 0.8)`, // Different shades of red
-                lineWidth: 1,
-            });
+        resistanceLine.setData([
+            { time: recentData[0].time, value: recentData[0].high }, // Start point
+            { time: mostSignificantHigh.time, value: mostSignificantHigh.value }, // Most significant high
+            { time: projectedHighTime, value: projectedHighValue }, // Projected point
+        ]);
 
-            // Calculate the slope of the resistance line
-            const slopeHigh = (mostSignificantHigh.value - subInterval[0].high) / (mostSignificantHigh.time - subInterval[0].time);
+        highLines.push(resistanceLine);
+    }
 
-            // Extend the resistance line beyond the last high point
-            const projectedHighTime = chartData[chartData.length - 1].time; // Current time
-            const projectedHighValue = mostSignificantHigh.value + slopeHigh * (projectedHighTime - mostSignificantHigh.time);
+    // Draw a single diagonal support line connecting the most significant low points
+    if (mostSignificantLow.value !== recentData[0].low) {
+        const supportLine = chart.addLineSeries({
+            color: 'rgba(0, 255, 0, 0.8)', // Green for support
+            lineWidth: 2,
+        });
 
-            resistanceLine.setData([
-                { time: subInterval[0].time, value: subInterval[0].high }, // Start point
-                { time: mostSignificantHigh.time, value: mostSignificantHigh.value }, // Most significant high
-                { time: projectedHighTime, value: projectedHighValue }, // Projected point
-            ]);
+        // Calculate the slope of the support line
+        const slopeLow = (mostSignificantLow.value - recentData[0].low) / (mostSignificantLow.time - recentData[0].time);
 
-            highLines.push(resistanceLine);
-        }
+        // Extend the support line beyond the last low point
+        const projectedLowTime = chartData[chartData.length - 1].time; // Current time
+        const projectedLowValue = mostSignificantLow.value + slopeLow * (projectedLowTime - mostSignificantLow.time);
 
-        // Draw a single diagonal support line for this sub-interval
-        if (mostSignificantLow.value !== subInterval[0].low) {
-            const supportLine = chart.addLineSeries({
-                color: `rgba(0, ${100 + index * 40}, 0, 0.8)`, // Different shades of green
-                lineWidth: 1,
-            });
+        supportLine.setData([
+            { time: recentData[0].time, value: recentData[0].low }, // Start point
+            { time: mostSignificantLow.time, value: mostSignificantLow.value }, // Most significant low
+            { time: projectedLowTime, value: projectedLowValue }, // Projected point
+        ]);
 
-            // Calculate the slope of the support line
-            const slopeLow = (mostSignificantLow.value - subInterval[0].low) / (mostSignificantLow.time - subInterval[0].time);
-
-            // Extend the support line beyond the last low point
-            const projectedLowTime = chartData[chartData.length - 1].time; // Current time
-            const projectedLowValue = mostSignificantLow.value + slopeLow * (projectedLowTime - mostSignificantLow.time);
-
-            supportLine.setData([
-                { time: subInterval[0].time, value: subInterval[0].low }, // Start point
-                { time: mostSignificantLow.time, value: mostSignificantLow.value }, // Most significant low
-                { time: projectedLowTime, value: projectedLowValue }, // Projected point
-            ]);
-
-            lowLines.push(supportLine);
-        }
-    });
+        lowLines.push(supportLine);
+    }
 };
 
 // Initialize chart
