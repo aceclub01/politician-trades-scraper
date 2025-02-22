@@ -33,13 +33,27 @@ app.get('/fetchFundamentals', async (req, res) => {
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
 
+    // Check if the symbol is an FX pair
+    if (symbol.includes('=X')) {
+        return res.json([{
+            symbol,
+            message: 'Fundamentals not available for FX pairs.'
+        }]);
+    }
+
     const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${FMP_API_KEY}`;
     try {
         const response = await axios.get(url);
+
+        // Check if the response is valid
+        if (!Array.isArray(response.data) || response.data.length === 0) {
+            return res.status(404).json({ error: 'Symbol not found or no data available' });
+        }
+
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching fundamentals:', error.message);
-        res.status(500).json({ error: 'Failed to fetch fundamentals' });
+        console.error('Error fetching fundamentals:', error.response?.data || error.message);
+        res.status(500).json({ error: error.response?.data?.message || 'Failed to fetch fundamentals' });
     }
 });
 

@@ -15,7 +15,13 @@ async function fetchNews(query, limit) {
     try {
         console.log(`Fetching news for: ${query}`);
         const response = await fetch(`${API_BASE_URL}/fetchNews?symbol=${query}&limit=${limit}`);
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch news: ${response.statusText}`);
+        }
+
         const data = await response.json();
+        console.log('API Response:', data);
 
         // Check if the response is valid
         if (!Array.isArray(data)) {
