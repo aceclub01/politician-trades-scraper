@@ -34,8 +34,8 @@ const createChart = () => {
     });
 
     lineSeries = chart.addCandlestickSeries();
+    console.log('Chart initialized:', chart);
 };
-
 // Function to handle null values (interpolation or previous value)
 const handleNullValue = (data, index, field) => {
     let value = data.chart.result[0].indicators.quote[0][field][index];
