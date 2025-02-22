@@ -62,14 +62,15 @@ const handleNullValue = (data, index, field) => {
 const fetchFXData = async (pair, period) => {
     try {
         const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-
-
         const data = await response.json();
 
         if (data.error) {
             alert('Failed to fetch data');
             return;
         }
+
+        // Log the raw data returned by the API
+        console.log('Fetched data:', data);
 
         // Prepare data for chart with null handling
         const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
@@ -80,8 +81,7 @@ const fetchFXData = async (pair, period) => {
             close: handleNullValue(data, index, 'close'),
         }));
 
-        // Debugging logs
-        console.log('Fetched data:', data);
+        // Log the processed chart data
         console.log('Chart data:', chartData);
 
         // Remove old data
@@ -108,12 +108,10 @@ const fetchFXData = async (pair, period) => {
         if (elliotInput.checked) {
             drawElliotWave(chartData);
         }
-
     } catch (error) {
         console.error('Error fetching FX data:', error);
     }
 };
-
 // Draw Fibonacci levels
 const drawFibonacci = (chartData) => {
     const minPrice = Math.min(...chartData.map(data => data.low));
