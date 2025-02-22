@@ -4,6 +4,7 @@ const API_BASE_URL = 'https://politician-trades-scraper.onrender.com';
 // Fetch and display news using NewsAPI
 async function fetchNews(query, limit) {
     try {
+        console.log(`Fetching news for: ${query}`);
         const response = await fetch(`${API_BASE_URL}/fetchNews?symbol=${query}&limit=${limit}`);
         const data = await response.json();
 
@@ -36,11 +37,14 @@ async function fetchFundamentals(symbol) {
 
         // Step 1: Fetch data from the API
         const response = await fetch(`${API_BASE_URL}/fetchFundamentals?symbol=${symbol}`);
-        console.log('API Response:', response);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch fundamentals for ${symbol}: ${response.statusText}`);
+        }
 
         // Step 2: Parse the response as JSON
         const data = await response.json();
-        console.log('Parsed API Data:', data);
+        console.log('API Response:', data);
 
         // Step 3: Check if the symbol is an FX pair
         if (symbol.includes('=X')) {
@@ -112,6 +116,26 @@ async function fetchFundamentals(symbol) {
     }
 }
 
+// Fetch FX data
+async function fetchFXData(pair, period) {
+    try {
+        console.log(`Fetching FX data for pair: ${pair} with period: ${period}`);
+        const response = await fetch(`${API_BASE_URL}/fxdata?pair=${pair}&period=${period}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch FX data: ${response.statusText}`);
+        }
+
+        const fxData = await response.json();
+        console.log('FX Data:', fxData);
+
+        // Render your chart or data here using the FX data
+    } catch (error) {
+        console.error('Error fetching FX data:', error);
+        document.getElementById('fxData').innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
 // Fetch data when the "Fetch Data" button is clicked
 document.getElementById('fetchData').addEventListener('click', async () => {
     const pair = document.getElementById('pair').value; // Get the FX pair from the input field
@@ -120,10 +144,7 @@ document.getElementById('fetchData').addEventListener('click', async () => {
 
     try {
         // Fetch FX data
-        const fxResponse = await fetch(`${API_BASE_URL}/fxdata?pair=${pair}&period=${period}`);
-        const fxData = await fxResponse.json();
-        console.log('FX Data:', fxData);
-        // Render your chart here using the FX data
+        await fetchFXData(pair, period);
 
         // Fetch fundamentals based on the FX pair
         fetchFundamentals(pair);
