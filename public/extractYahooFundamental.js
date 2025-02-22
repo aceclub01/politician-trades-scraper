@@ -35,31 +35,28 @@ async function fetchFundamentals(symbol) {
     try {
         console.log(`Fetching fundamentals for symbol: ${symbol}`);
 
-        // Step 1: Fetch data from the API
         const response = await fetch(`${API_BASE_URL}/fetchFundamentals?symbol=${symbol}`);
-        
         if (!response.ok) {
             throw new Error(`Failed to fetch fundamentals for ${symbol}: ${response.statusText}`);
         }
 
-        // Step 2: Parse the response as JSON
         const data = await response.json();
         console.log('API Response:', data);
 
-        // Step 3: Check if the symbol is an FX pair
+        // Handle FX pairs
         if (symbol.includes('=X')) {
             console.log('Symbol is an FX pair. Skipping stock fundamentals.');
-            document.getElementById('mktCap').textContent = 'N/A (FX Pair)';
-            document.getElementById('targetPE').textContent = 'N/A (FX Pair)';
-            document.getElementById('eps').textContent = 'N/A (FX Pair)';
-            document.getElementById('oneYearTargetEst').textContent = 'N/A (FX Pair)';
-            document.getElementById('exDividendDate').textContent = 'N/A (FX Pair)';
-            document.getElementById('earningsDate').textContent = 'N/A (FX Pair)';
-            document.getElementById('fiftyTwoWeekRange').textContent = 'N/A (FX Pair)';
+            setTextContent('mktCap', 'N/A (FX Pair)');
+            setTextContent('targetPE', 'N/A (FX Pair)');
+            setTextContent('eps', 'N/A (FX Pair)');
+            setTextContent('oneYearTargetEst', 'N/A (FX Pair)');
+            setTextContent('exDividendDate', 'N/A (FX Pair)');
+            setTextContent('earningsDate', 'N/A (FX Pair)');
+            setTextContent('fiftyTwoWeekRange', 'N/A (FX Pair)');
             return;
         }
 
-        // Step 4: Handle stock data
+        // Handle stock data
         if (!Array.isArray(data) || data.length === 0) {
             throw new Error('Invalid or missing data from Financial Modeling Prep');
         }
@@ -67,55 +64,27 @@ async function fetchFundamentals(symbol) {
         const fundamentals = data[0];
         console.log('Fundamentals Object:', fundamentals);
 
-        // Step 5: Extract and display relevant fields
         const {
             mktCap,
             price,
             beta,
             lastDiv,
             range,
-            companyName,
-            exchange,
-            industry,
-            website,
-            description,
-            ceo,
-            sector,
-            image
         } = fundamentals;
 
-        console.log('Extracted Fields:', {
-            mktCap,
-            price,
-            beta,
-            lastDiv,
-            range,
-            companyName,
-            exchange,
-            industry,
-            website,
-            description,
-            ceo,
-            sector,
-            image
-        });
-
-        document.getElementById('mktCap').textContent = mktCap ? `$${mktCap.toLocaleString()}` : 'N/A';
-        document.getElementById('targetPE').textContent = beta || 'N/A';
-        document.getElementById('eps').textContent = price || 'N/A';
-        document.getElementById('oneYearTargetEst').textContent = range || 'N/A';
-        document.getElementById('exDividendDate').textContent = lastDiv || 'N/A';
-        document.getElementById('earningsDate').textContent = range || 'N/A';
-        document.getElementById('fiftyTwoWeekRange').textContent = range || 'N/A';
-
-        // Step 6: Log all available fields in the fundamentals object
-        console.log('All Available Fields:', Object.keys(fundamentals));
+        // Update the fundamentals display
+        setTextContent('mktCap', mktCap ? `$${mktCap.toLocaleString()}` : 'N/A');
+        setTextContent('targetPE', beta || 'N/A');
+        setTextContent('eps', price || 'N/A');
+        setTextContent('oneYearTargetEst', range || 'N/A');
+        setTextContent('exDividendDate', lastDiv || 'N/A');
+        setTextContent('earningsDate', range || 'N/A');
+        setTextContent('fiftyTwoWeekRange', range || 'N/A');
     } catch (error) {
         console.error('Error fetching fundamentals:', error);
         document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
-
 // Fetch FX data
 async function fetchFXData(pair, period) {
     try {
