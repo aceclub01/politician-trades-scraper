@@ -1,5 +1,14 @@
-// Base URL for the Render deployment
 const API_BASE_URL = 'https://politician-trades-scraper.onrender.com';
+
+// Helper function to safely set text content
+const setTextContent = (elementId, value) => {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = value;
+    } else {
+        console.error(`Element with ID '${elementId}' not found.`);
+    }
+};
 
 // Fetch and display news using NewsAPI
 async function fetchNews(query, limit) {
@@ -8,7 +17,7 @@ async function fetchNews(query, limit) {
         const response = await fetch(`${API_BASE_URL}/fetchNews?symbol=${query}&limit=${limit}`);
         const data = await response.json();
 
-        // Check if the response is an array
+        // Check if the response is valid
         if (!Array.isArray(data)) {
             throw new Error('Invalid or missing news data from NewsAPI');
         }
@@ -85,40 +94,21 @@ async function fetchFundamentals(symbol) {
         document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
-// Fetch FX data
-async function fetchFXData(pair, period) {
-    try {
-        console.log(`Fetching FX data for pair: ${pair} with period: ${period}`);
-        const response = await fetch(`${API_BASE_URL}/fxdata?pair=${pair}&period=${period}`);
-        
-        if (!response.ok) {
-            throw new Error(`Failed to fetch FX data: ${response.statusText}`);
-        }
-
-        const fxData = await response.json();
-        console.log('FX Data:', fxData);
-
-        // Render your chart or data here using the FX data
-    } catch (error) {
-        console.error('Error fetching FX data:', error);
-        document.getElementById('fxData').innerHTML = `<p>Error: ${error.message}</p>`;
-    }
-}
 
 // Fetch data when the "Fetch Data" button is clicked
 document.getElementById('fetchData').addEventListener('click', async () => {
-    const pair = document.getElementById('pair').value; // Get the FX pair from the input field
+    const pair = document.getElementById('pair').value.trim();
     const period = document.getElementById('period').value;
-    const newsLimit = document.getElementById('newsLimit').value; // Get the selected news limit
+    const newsLimit = document.getElementById('newsLimit').value;
 
     try {
         // Fetch FX data
         await fetchFXData(pair, period);
 
-        // Fetch fundamentals based on the FX pair
+        // Fetch fundamentals
         fetchFundamentals(pair);
 
-        // Fetch news based on the FX pair and selected limit
+        // Fetch news
         fetchNews(pair, parseInt(newsLimit, 10));
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -126,7 +116,7 @@ document.getElementById('fetchData').addEventListener('click', async () => {
 });
 
 // Example usage (initial load with default pair and limit)
-const defaultPair = document.getElementById('pair').value; // Get the default pair value
-const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10); // Get the default limit
-fetchFundamentals(defaultPair); // Fetch fundamentals for the default pair
-fetchNews(defaultPair, defaultLimit); // Fetch news for the default pair and limit
+const defaultPair = document.getElementById('pair').value.trim();
+const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10);
+fetchFundamentals(defaultPair);
+fetchNews(defaultPair, defaultLimit);
