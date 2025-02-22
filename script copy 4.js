@@ -408,3 +408,4 @@ intervalSlider.addEventListener('change', () => {
         fetchFXData(pair, period);
     }
 });
+
