@@ -28,8 +28,15 @@ async function fetchNews(query, limit) {
             throw new Error('Invalid or missing news data from NewsAPI');
         }
 
-        // Extract news headlines, dates, and links
+        // Get the news container
         const newsList = document.getElementById('newsHeadlines');
+        const topNews = document.getElementById('topNews');
+
+        if (!newsList || !topNews) {
+            throw new Error('News container elements not found in the DOM.');
+        }
+
+        // Extract news headlines, dates, and links
         newsList.innerHTML = data
             .slice(0, limit) // Limit the number of news articles
             .map(article => `
@@ -41,10 +48,14 @@ async function fetchNews(query, limit) {
             .join('');
     } catch (error) {
         console.error('Error fetching news:', error);
-        document.getElementById('topNews').innerHTML = `<p>Error: ${error.message}</p>`;
+        const topNews = document.getElementById('topNews');
+        if (topNews) {
+            topNews.innerHTML = `<p>Error: ${error.message}</p>`;
+        } else {
+            console.error('Top news container not found.');
+        }
     }
 }
-
 // Fetch and display fundamentals using FMP
 async function fetchFundamentals(symbol) {
     try {
@@ -97,7 +108,12 @@ async function fetchFundamentals(symbol) {
         setTextContent('fiftyTwoWeekRange', range || 'N/A');
     } catch (error) {
         console.error('Error fetching fundamentals:', error);
-        document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+        const fundamentalsContainer = document.getElementById('fundamentals');
+        if (fundamentalsContainer) {
+            fundamentalsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+        } else {
+            console.error('Fundamentals container not found.');
+        }
     }
 }
 
