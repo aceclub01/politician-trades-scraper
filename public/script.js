@@ -79,23 +79,19 @@ const drawDiagonalTrendlines = (chartData) => {
     const threeMonthsFromToday = new Date(today.setMonth(today.getMonth() + 3));
     const futureTime = Math.floor(threeMonthsFromToday.getTime() / 1000); // Convert to Unix timestamp
 
-    // Step 1: Identify significant highs and lows
-    const significantHighs = [];
-    const significantLows = [];
+    // Step 1: Identify all significant highs and lows
+    const allHighs = chartData.map(data => ({ time: data.time, value: data.high }));
+    const allLows = chartData.map(data => ({ time: data.time, value: data.low }));
 
-    // Select significant points (e.g., highest highs and lowest lows)
-    for (let i = 0; i < numLines; i++) {
-        const high = chartData.reduce((a, b) => (a.high > b.high ? a : b));
-        const low = chartData.reduce((a, b) => (a.low < b.low ? a : b));
+    // Step 2: Sort highs and lows by value (descending for highs, ascending for lows)
+    const sortedHighs = allHighs.sort((a, b) => b.value - a.value);
+    const sortedLows = allLows.sort((a, b) => a.value - b.value);
 
-        significantHighs.push({ time: high.time, value: high.high });
-        significantLows.push({ time: low.time, value: low.low });
+    // Step 3: Select the top `numLines` significant highs and lows
+    const significantHighs = sortedHighs.slice(0, numLines).sort((a, b) => a.time - b.time);
+    const significantLows = sortedLows.slice(0, numLines).sort((a, b) => a.time - b.time);
 
-        // Remove the selected points to avoid duplicates
-        chartData = chartData.filter(data => data.time !== high.time && data.time !== low.time);
-    }
-
-    // Step 2: Draw diagonal lines for significant highs
+    // Step 4: Draw diagonal lines for significant highs
     for (let i = 0; i < significantHighs.length - 1; i++) {
         const start = significantHighs[i];
         const end = significantHighs[i + 1];
@@ -115,7 +111,7 @@ const drawDiagonalTrendlines = (chartData) => {
         fibonacciLines.push(line); // Store the line for later removal
     }
 
-    // Step 3: Draw diagonal lines for significant lows
+    // Step 5: Draw diagonal lines for significant lows
     for (let i = 0; i < significantLows.length - 1; i++) {
         const start = significantLows[i];
         const end = significantLows[i + 1];
