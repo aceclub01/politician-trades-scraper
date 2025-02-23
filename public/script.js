@@ -1,5 +1,6 @@
+// DOM Elements
 const fetchDataButton = document.getElementById('fetchData');
-const fetchChartButton = document.getElementById('fetchChartData'); // New button
+const fetchChartButton = document.getElementById('fetchChartData');
 const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
 const fibonacciInput = document.getElementById('fibonacci');
@@ -40,27 +41,23 @@ const createChart = () => {
 
 // Function to handle null values (interpolation or previous value)
 const handleNullValue = (data, index, field) => {
-    let value = data.chart.result[0].indicators.quote[0][field][index];
+    const quote = data.chart.result[0].indicators.quote[0][field];
+    let value = quote[index];
 
     if (value === null) {
         // Look for the last valid value
         for (let i = index - 1; i >= 0; i--) {
-            if (data.chart.result[0].indicators.quote[0][field][i] !== null) {
-                return data.chart.result[0].indicators.quote[0][field][i];
-            }
+            if (quote[i] !== null) return quote[i];
         }
         // If no previous value, use the next valid value
-        for (let i = index + 1; i < data.chart.result[0].timestamp.length; i++) {
-            if (data.chart.result[0].indicators.quote[0][field][i] !== null) {
-                return data.chart.result[0].indicators.quote[0][field][i];
-            }
+        for (let i = index + 1; i < quote.length; i++) {
+            if (quote[i] !== null) return quote[i];
         }
         return 0; // Default fallback
     }
     return value;
 };
 
-// Function to draw diagonal trendlines
 // Function to clear all diagonal lines
 const clearDiagonalLines = () => {
     fibonacciLines.forEach(line => chart.removeSeries(line));
@@ -69,7 +66,6 @@ const clearDiagonalLines = () => {
     elliotLines = [];
 };
 
-// Function to draw diagonal trendlines connecting far ends
 // Function to draw diagonal trendlines connecting monthly highs and lows
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
@@ -173,6 +169,7 @@ const drawDiagonalTrendlines = (chartData) => {
         elliotLines.push(line); // Store the line for later removal
     }
 };
+
 // Fetch FX data and update the chart
 const fetchAndUpdateChart = async (pair, period) => {
     try {
