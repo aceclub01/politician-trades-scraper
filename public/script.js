@@ -29,6 +29,11 @@ const createChart = () => {
             mode: LightweightCharts.CrosshairMode.Normal,
         },
         priceScale: {
+            position: 'right', // Price scale on the right for the price chart
+            borderColor: '#cccccc',
+        },
+        overlayPriceScales: {
+            position: 'left', // Price scale on the left for the MACD histogram
             borderColor: '#cccccc',
         },
         timeScale: {
