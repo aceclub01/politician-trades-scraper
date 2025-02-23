@@ -5,6 +5,7 @@ const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
 const fibonacciInput = document.getElementById('fibonacci');
 const elliotInput = document.getElementById('elliot');
+const diagonalLinesInput = document.getElementById('diagonalLines');
 const chartDiv = document.getElementById('chart');
 let chart;
 let lineSeries;
@@ -65,14 +66,8 @@ const clearDiagonalLines = () => {
     fibonacciLines = [];
     elliotLines = [];
 };
-diagonalLinesInput.addEventListener('input', () => {
-    const pair = pairInput.value.trim();
-    const period = periodInput.value;
 
-    // Redraw the chart with the updated number of diagonal lines
-    fetchAndUpdateChart(pair, period);
-});
-// Function to draw diagonal trendlines connecting monthly highs and lows
+// Function to draw diagonal trendlines
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
@@ -159,6 +154,7 @@ const drawDiagonalTrendlines = (chartData) => {
         elliotLines.push(line); // Store the line for later removal
     }
 };
+
 // Fetch FX data and update the chart
 const fetchAndUpdateChart = async (pair, period) => {
     try {
@@ -308,6 +304,15 @@ fetchChartButton.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error updating chart:', error);
     }
+});
+
+// Handle the diagonal lines input change
+diagonalLinesInput.addEventListener('input', () => {
+    const pair = pairInput.value.trim();
+    const period = periodInput.value;
+
+    // Redraw the chart with the updated number of diagonal lines
+    fetchAndUpdateChart(pair, period);
 });
 
 // Initialize chart when the page loads
