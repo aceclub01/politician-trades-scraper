@@ -61,11 +61,14 @@ const handleNullValue = (data, index, field) => {
 };
 
 // Function to draw diagonal trendlines
+// Function to draw 3 well-spaced diagonal trendlines for highs and lows
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
     // Step 1: Identify significant highs and lows
-    const significantPoints = [];
+    const significantHighs = [];
+    const significantLows = [];
+
     for (let i = 1; i < chartData.length - 1; i++) {
         const prev = chartData[i - 1];
         const current = chartData[i];
@@ -73,35 +76,41 @@ const drawDiagonalTrendlines = (chartData) => {
 
         // Check for significant highs
         if (current.high > prev.high && current.high > next.high) {
-            significantPoints.push({ time: current.time, value: current.high, type: 'high' });
+            significantHighs.push({ time: current.time, value: current.high });
         }
 
         // Check for significant lows
         if (current.low < prev.low && current.low < next.low) {
-            significantPoints.push({ time: current.time, value: current.low, type: 'low' });
+            significantLows.push({ time: current.time, value: current.low });
         }
     }
 
-    // Step 2: Filter out outliers (e.g., sudden spikes or dips)
-    const filteredPoints = significantPoints.filter((point, index, array) => {
-        if (index === 0 || index === array.length - 1) return true; // Keep the first and last points
-        const prev = array[index - 1];
-        const next = array[index + 1];
-        const avg = (prev.value + next.value) / 2;
-        return Math.abs(point.value - avg) < 2 * Math.abs(prev.value - next.value); // Adjust threshold as needed
-    });
+    // Step 2: Sort highs and lows by time
+    significantHighs.sort((a, b) => a.time - b.time);
+    significantLows.sort((a, b) => a.time - b.time);
 
-    // Step 3: Sort points by time
-    filteredPoints.sort((a, b) => a.time - b.time);
+    // Step 3: Select 3 well-spaced highs and lows
+    const selectSpacedPoints = (points) => {
+        if (points.length <= 3) return points; // If there are 3 or fewer points, use all of them
 
-    // Step 4: Draw diagonal lines for highs and lows
-    const highPoints = filteredPoints.filter(point => point.type === 'high');
-    const lowPoints = filteredPoints.filter(point => point.type === 'low');
+        const spacedPoints = [];
+        const step = Math.floor(points.length / 3); // Divide into 3 segments
 
-    // Draw lines for significant highs
-    for (let i = 0; i < highPoints.length - 1; i++) {
-        const start = highPoints[i];
-        const end = highPoints[i + 1];
+        // Select 1 point from each segment
+        spacedPoints.push(points[0]); // Furthest point
+        spacedPoints.push(points[step]); // Middle point
+        spacedPoints.push(points[2 * step]); // Nearest point
+
+        return spacedPoints;
+    };
+
+    const spacedHighs = selectSpacedPoints(significantHighs);
+    const spacedLows = selectSpacedPoints(significantLows);
+
+    // Step 4: Draw diagonal lines for highs
+    for (let i = 0; i < spacedHighs.length - 1; i++) {
+        const start = spacedHighs[i];
+        const end = spacedHighs[i + 1];
 
         const line = chart.addLineSeries({
             color: 'rgba(255, 0, 0, 0.8)', // Red for resistance
@@ -117,10 +126,10 @@ const drawDiagonalTrendlines = (chartData) => {
         ]);
     }
 
-    // Draw lines for significant lows
-    for (let i = 0; i < lowPoints.length - 1; i++) {
-        const start = lowPoints[i];
-        const end = lowPoints[i + 1];
+    // Step 5: Draw diagonal lines for lows
+    for (let i = 0; i < spacedLows.length - 1; i++) {
+        const start = spacedLows[i];
+        const end = spacedLows[i + 1];
 
         const line = chart.addLineSeries({
             color: 'rgba(0, 255, 0, 0.8)', // Green for support
