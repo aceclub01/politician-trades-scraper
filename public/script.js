@@ -7,8 +7,8 @@ const historyBarsInput = document.getElementById('historyBars'); // New input fo
 const resolutionInput = document.getElementById('resolution'); // New input for resolution
 const chartDiv = document.getElementById('chart');
 let chart;
-let lineSeries;
-let macdSeries; // New series for MACD histogram
+let lineSeries = null;
+let macdSeries = null;
 let supports = [];
 let resistances = [];
 
@@ -222,8 +222,14 @@ const fetchAndUpdateChart = async (pair, period) => {
         console.log('Chart data:', chartData);
 
         // Remove old data
-        chart.removeSeries(lineSeries);
-        chart.removeSeries(macdSeries); // Remove old MACD series
+        if (lineSeries) {
+            chart.removeSeries(lineSeries);
+            lineSeries = null; // Reset the variable
+        }
+        if (macdSeries) {
+            chart.removeSeries(macdSeries);
+            macdSeries = null; // Reset the variable
+        }
         clearLines(); // Clear existing lines
 
         // Add new candlestick series
@@ -240,41 +246,48 @@ const fetchAndUpdateChart = async (pair, period) => {
             value: histogram[i],
             color: histogram[i] >= 0 ? '#26a69a' : '#ef5350', // Green for positive, red for negative
         }));
+        macdSeries = chart.addHistogramSeries({
+            color: '#26a69a',
+            priceFormat: {
+                type: 'volume',
+            },
+            priceScaleId: 'macd',
+        });
         macdSeries.setData(macdData);
 
         // Detect buy/sell signals
         const { buySig, sellSig } = detectSignals(histogram);
 
         // Plot buy/sell signals using markers
-buySig.forEach((signal, index) => {
-    if (signal) {
-        lineSeries.setMarkers([
-            {
-                time: chartData[index].time,
-                position: 'belowBar',
-                color: '#00ff00',
-                shape: 'arrowUp',
-                text: 'Buy',
-                id: `buy-${index}`,
-            },
-        ]);
-    }
-});
+        buySig.forEach((signal, index) => {
+            if (signal) {
+                lineSeries.setMarkers([
+                    {
+                        time: chartData[index].time,
+                        position: 'belowBar',
+                        color: '#00ff00',
+                        shape: 'arrowUp',
+                        text: 'Buy',
+                        id: `buy-${index}`,
+                    },
+                ]);
+            }
+        });
 
-sellSig.forEach((signal, index) => {
-    if (signal) {
-        lineSeries.setMarkers([
-            {
-                time: chartData[index].time,
-                position: 'aboveBar',
-                color: '#ff0000',
-                shape: 'arrowDown',
-                text: 'Sell',
-                id: `sell-${index}`,
-            },
-        ]);
-    }
-});
+        sellSig.forEach((signal, index) => {
+            if (signal) {
+                lineSeries.setMarkers([
+                    {
+                        time: chartData[index].time,
+                        position: 'aboveBar',
+                        color: '#ff0000',
+                        shape: 'arrowDown',
+                        text: 'Sell',
+                        id: `sell-${index}`,
+                    },
+                ]);
+            }
+        });
 
         // Draw support and resistance lines
         drawSupportResistance(chartData);
