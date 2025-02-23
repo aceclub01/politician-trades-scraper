@@ -49,24 +49,22 @@
         <input type="number" id="diagonalLines" value="3" min="1" max="10" />
     </div>
     <button id="fetchData">Fetch Data</button>
-    <!-- Add this button below the existing "Fetch Data" button -->
-    
-    <button id="fetchChartData">Update Chart</button>
+    <button id="fetchChartData">Update Chart</button> <!-- New button -->
+
     <!-- Chart Container -->
     <div id="chart" style="height: 500px;"></div>
 
-
-<!-- Fundamentals Container -->
-<div id="fundamentals">
-    <h2>Fundamentals</h2>
-    <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-    <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
-    <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-    <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-    <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-    <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
-    <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-</div>
+    <!-- Fundamentals Container -->
+    <div id="fundamentals">
+        <h2>Fundamentals</h2>
+        <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+        <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
+        <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+        <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+        <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+        <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+        <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
+    </div>
 
     <!-- Top News Container -->
     <div id="topNews">
@@ -74,11 +72,8 @@
         <ul id="newsHeadlines"></ul>
     </div>
 
-    <!--script type="module" src="script.js"></script>
-    <script src="extractYahooFundamental.js"></script-->
-    <script src="extractYahooFundamental.js"></script>
-    <script src="script.js"></script>
-    <!--script src="/ref2ExtSources.js"></script-->
-
+    <!-- Scripts -->
+    <script src="/extractYahooFundamental.js"></script>
+    <script src="/script.js"></script>
 </body>
 </html>

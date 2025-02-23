@@ -1,4 +1,5 @@
 const fetchDataButton = document.getElementById('fetchData');
+const fetchChartButton = document.getElementById('fetchChartData'); // New button
 const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
 const fibonacciInput = document.getElementById('fibonacci');
@@ -36,6 +37,7 @@ const createChart = () => {
     lineSeries = chart.addCandlestickSeries();
     console.log('Chart initialized:', chart);
 };
+
 // Function to handle null values (interpolation or previous value)
 const handleNullValue = (data, index, field) => {
     let value = data.chart.result[0].indicators.quote[0][field][index];
@@ -58,9 +60,11 @@ const handleNullValue = (data, index, field) => {
     return value;
 };
 
-// Fetch FX data from the server
-const fetchFXData = async (pair, period) => {
+// Fetch FX data and update the chart
+const fetchAndUpdateChart = async (pair, period) => {
     try {
+        console.log(`Fetching chart data for pair: ${pair}, period: ${period}`);
+
         const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
         const data = await response.json();
 
@@ -110,8 +114,10 @@ const fetchFXData = async (pair, period) => {
         }
     } catch (error) {
         console.error('Error fetching FX data:', error);
+        alert('Failed to fetch FX data. Check the console for details.');
     }
 };
+
 // Draw Fibonacci levels
 const drawFibonacci = (chartData) => {
     const minPrice = Math.min(...chartData.map(data => data.low));
@@ -173,16 +179,37 @@ const drawElliotWave = (chartData) => {
 };
 
 // Handle the fetch button click
-fetchDataButton.addEventListener('click', () => {
+fetchDataButton.addEventListener('click', async () => {
     const pair = pairInput.value.trim();
     const period = periodInput.value;
+    const newsLimit = document.getElementById('newsLimit').value;
 
-    if (pair) {
-        fetchFXData(pair, period);
-    } else {
-        alert('Please enter a valid FX pair');
+    try {
+        // Fetch FX data
+        await fetchAndUpdateChart(pair, period);
+
+        // Fetch fundamentals
+        fetchFundamentals(pair);
+
+        // Fetch news
+        fetchNews(pair, parseInt(newsLimit, 10));
+    } catch (error) {
+        console.error('Error fetching data:', error);
     }
 });
 
-// Initialize chart
+// Handle the new "Update Chart" button click
+fetchChartButton.addEventListener('click', async () => {
+    const pair = pairInput.value.trim();
+    const period = periodInput.value;
+
+    try {
+        // Fetch and update the chart only
+        await fetchAndUpdateChart(pair, period);
+    } catch (error) {
+        console.error('Error updating chart:', error);
+    }
+});
+
+// Initialize chart when the page loads
 createChart();

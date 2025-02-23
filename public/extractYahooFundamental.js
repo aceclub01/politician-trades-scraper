@@ -56,6 +56,7 @@ async function fetchNews(query, limit) {
         }
     }
 }
+
 // Fetch and display fundamentals using FMP
 async function fetchFundamentals(symbol) {
     try {
@@ -116,29 +117,3 @@ async function fetchFundamentals(symbol) {
         }
     }
 }
-
-// Fetch data when the "Fetch Data" button is clicked
-document.getElementById('fetchData').addEventListener('click', async () => {
-    const pair = document.getElementById('pair').value.trim();
-    const period = document.getElementById('period').value;
-    const newsLimit = document.getElementById('newsLimit').value;
-
-    try {
-        // Fetch FX data
-        await fetchFXData(pair, period);
-
-        // Fetch fundamentals
-        fetchFundamentals(pair);
-
-        // Fetch news
-        fetchNews(pair, parseInt(newsLimit, 10));
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-});
-
-// Example usage (initial load with default pair and limit)
-const defaultPair = document.getElementById('pair').value.trim();
-const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10);
-fetchFundamentals(defaultPair);
-fetchNews(defaultPair, defaultLimit);
