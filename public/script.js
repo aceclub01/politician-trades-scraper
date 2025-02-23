@@ -61,6 +61,14 @@ const handleNullValue = (data, index, field) => {
 };
 
 // Function to draw diagonal trendlines
+// Function to clear all diagonal lines
+const clearDiagonalLines = () => {
+    fibonacciLines.forEach(line => chart.removeSeries(line));
+    elliotLines.forEach(line => chart.removeSeries(line));
+    fibonacciLines = [];
+    elliotLines = [];
+};
+
 // Function to draw diagonal trendlines connecting far ends
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
@@ -89,36 +97,7 @@ const drawDiagonalTrendlines = (chartData) => {
     swingHighs.sort((a, b) => a.time - b.time);
     swingLows.sort((a, b) => a.time - b.time);
 
-    // Step 3: Filter out points that are too close in time or price
-    const filterSpacedPoints = (points, minTimeGap = 30 * 24 * 60 * 60, minPriceGap = 0.01) => {
-        const filteredPoints = [];
-        for (let i = 0; i < points.length; i++) {
-            if (i === 0 || i === points.length - 1) {
-                // Always include the first and last points
-                filteredPoints.push(points[i]);
-            } else {
-                const prev = points[i - 1];
-                const current = points[i];
-                const next = points[i + 1];
-
-                // Check if the current point is far enough from the previous and next points
-                const timeGapPrev = current.time - prev.time;
-                const timeGapNext = next.time - current.time;
-                const priceGapPrev = Math.abs(current.value - prev.value);
-                const priceGapNext = Math.abs(current.value - next.value);
-
-                if (timeGapPrev >= minTimeGap && timeGapNext >= minTimeGap && priceGapPrev >= minPriceGap && priceGapNext >= minPriceGap) {
-                    filteredPoints.push(current);
-                }
-            }
-        }
-        return filteredPoints;
-    };
-
-    const filteredHighs = filterSpacedPoints(swingHighs);
-    const filteredLows = filterSpacedPoints(swingLows);
-
-    // Step 4: Select the most significant swing highs and lows
+    // Step 3: Select significant highs and lows
     const selectSignificantPoints = (points, count = 3) => {
         if (points.length <= count) return points; // If there are fewer points than required, use all of them
 
@@ -129,10 +108,10 @@ const drawDiagonalTrendlines = (chartData) => {
             .sort((a, b) => a.time - b.time); // Re-sort by time
     };
 
-    const significantHighs = selectSignificantPoints(filteredHighs);
-    const significantLows = selectSignificantPoints(filteredLows);
+    const significantHighs = selectSignificantPoints(swingHighs);
+    const significantLows = selectSignificantPoints(swingLows);
 
-    // Step 5: Draw diagonal lines for swing highs
+    // Step 4: Draw diagonal lines for swing highs
     for (let i = 0; i < significantHighs.length - 1; i++) {
         const start = significantHighs[i];
         const end = significantHighs[i + 1];
@@ -149,9 +128,11 @@ const drawDiagonalTrendlines = (chartData) => {
             { time: end.time, value: end.value },
             { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
         ]);
+
+        fibonacciLines.push(line); // Store the line for later removal
     }
 
-    // Step 6: Draw diagonal lines for swing lows
+    // Step 5: Draw diagonal lines for swing lows
     for (let i = 0; i < significantLows.length - 1; i++) {
         const start = significantLows[i];
         const end = significantLows[i + 1];
@@ -168,6 +149,8 @@ const drawDiagonalTrendlines = (chartData) => {
             { time: end.time, value: end.value },
             { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
         ]);
+
+        elliotLines.push(line); // Store the line for later removal
     }
 };
 
@@ -201,10 +184,7 @@ const fetchAndUpdateChart = async (pair, period) => {
 
         // Remove old data
         chart.removeSeries(lineSeries);
-        fibonacciLines.forEach(line => chart.removeSeries(line));
-        elliotLines.forEach(line => chart.removeSeries(line));
-        fibonacciLines = [];
-        elliotLines = [];
+        clearDiagonalLines(); // Clear existing diagonal lines
 
         // Add new candlestick series
         lineSeries = chart.addCandlestickSeries();
