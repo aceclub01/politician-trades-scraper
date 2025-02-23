@@ -245,30 +245,36 @@ const fetchAndUpdateChart = async (pair, period) => {
         // Detect buy/sell signals
         const { buySig, sellSig } = detectSignals(histogram);
 
-        // Plot buy/sell signals
-        buySig.forEach((signal, index) => {
-            if (signal) {
-                chart.addShape({
-                    time: chartData[index].time,
-                    position: 'belowBar',
-                    color: '#00ff00',
-                    shape: 'arrowUp',
-                    text: 'Buy',
-                });
-            }
-        });
+        // Plot buy/sell signals using markers
+buySig.forEach((signal, index) => {
+    if (signal) {
+        lineSeries.setMarkers([
+            {
+                time: chartData[index].time,
+                position: 'belowBar',
+                color: '#00ff00',
+                shape: 'arrowUp',
+                text: 'Buy',
+                id: `buy-${index}`,
+            },
+        ]);
+    }
+});
 
-        sellSig.forEach((signal, index) => {
-            if (signal) {
-                chart.addShape({
-                    time: chartData[index].time,
-                    position: 'aboveBar',
-                    color: '#ff0000',
-                    shape: 'arrowDown',
-                    text: 'Sell',
-                });
-            }
-        });
+sellSig.forEach((signal, index) => {
+    if (signal) {
+        lineSeries.setMarkers([
+            {
+                time: chartData[index].time,
+                position: 'aboveBar',
+                color: '#ff0000',
+                shape: 'arrowDown',
+                text: 'Sell',
+                id: `sell-${index}`,
+            },
+        ]);
+    }
+});
 
         // Draw support and resistance lines
         drawSupportResistance(chartData);
