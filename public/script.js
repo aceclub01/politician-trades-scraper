@@ -36,13 +36,18 @@ const createChart = () => {
         },
     });
 
-    lineSeries = chart.addCandlestickSeries();
+    // Add candlestick series for the price chart
+    lineSeries = chart.addCandlestickSeries({
+        priceScaleId: 'right', // Use the right price scale for the price chart
+    });
+
+    // Add histogram series for the MACD
     macdSeries = chart.addHistogramSeries({
         color: '#26a69a', // Default color for MACD histogram
         priceFormat: {
             type: 'volume',
         },
-        priceScaleId: 'macd', // Use a separate price scale for MACD
+        priceScaleId: 'left', // Use a separate price scale for MACD
     });
 
     console.log('Chart initialized:', chart);
@@ -66,77 +71,6 @@ const calculateMACD = (data, fastLength = 12, slowLength = 26, signalLength = 9)
     const signal = calculateEMA(macd, signalLength);
     const histogram = macd.map((macdVal, i) => macdVal - signal[i]);
     return { macd, signal, histogram };
-};
-
-// Function to calculate RSI
-const calculateRSI = (data, period = 14) => {
-    let gains = [];
-    let losses = [];
-    for (let i = 1; i < data.length; i++) {
-        const change = data[i] - data[i - 1];
-        gains.push(Math.max(change, 0));
-        losses.push(Math.max(-change, 0));
-    }
-    const avgGain = calculateEMA(gains, period);
-    const avgLoss = calculateEMA(losses, period);
-    const rs = avgGain.map((gain, i) => gain / (avgLoss[i] || 1)); // Avoid division by zero
-    const rsi = rs.map(r => 100 - (100 / (1 + r)));
-    return rsi;
-};
-
-// Function to calculate Awesome Oscillator (AO)
-const calculateAO = (high, low, shortPeriod = 5, longPeriod = 34) => {
-    const hl2 = high.map((h, i) => (h + low[i]) / 2); // Calculate HL2 (midpoint)
-    const shortSMA = calculateEMA(hl2, shortPeriod);
-    const longSMA = calculateEMA(hl2, longPeriod);
-    const ao = shortSMA.map((short, i) => short - longSMA[i]);
-    return ao;
-};
-
-// Function to detect divergences
-const detectDivergences = (prices, indicatorValues, n = 4) => {
-    const divergences = {
-        bullish: [],
-        bearish: [],
-    };
-
-    // Find pivot highs and lows
-    const pivotHighs = [];
-    const pivotLows = [];
-    for (let i = n; i < prices.length - n; i++) {
-        const high = prices[i];
-        const low = prices[i];
-        let isPivotHigh = true;
-        let isPivotLow = true;
-
-        for (let j = i - n; j <= i + n; j++) {
-            if (prices[j] > high) isPivotHigh = false;
-            if (prices[j] < low) isPivotLow = false;
-        }
-
-        if (isPivotHigh) pivotHighs.push({ index: i, price: high, indicator: indicatorValues[i] });
-        if (isPivotLow) pivotLows.push({ index: i, price: low, indicator: indicatorValues[i] });
-    }
-
-    // Detect bearish divergences (price higher, indicator lower)
-    for (let i = 1; i < pivotHighs.length; i++) {
-        const prev = pivotHighs[i - 1];
-        const current = pivotHighs[i];
-        if (current.price > prev.price && current.indicator < prev.indicator) {
-            divergences.bearish.push({ start: prev, end: current });
-        }
-    }
-
-    // Detect bullish divergences (price lower, indicator higher)
-    for (let i = 1; i < pivotLows.length; i++) {
-        const prev = pivotLows[i - 1];
-        const current = pivotLows[i];
-        if (current.price < prev.price && current.indicator > prev.indicator) {
-            divergences.bullish.push({ start: prev, end: current });
-        }
-    }
-
-    return divergences;
 };
 
 // Function to handle null values (interpolation or previous value)
@@ -280,7 +214,9 @@ const fetchAndUpdateChart = async (pair, period) => {
         clearLines(); // Clear existing lines
 
         // Add new candlestick series
-        lineSeries = chart.addCandlestickSeries();
+        lineSeries = chart.addCandlestickSeries({
+            priceScaleId: 'right', // Use the right price scale for the price chart
+        });
         lineSeries.setData(chartData);
 
         // Calculate MACD values
@@ -298,43 +234,9 @@ const fetchAndUpdateChart = async (pair, period) => {
             priceFormat: {
                 type: 'volume',
             },
-            priceScaleId: 'macd',
+            priceScaleId: 'left', // Use a separate price scale for MACD
         });
         macdSeries.setData(macdData);
-
-        // Calculate RSI and AO
-        const rsi = calculateRSI(closePrices);
-        const ao = calculateAO(chartData.map(d => d.high), chartData.map(d => d.low));
-
-        // Detect divergences
-        const divergences = detectDivergences(closePrices, histogram);
-
-        // Plot divergences
-        divergences.bullish.forEach(divergence => {
-            lineSeries.setMarkers([
-                {
-                    time: chartData[divergence.end.index].time,
-                    position: 'belowBar',
-                    color: '#00ff00',
-                    shape: 'arrowUp',
-                    text: 'Bullish Divergence',
-                    id: `bullish-${divergence.end.index}`,
-                },
-            ]);
-        });
-
-        divergences.bearish.forEach(divergence => {
-            lineSeries.setMarkers([
-                {
-                    time: chartData[divergence.end.index].time,
-                    position: 'aboveBar',
-                    color: '#ff0000',
-                    shape: 'arrowDown',
-                    text: 'Bearish Divergence',
-                    id: `bearish-${divergence.end.index}`,
-                },
-            ]);
-        });
 
         // Draw support and resistance lines
         drawSupportResistance(chartData);
