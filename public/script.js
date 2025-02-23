@@ -3,14 +3,13 @@ const fetchDataButton = document.getElementById('fetchData');
 const fetchChartButton = document.getElementById('fetchChartData');
 const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
-const fibonacciInput = document.getElementById('fibonacci');
-const elliotInput = document.getElementById('elliot');
-const diagonalLinesInput = document.getElementById('diagonalLines');
+const historyBarsInput = document.getElementById('historyBars'); // New input for history bars
+const resolutionInput = document.getElementById('resolution'); // New input for resolution
 const chartDiv = document.getElementById('chart');
 let chart;
 let lineSeries;
-let fibonacciLines = [];
-let elliotLines = [];
+let supports = [];
+let resistances = [];
 
 // Create chart instance
 const createChart = () => {
@@ -59,100 +58,85 @@ const handleNullValue = (data, index, field) => {
     return value;
 };
 
-// Function to clear all diagonal lines
-const clearDiagonalLines = () => {
-    fibonacciLines.forEach(line => chart.removeSeries(line));
-    elliotLines.forEach(line => chart.removeSeries(line));
-    fibonacciLines = [];
-    elliotLines = [];
+// Function to clear all lines
+const clearLines = () => {
+    supports.forEach(line => chart.removeSeries(line));
+    resistances.forEach(line => chart.removeSeries(line));
+    supports = [];
+    resistances = [];
 };
 
-// Function to draw diagonal trendlines
-const drawDiagonalTrendlines = (chartData) => {
+// Function to calculate price at a specific time
+const priceAt = (t1, p1, t2, p2, t3) => {
+    return p1 + (p2 - p1) * (t3 - t1) / (t2 - t1);
+};
+
+// Function to draw support and resistance lines
+const drawSupportResistance = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
-    // Get the number of diagonal lines from the input
-    const numLines = parseInt(diagonalLinesInput.value, 10);
+    const historyBars = parseInt(historyBarsInput.value, 10);
+    const resolution = parseInt(resolutionInput.value, 10);
+    const x2 = Math.round(resolution / 2);
 
-    // Calculate the end time (3 months from today)
-    const today = new Date();
-    const threeMonthsFromToday = new Date(today.setMonth(today.getMonth() + 3));
-    const futureTime = Math.floor(threeMonthsFromToday.getTime() / 1000); // Convert to Unix timestamp
-
-    // Step 1: Identify significant highs and lows
-    const significantHighs = [];
-    const significantLows = [];
-
-    // Select significant highs and lows spaced by at least 1 month
+    // Find significant lows (supports)
+    let minimums = [];
     for (let i = 0; i < chartData.length; i++) {
-        const current = chartData[i];
-        const next = chartData[i + 1] || current;
-
-        // Check if the current point is a significant high or low
-        if (current.high > next.high && current.high > chartData[i - 1]?.high) {
-            significantHighs.push({ time: current.time, value: current.high });
-        }
-        if (current.low < next.low && current.low < chartData[i - 1]?.low) {
-            significantLows.push({ time: current.time, value: current.low });
+        if (i >= historyBars) break;
+        if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
+            minimums.push({ time: chartData[i].time, value: chartData[i].low });
         }
     }
 
-    // Step 2: Sort significant highs and lows by time
-    significantHighs.sort((a, b) => a.time - b.time);
-    significantLows.sort((a, b) => a.time - b.time);
-
-    // Step 3: Select the top `numLines` significant highs and lows
-    const selectSignificantPoints = (points, count) => {
-        if (points.length <= count) return points; // If there are fewer points than required, use all of them
-
-        // Select the most significant points (e.g., those with the highest/lowest values)
-        return points
-            .sort((a, b) => b.value - a.value) // Sort by value (descending for highs, ascending for lows)
-            .slice(0, count) // Select the top `count` points
-            .sort((a, b) => a.time - b.time); // Re-sort by time
-    };
-
-    const selectedHighs = selectSignificantPoints(significantHighs, numLines);
-    const selectedLows = selectSignificantPoints(significantLows, numLines);
-
-    // Step 4: Draw diagonal lines for significant highs
-    for (let i = 0; i < selectedHighs.length - 1; i++) {
-        const start = selectedHighs[i];
-        const end = selectedHighs[i + 1];
-
-        const line = chart.addLineSeries({
-            color: 'rgba(255, 0, 0, 0.8)', // Red for resistance
-            lineWidth: 2,
-        });
-
-        // Extend the line 3 months into the future
-        line.setData([
-            { time: start.time, value: start.value },
-            { time: end.time, value: end.value },
-            { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
-        ]);
-
-        fibonacciLines.push(line); // Store the line for later removal
+    // Find significant highs (resistances)
+    let maximums = [];
+    for (let i = 0; i < chartData.length; i++) {
+        if (i >= historyBars) break;
+        if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+            maximums.push({ time: chartData[i].time, value: chartData[i].high });
+        }
     }
 
-    // Step 5: Draw diagonal lines for significant lows
-    for (let i = 0; i < selectedLows.length - 1; i++) {
-        const start = selectedLows[i];
-        const end = selectedLows[i + 1];
+    // Draw support lines
+    for (let i = 0; i < minimums.length - 1; i++) {
+        const start = minimums[i];
+        const end = minimums[i + 1];
 
         const line = chart.addLineSeries({
-            color: 'rgba(0, 255, 0, 0.8)', // Green for support
+            color: 'rgba(23, 255, 39, 0.5)', // Green for support
             lineWidth: 2,
         });
 
-        // Extend the line 3 months into the future
+        // Extend the line into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
         line.setData([
             { time: start.time, value: start.value },
             { time: end.time, value: end.value },
-            { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
+            { time: futureTime, value: priceAt(start.time, start.value, end.time, end.value, futureTime) },
         ]);
 
-        elliotLines.push(line); // Store the line for later removal
+        supports.push(line);
+    }
+
+    // Draw resistance lines
+    for (let i = 0; i < maximums.length - 1; i++) {
+        const start = maximums[i];
+        const end = maximums[i + 1];
+
+        const line = chart.addLineSeries({
+            color: 'rgba(255, 119, 173, 0.5)', // Pink for resistance
+            lineWidth: 2,
+        });
+
+        // Extend the line into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+        line.setData([
+            { time: start.time, value: start.value },
+            { time: end.time, value: end.value },
+            { time: futureTime, value: priceAt(start.time, start.value, end.time, end.value, futureTime) },
+        ]);
+
+        resistances.push(line);
     }
 };
 
@@ -186,109 +170,28 @@ const fetchAndUpdateChart = async (pair, period) => {
 
         // Remove old data
         chart.removeSeries(lineSeries);
-        clearDiagonalLines(); // Clear existing diagonal lines
+        clearLines(); // Clear existing lines
 
         // Add new candlestick series
         lineSeries = chart.addCandlestickSeries();
         lineSeries.setData(chartData);
 
-        // Draw diagonal trendlines
-        drawDiagonalTrendlines(chartData);
-
-        // Reset chart if no checkbox is active
-        if (!fibonacciInput.checked && !elliotInput.checked) {
-            lineSeries.setData(chartData);
-            return;
-        }
-
-        if (fibonacciInput.checked) {
-            drawFibonacci(chartData);
-        }
-
-        if (elliotInput.checked) {
-            drawElliotWave(chartData);
-        }
+        // Draw support and resistance lines
+        drawSupportResistance(chartData);
     } catch (error) {
         console.error('Error fetching FX data:', error);
         alert('Failed to fetch FX data. Check the console for details.');
     }
 };
 
-// Draw Fibonacci levels
-const drawFibonacci = (chartData) => {
-    const minPrice = Math.min(...chartData.map(data => data.low));
-    const maxPrice = Math.max(...chartData.map(data => data.high));
-
-    const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
-    const fibonacciLinesArr = fibonacciLevels.map(level => ({
-        price: minPrice + (maxPrice - minPrice) * level,
-        label: `${(level * 100).toFixed(1)}%`
-    }));
-
-    fibonacciLinesArr.forEach(level => {
-        const fibLine = chart.addLineSeries({
-            color: 'rgba(0, 255, 255, 0.8)',
-            lineWidth: 2,
-        });
-
-        // Draw the line across the chart time range
-        fibLine.setData([
-            { time: chartData[0].time, value: level.price },
-            { time: chartData[chartData.length - 1].time, value: level.price }
-        ]);
-
-        fibonacciLines.push(fibLine);
-    });
-};
-
-// Draw Elliott Waves with null handling
-const drawElliotWave = (chartData) => {
-    if (chartData.length < 5) return; // Ensure we have enough data for waves
-
-    const cleanData = chartData.filter(data => data.close !== null); // Remove null values
-    if (cleanData.length < 5) return; // Ensure we have at least 5 valid points
-
-    const points = [
-        cleanData[0],  // Wave 1
-        cleanData[Math.floor(cleanData.length * 0.25)],  // Wave 2
-        cleanData[Math.floor(cleanData.length * 0.5)],   // Wave 3
-        cleanData[Math.floor(cleanData.length * 0.75)],  // Wave 4
-        cleanData[cleanData.length - 1]  // Wave 5
-    ];
-
-    points.forEach((point, index) => {
-        if (index < points.length - 1) {
-            const line = chart.addLineSeries({
-                color: 'rgba(255, 165, 0, 0.8)',
-                lineWidth: 2,
-            });
-
-            // Set data for Elliot Wave lines
-            line.setData([
-                { time: point.time, value: point.close },
-                { time: points[index + 1].time, value: points[index + 1].close }
-            ]);
-
-            elliotLines.push(line);
-        }
-    });
-};
-
 // Handle the fetch button click
 fetchDataButton.addEventListener('click', async () => {
     const pair = pairInput.value.trim();
     const period = periodInput.value;
-    const newsLimit = document.getElementById('newsLimit').value;
 
     try {
-        // Fetch FX data
+        // Fetch and update the chart
         await fetchAndUpdateChart(pair, period);
-
-        // Fetch fundamentals
-        fetchFundamentals(pair);
-
-        // Fetch news
-        fetchNews(pair, parseInt(newsLimit, 10));
     } catch (error) {
         console.error('Error fetching data:', error);
     }
@@ -305,15 +208,6 @@ fetchChartButton.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error updating chart:', error);
     }
-});
-
-// Handle the diagonal lines input change
-diagonalLinesInput.addEventListener('input', () => {
-    const pair = pairInput.value.trim();
-    const period = periodInput.value;
-
-    // Redraw the chart with the updated number of diagonal lines
-    fetchAndUpdateChart(pair, period);
 });
 
 // Initialize chart when the page loads
