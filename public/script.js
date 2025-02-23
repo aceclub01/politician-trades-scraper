@@ -79,45 +79,46 @@ const drawDiagonalTrendlines = (chartData) => {
     const threeMonthsFromToday = new Date(today.setMonth(today.getMonth() + 3));
     const futureTime = Math.floor(threeMonthsFromToday.getTime() / 1000); // Convert to Unix timestamp
 
-    // Step 1: Identify all significant highs and lows
-    const allHighs = chartData.map(data => ({ time: data.time, value: data.high }));
-    const allLows = chartData.map(data => ({ time: data.time, value: data.low }));
+    // Step 1: Identify significant highs and lows
+    const significantHighs = [];
+    const significantLows = [];
 
-    // Step 2: Sort highs and lows by value (descending for highs, ascending for lows)
-    const sortedHighs = allHighs.sort((a, b) => b.value - a.value);
-    const sortedLows = allLows.sort((a, b) => a.value - b.value);
+    // Select significant highs and lows spaced by at least 1 month
+    for (let i = 0; i < chartData.length; i++) {
+        const current = chartData[i];
+        const next = chartData[i + 1] || current;
 
-    // Step 3: Select significant highs and lows spaced by at least 1 month
-    const selectSpacedPoints = (points, count) => {
-        const selectedPoints = [];
-        let lastSelectedTime = 0;
-
-        for (const point of points) {
-            const pointDate = new Date(point.time * 1000);
-            const lastSelectedDate = new Date(lastSelectedTime * 1000);
-
-            // Check if the current point is at least 1 month apart from the last selected point
-            if (
-                lastSelectedTime === 0 ||
-                Math.abs(pointDate.getMonth() - lastSelectedDate.getMonth()) >= 1
-            ) {
-                selectedPoints.push(point);
-                lastSelectedTime = point.time;
-
-                if (selectedPoints.length >= count) break;
-            }
+        // Check if the current point is a significant high or low
+        if (current.high > next.high && current.high > chartData[i - 1]?.high) {
+            significantHighs.push({ time: current.time, value: current.high });
         }
+        if (current.low < next.low && current.low < chartData[i - 1]?.low) {
+            significantLows.push({ time: current.time, value: current.low });
+        }
+    }
 
-        return selectedPoints.sort((a, b) => a.time - b.time);
+    // Step 2: Sort significant highs and lows by time
+    significantHighs.sort((a, b) => a.time - b.time);
+    significantLows.sort((a, b) => a.time - b.time);
+
+    // Step 3: Select the top `numLines` significant highs and lows
+    const selectSignificantPoints = (points, count) => {
+        if (points.length <= count) return points; // If there are fewer points than required, use all of them
+
+        // Select the most significant points (e.g., those with the highest/lowest values)
+        return points
+            .sort((a, b) => b.value - a.value) // Sort by value (descending for highs, ascending for lows)
+            .slice(0, count) // Select the top `count` points
+            .sort((a, b) => a.time - b.time); // Re-sort by time
     };
 
-    const significantHighs = selectSpacedPoints(sortedHighs, numLines);
-    const significantLows = selectSpacedPoints(sortedLows, numLines);
+    const selectedHighs = selectSignificantPoints(significantHighs, numLines);
+    const selectedLows = selectSignificantPoints(significantLows, numLines);
 
     // Step 4: Draw diagonal lines for significant highs
-    for (let i = 0; i < significantHighs.length - 1; i++) {
-        const start = significantHighs[i];
-        const end = significantHighs[i + 1];
+    for (let i = 0; i < selectedHighs.length - 1; i++) {
+        const start = selectedHighs[i];
+        const end = selectedHighs[i + 1];
 
         const line = chart.addLineSeries({
             color: 'rgba(255, 0, 0, 0.8)', // Red for resistance
@@ -135,9 +136,9 @@ const drawDiagonalTrendlines = (chartData) => {
     }
 
     // Step 5: Draw diagonal lines for significant lows
-    for (let i = 0; i < significantLows.length - 1; i++) {
-        const start = significantLows[i];
-        const end = significantLows[i + 1];
+    for (let i = 0; i < selectedLows.length - 1; i++) {
+        const start = selectedLows[i];
+        const end = selectedLows[i + 1];
 
         const line = chart.addLineSeries({
             color: 'rgba(0, 255, 0, 0.8)', // Green for support
