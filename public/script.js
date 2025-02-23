@@ -70,34 +70,54 @@ const clearDiagonalLines = () => {
 };
 
 // Function to draw diagonal trendlines connecting far ends
+// Function to draw diagonal trendlines connecting monthly highs and lows
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
-    // Step 1: Identify swing highs and lows
-    const swingHighs = [];
-    const swingLows = [];
+    // Step 1: Identify monthly highs and lows
+    const monthlyHighs = [];
+    const monthlyLows = [];
 
-    for (let i = 1; i < chartData.length - 1; i++) {
-        const prev = chartData[i - 1];
-        const current = chartData[i];
-        const next = chartData[i + 1];
+    let currentMonth = null;
+    let currentHigh = { time: 0, value: -Infinity };
+    let currentLow = { time: 0, value: Infinity };
 
-        // Check for swing highs
-        if (current.high > prev.high && current.high > next.high) {
-            swingHighs.push({ time: current.time, value: current.high });
-        }
+    for (const data of chartData) {
+        const date = new Date(data.time * 1000); // Convert timestamp to Date object
+        const month = date.getMonth(); // Get the month (0-11)
 
-        // Check for swing lows
-        if (current.low < prev.low && current.low < next.low) {
-            swingLows.push({ time: current.time, value: current.low });
+        // Check if we've moved to a new month
+        if (currentMonth !== month) {
+            if (currentMonth !== null) {
+                // Save the high and low for the previous month
+                monthlyHighs.push(currentHigh);
+                monthlyLows.push(currentLow);
+            }
+
+            // Reset for the new month
+            currentMonth = month;
+            currentHigh = { time: data.time, value: data.high };
+            currentLow = { time: data.time, value: data.low };
+        } else {
+            // Update the high and low for the current month
+            if (data.high > currentHigh.value) {
+                currentHigh = { time: data.time, value: data.high };
+            }
+            if (data.low < currentLow.value) {
+                currentLow = { time: data.time, value: data.low };
+            }
         }
     }
 
-    // Step 2: Sort swing highs and lows by time
-    swingHighs.sort((a, b) => a.time - b.time);
-    swingLows.sort((a, b) => a.time - b.time);
+    // Add the last month's high and low
+    monthlyHighs.push(currentHigh);
+    monthlyLows.push(currentLow);
 
-    // Step 3: Select significant highs and lows
+    // Step 2: Sort monthly highs and lows by time
+    monthlyHighs.sort((a, b) => a.time - b.time);
+    monthlyLows.sort((a, b) => a.time - b.time);
+
+    // Step 3: Select significant monthly highs and lows
     const selectSignificantPoints = (points, count = 3) => {
         if (points.length <= count) return points; // If there are fewer points than required, use all of them
 
@@ -108,10 +128,10 @@ const drawDiagonalTrendlines = (chartData) => {
             .sort((a, b) => a.time - b.time); // Re-sort by time
     };
 
-    const significantHighs = selectSignificantPoints(swingHighs);
-    const significantLows = selectSignificantPoints(swingLows);
+    const significantHighs = selectSignificantPoints(monthlyHighs);
+    const significantLows = selectSignificantPoints(monthlyLows);
 
-    // Step 4: Draw diagonal lines for swing highs
+    // Step 4: Draw diagonal lines for monthly highs
     for (let i = 0; i < significantHighs.length - 1; i++) {
         const start = significantHighs[i];
         const end = significantHighs[i + 1];
@@ -132,7 +152,7 @@ const drawDiagonalTrendlines = (chartData) => {
         fibonacciLines.push(line); // Store the line for later removal
     }
 
-    // Step 5: Draw diagonal lines for swing lows
+    // Step 5: Draw diagonal lines for monthly lows
     for (let i = 0; i < significantLows.length - 1; i++) {
         const start = significantLows[i];
         const end = significantLows[i + 1];
@@ -153,7 +173,6 @@ const drawDiagonalTrendlines = (chartData) => {
         elliotLines.push(line); // Store the line for later removal
     }
 };
-
 // Fetch FX data and update the chart
 const fetchAndUpdateChart = async (pair, period) => {
     try {
