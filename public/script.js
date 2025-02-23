@@ -3,8 +3,8 @@ const fetchDataButton = document.getElementById('fetchData');
 const fetchChartButton = document.getElementById('fetchChartData');
 const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
-const historyBarsInput = document.getElementById('historyBars'); // New input for history bars
-const resolutionInput = document.getElementById('resolution'); // New input for resolution
+const historyBarsInput = document.getElementById('historyBars');
+const resolutionInput = document.getElementById('resolution');
 const chartDiv = document.getElementById('chart');
 let chart;
 let lineSeries = null;
@@ -68,28 +68,75 @@ const calculateMACD = (data, fastLength = 12, slowLength = 26, signalLength = 9)
     return { macd, signal, histogram };
 };
 
-// Function to detect buy/sell signals
-const detectSignals = (histogram) => {
-    const buySig = [];
-    const sellSig = [];
-    for (let i = 5; i < histogram.length; i++) {
-        const hist = histogram[i];
-        const hist1 = histogram[i - 1];
-        const hist2 = histogram[i - 2];
-        const hist3 = histogram[i - 3];
-        const hist4 = histogram[i - 4];
-        const hist5 = histogram[i - 5];
-
-        const isBuy = hist < 0 && hist1 < hist && hist1 < 0 && hist2 < 0 && hist3 < 0 && hist4 < 0 && hist5 < 0 &&
-                       hist1 < hist2 && hist2 < hist3 && hist3 < hist4 && hist4 < hist5;
-
-        const isSell = hist > 0 && hist1 > hist && hist1 > 0 && hist2 > 0 && hist3 > 0 && hist4 > 0 && hist5 > 0 &&
-                       hist1 > hist2 && hist2 > hist3 && hist3 > hist4 && hist4 > hist5;
-
-        buySig.push(isBuy ? 1 : 0);
-        sellSig.push(isSell ? 1 : 0);
+// Function to calculate RSI
+const calculateRSI = (data, period = 14) => {
+    let gains = [];
+    let losses = [];
+    for (let i = 1; i < data.length; i++) {
+        const change = data[i] - data[i - 1];
+        gains.push(Math.max(change, 0));
+        losses.push(Math.max(-change, 0));
     }
-    return { buySig, sellSig };
+    const avgGain = calculateEMA(gains, period);
+    const avgLoss = calculateEMA(losses, period);
+    const rs = avgGain.map((gain, i) => gain / (avgLoss[i] || 1)); // Avoid division by zero
+    const rsi = rs.map(r => 100 - (100 / (1 + r)));
+    return rsi;
+};
+
+// Function to calculate Awesome Oscillator (AO)
+const calculateAO = (high, low, shortPeriod = 5, longPeriod = 34) => {
+    const hl2 = high.map((h, i) => (h + low[i]) / 2); // Calculate HL2 (midpoint)
+    const shortSMA = calculateEMA(hl2, shortPeriod);
+    const longSMA = calculateEMA(hl2, longPeriod);
+    const ao = shortSMA.map((short, i) => short - longSMA[i]);
+    return ao;
+};
+
+// Function to detect divergences
+const detectDivergences = (prices, indicatorValues, n = 4) => {
+    const divergences = {
+        bullish: [],
+        bearish: [],
+    };
+
+    // Find pivot highs and lows
+    const pivotHighs = [];
+    const pivotLows = [];
+    for (let i = n; i < prices.length - n; i++) {
+        const high = prices[i];
+        const low = prices[i];
+        let isPivotHigh = true;
+        let isPivotLow = true;
+
+        for (let j = i - n; j <= i + n; j++) {
+            if (prices[j] > high) isPivotHigh = false;
+            if (prices[j] < low) isPivotLow = false;
+        }
+
+        if (isPivotHigh) pivotHighs.push({ index: i, price: high, indicator: indicatorValues[i] });
+        if (isPivotLow) pivotLows.push({ index: i, price: low, indicator: indicatorValues[i] });
+    }
+
+    // Detect bearish divergences (price higher, indicator lower)
+    for (let i = 1; i < pivotHighs.length; i++) {
+        const prev = pivotHighs[i - 1];
+        const current = pivotHighs[i];
+        if (current.price > prev.price && current.indicator < prev.indicator) {
+            divergences.bearish.push({ start: prev, end: current });
+        }
+    }
+
+    // Detect bullish divergences (price lower, indicator higher)
+    for (let i = 1; i < pivotLows.length; i++) {
+        const prev = pivotLows[i - 1];
+        const current = pivotLows[i];
+        if (current.price < prev.price && current.indicator > prev.indicator) {
+            divergences.bullish.push({ start: prev, end: current });
+        }
+    }
+
+    return divergences;
 };
 
 // Function to handle null values (interpolation or previous value)
@@ -255,38 +302,38 @@ const fetchAndUpdateChart = async (pair, period) => {
         });
         macdSeries.setData(macdData);
 
-        // Detect buy/sell signals
-        const { buySig, sellSig } = detectSignals(histogram);
+        // Calculate RSI and AO
+        const rsi = calculateRSI(closePrices);
+        const ao = calculateAO(chartData.map(d => d.high), chartData.map(d => d.low));
 
-        // Plot buy/sell signals using markers
-        buySig.forEach((signal, index) => {
-            if (signal) {
-                lineSeries.setMarkers([
-                    {
-                        time: chartData[index].time,
-                        position: 'belowBar',
-                        color: '#00ff00',
-                        shape: 'arrowUp',
-                        text: 'Buy',
-                        id: `buy-${index}`,
-                    },
-                ]);
-            }
+        // Detect divergences
+        const divergences = detectDivergences(closePrices, histogram);
+
+        // Plot divergences
+        divergences.bullish.forEach(divergence => {
+            lineSeries.setMarkers([
+                {
+                    time: chartData[divergence.end.index].time,
+                    position: 'belowBar',
+                    color: '#00ff00',
+                    shape: 'arrowUp',
+                    text: 'Bullish Divergence',
+                    id: `bullish-${divergence.end.index}`,
+                },
+            ]);
         });
 
-        sellSig.forEach((signal, index) => {
-            if (signal) {
-                lineSeries.setMarkers([
-                    {
-                        time: chartData[index].time,
-                        position: 'aboveBar',
-                        color: '#ff0000',
-                        shape: 'arrowDown',
-                        text: 'Sell',
-                        id: `sell-${index}`,
-                    },
-                ]);
-            }
+        divergences.bearish.forEach(divergence => {
+            lineSeries.setMarkers([
+                {
+                    time: chartData[divergence.end.index].time,
+                    position: 'aboveBar',
+                    color: '#ff0000',
+                    shape: 'arrowDown',
+                    text: 'Bearish Divergence',
+                    id: `bearish-${divergence.end.index}`,
+                },
+            ]);
         });
 
         // Draw support and resistance lines
