@@ -5,7 +5,6 @@ const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
 const fibonacciInput = document.getElementById('fibonacci');
 const elliotInput = document.getElementById('elliot');
-const diagonalLinesInput = document.getElementById('diagonalLines'); // New input
 const chartDiv = document.getElementById('chart');
 let chart;
 let lineSeries;
@@ -67,31 +66,68 @@ const clearDiagonalLines = () => {
     elliotLines = [];
 };
 
-// Function to draw diagonal trendlines
+// Function to draw diagonal trendlines connecting monthly highs and lows
 const drawDiagonalTrendlines = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
-    // Get the number of diagonal lines from the input
-    const numLines = parseInt(diagonalLinesInput.value, 10);
+    // Step 1: Identify monthly highs and lows
+    const monthlyHighs = [];
+    const monthlyLows = [];
 
-    // Calculate the end time (3 months from today)
-    const today = new Date();
-    const threeMonthsFromToday = new Date(today.setMonth(today.getMonth() + 3));
-    const futureTime = Math.floor(threeMonthsFromToday.getTime() / 1000); // Convert to Unix timestamp
+    let currentMonth = null;
+    let currentHigh = { time: 0, value: -Infinity };
+    let currentLow = { time: 0, value: Infinity };
 
-    // Step 1: Identify all significant highs and lows
-    const allHighs = chartData.map(data => ({ time: data.time, value: data.high }));
-    const allLows = chartData.map(data => ({ time: data.time, value: data.low }));
+    for (const data of chartData) {
+        const date = new Date(data.time * 1000); // Convert timestamp to Date object
+        const month = date.getMonth(); // Get the month (0-11)
 
-    // Step 2: Sort highs and lows by value (descending for highs, ascending for lows)
-    const sortedHighs = allHighs.sort((a, b) => b.value - a.value);
-    const sortedLows = allLows.sort((a, b) => a.value - b.value);
+        // Check if we've moved to a new month
+        if (currentMonth !== month) {
+            if (currentMonth !== null) {
+                // Save the high and low for the previous month
+                monthlyHighs.push(currentHigh);
+                monthlyLows.push(currentLow);
+            }
 
-    // Step 3: Select the top `numLines` significant highs and lows
-    const significantHighs = sortedHighs.slice(0, numLines).sort((a, b) => a.time - b.time);
-    const significantLows = sortedLows.slice(0, numLines).sort((a, b) => a.time - b.time);
+            // Reset for the new month
+            currentMonth = month;
+            currentHigh = { time: data.time, value: data.high };
+            currentLow = { time: data.time, value: data.low };
+        } else {
+            // Update the high and low for the current month
+            if (data.high > currentHigh.value) {
+                currentHigh = { time: data.time, value: data.high };
+            }
+            if (data.low < currentLow.value) {
+                currentLow = { time: data.time, value: data.low };
+            }
+        }
+    }
 
-    // Step 4: Draw diagonal lines for significant highs
+    // Add the last month's high and low
+    monthlyHighs.push(currentHigh);
+    monthlyLows.push(currentLow);
+
+    // Step 2: Sort monthly highs and lows by time
+    monthlyHighs.sort((a, b) => a.time - b.time);
+    monthlyLows.sort((a, b) => a.time - b.time);
+
+    // Step 3: Select significant monthly highs and lows
+    const selectSignificantPoints = (points, count = 3) => {
+        if (points.length <= count) return points; // If there are fewer points than required, use all of them
+
+        // Select the most significant points (e.g., those with the highest/lowest values)
+        return points
+            .sort((a, b) => b.value - a.value) // Sort by value (descending for highs, ascending for lows)
+            .slice(0, count) // Select the top `count` points
+            .sort((a, b) => a.time - b.time); // Re-sort by time
+    };
+
+    const significantHighs = selectSignificantPoints(monthlyHighs);
+    const significantLows = selectSignificantPoints(monthlyLows);
+
+    // Step 4: Draw diagonal lines for monthly highs
     for (let i = 0; i < significantHighs.length - 1; i++) {
         const start = significantHighs[i];
         const end = significantHighs[i + 1];
@@ -102,6 +138,7 @@ const drawDiagonalTrendlines = (chartData) => {
         });
 
         // Extend the line 3 months into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
         line.setData([
             { time: start.time, value: start.value },
             { time: end.time, value: end.value },
@@ -111,7 +148,7 @@ const drawDiagonalTrendlines = (chartData) => {
         fibonacciLines.push(line); // Store the line for later removal
     }
 
-    // Step 5: Draw diagonal lines for significant lows
+    // Step 5: Draw diagonal lines for monthly lows
     for (let i = 0; i < significantLows.length - 1; i++) {
         const start = significantLows[i];
         const end = significantLows[i + 1];
@@ -122,6 +159,7 @@ const drawDiagonalTrendlines = (chartData) => {
         });
 
         // Extend the line 3 months into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
         line.setData([
             { time: start.time, value: start.value },
             { time: end.time, value: end.value },
@@ -281,15 +319,6 @@ fetchChartButton.addEventListener('click', async () => {
     } catch (error) {
         console.error('Error updating chart:', error);
     }
-});
-
-// Handle the diagonal lines input change
-diagonalLinesInput.addEventListener('input', () => {
-    const pair = pairInput.value.trim();
-    const period = periodInput.value;
-
-    // Redraw the chart with the updated number of diagonal lines
-    fetchAndUpdateChart(pair, period);
 });
 
 // Initialize chart when the page loads
