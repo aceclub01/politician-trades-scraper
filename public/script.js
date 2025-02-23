@@ -60,6 +60,83 @@ const handleNullValue = (data, index, field) => {
     return value;
 };
 
+// Function to draw diagonal trendlines
+const drawDiagonalTrendlines = (chartData) => {
+    if (chartData.length < 2) return; // Need at least 2 points to draw a line
+
+    // Step 1: Identify significant highs and lows
+    const significantPoints = [];
+    for (let i = 1; i < chartData.length - 1; i++) {
+        const prev = chartData[i - 1];
+        const current = chartData[i];
+        const next = chartData[i + 1];
+
+        // Check for significant highs
+        if (current.high > prev.high && current.high > next.high) {
+            significantPoints.push({ time: current.time, value: current.high, type: 'high' });
+        }
+
+        // Check for significant lows
+        if (current.low < prev.low && current.low < next.low) {
+            significantPoints.push({ time: current.time, value: current.low, type: 'low' });
+        }
+    }
+
+    // Step 2: Filter out outliers (e.g., sudden spikes or dips)
+    const filteredPoints = significantPoints.filter((point, index, array) => {
+        if (index === 0 || index === array.length - 1) return true; // Keep the first and last points
+        const prev = array[index - 1];
+        const next = array[index + 1];
+        const avg = (prev.value + next.value) / 2;
+        return Math.abs(point.value - avg) < 2 * Math.abs(prev.value - next.value); // Adjust threshold as needed
+    });
+
+    // Step 3: Sort points by time
+    filteredPoints.sort((a, b) => a.time - b.time);
+
+    // Step 4: Draw diagonal lines for highs and lows
+    const highPoints = filteredPoints.filter(point => point.type === 'high');
+    const lowPoints = filteredPoints.filter(point => point.type === 'low');
+
+    // Draw lines for significant highs
+    for (let i = 0; i < highPoints.length - 1; i++) {
+        const start = highPoints[i];
+        const end = highPoints[i + 1];
+
+        const line = chart.addLineSeries({
+            color: 'rgba(255, 0, 0, 0.8)', // Red for resistance
+            lineWidth: 2,
+        });
+
+        // Extend the line 3 months into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+        line.setData([
+            { time: start.time, value: start.value },
+            { time: end.time, value: end.value },
+            { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
+        ]);
+    }
+
+    // Draw lines for significant lows
+    for (let i = 0; i < lowPoints.length - 1; i++) {
+        const start = lowPoints[i];
+        const end = lowPoints[i + 1];
+
+        const line = chart.addLineSeries({
+            color: 'rgba(0, 255, 0, 0.8)', // Green for support
+            lineWidth: 2,
+        });
+
+        // Extend the line 3 months into the future
+        const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+        line.setData([
+            { time: start.time, value: start.value },
+            { time: end.time, value: end.value },
+            { time: futureTime, value: end.value + (end.value - start.value) / (end.time - start.time) * (futureTime - end.time) },
+        ]);
+    }
+};
+
 // Fetch FX data and update the chart
 const fetchAndUpdateChart = async (pair, period) => {
     try {
@@ -98,6 +175,9 @@ const fetchAndUpdateChart = async (pair, period) => {
         // Add new candlestick series
         lineSeries = chart.addCandlestickSeries();
         lineSeries.setData(chartData);
+
+        // Draw diagonal trendlines
+        drawDiagonalTrendlines(chartData);
 
         // Reset chart if no checkbox is active
         if (!fibonacciInput.checked && !elliotInput.checked) {
