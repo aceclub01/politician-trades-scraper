@@ -8,8 +8,11 @@ const sliderValue = document.getElementById('sliderValue');
 const historyBarsInput = document.getElementById('historyBars');
 const resolutionInput = document.getElementById('resolution');
 const diagonalLinesInput = document.getElementById('diagonalLines');
+const alphaSlider = document.getElementById('alphaSlider');
+const alphaValue = document.getElementById('alphaValue');
 const chartDiv = document.getElementById('chart');
 let chart;
+let macdChart;
 let lineSeries = null;
 let macdSeries = null;
 let supports = [];
@@ -20,11 +23,26 @@ intervalSlider.addEventListener('input', () => {
     sliderValue.textContent = intervalSlider.value;
 });
 
-// Create chart instance
-const createChart = () => {
+// Initialize alpha slider value display
+alphaSlider.addEventListener('input', () => {
+    alphaValue.textContent = alphaSlider.value;
+    updateMACDTransparency();
+});
+
+// Update resolution based on history bars
+const updateResolution = () => {
+    const historyBars = parseInt(historyBarsInput.value, 10);
+    resolutionInput.value = Math.round(historyBars / 5);
+};
+
+historyBarsInput.addEventListener('input', updateResolution);
+
+// Create chart instances
+const createCharts = () => {
+    // Main chart for price data
     chart = LightweightCharts.createChart(chartDiv, {
         width: chartDiv.clientWidth,
-        height: chartDiv.clientHeight,
+        height: chartDiv.clientHeight * 0.7, // 70% height for main chart
         layout: {
             backgroundColor: '#ffffff',
             textColor: '#000000',
@@ -37,11 +55,35 @@ const createChart = () => {
             mode: LightweightCharts.CrosshairMode.Normal,
         },
         priceScale: {
-            position: 'right', // Price scale on the right for the price chart
+            position: 'right',
             borderColor: '#cccccc',
         },
-        overlayPriceScales: {
-            position: 'left', // Price scale on the left for the MACD histogram
+        timeScale: {
+            borderColor: '#cccccc',
+        },
+    });
+
+    // Secondary chart for MACD histogram
+    const macdChartDiv = document.createElement('div');
+    macdChartDiv.style.height = `${chartDiv.clientHeight * 0.3}px`; // 30% height for MACD chart
+    chartDiv.appendChild(macdChartDiv);
+
+    macdChart = LightweightCharts.createChart(macdChartDiv, {
+        width: chartDiv.clientWidth,
+        height: chartDiv.clientHeight * 0.3,
+        layout: {
+            backgroundColor: '#ffffff',
+            textColor: '#000000',
+        },
+        grid: {
+            vertLines: { color: '#eeeeee' },
+            horzLines: { color: '#eeeeee' },
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode.Normal,
+        },
+        priceScale: {
+            position: 'right',
             borderColor: '#cccccc',
         },
         timeScale: {
@@ -51,19 +93,26 @@ const createChart = () => {
 
     // Add candlestick series for the price chart
     lineSeries = chart.addCandlestickSeries({
-        priceScaleId: 'right', // Use the right price scale for the price chart
+        priceScaleId: 'right',
     });
 
     // Add histogram series for the MACD
-    macdSeries = chart.addHistogramSeries({
-        color: 'rgba(38, 166, 154, 0.5)', // 50% transparent green
+    macdSeries = macdChart.addHistogramSeries({
+        color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
         priceFormat: {
             type: 'volume',
         },
-        priceScaleId: 'left', // Use a separate price scale for MACD
     });
 
-    console.log('Chart initialized:', chart);
+    console.log('Charts initialized:', chart, macdChart);
+};
+
+// Update MACD histogram transparency
+const updateMACDTransparency = () => {
+    const alpha = alphaSlider.value;
+    macdSeries.applyOptions({
+        color: `rgba(38, 166, 154, ${alpha})`, // Update transparency
+    });
 };
 
 // Function to calculate EMA
@@ -192,6 +241,59 @@ const drawSupportResistance = (chartData) => {
     }
 };
 
+// Function to draw Fibonacci levels
+const drawFibonacci = (chartData) => {
+    if (chartData.length < 2) return;
+
+    const high = Math.max(...chartData.map(d => d.high));
+    const low = Math.min(...chartData.map(d => d.low));
+    const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+
+    levels.forEach(level => {
+        const line = chart.addLineSeries({
+            color: 'rgba(0, 0, 255, 0.5)', // Blue for Fibonacci levels
+            lineWidth: 1,
+        });
+
+        const value = low + (high - low) * level;
+        line.setData([
+            { time: chartData[0].time, value: value },
+            { time: chartData[chartData.length - 1].time, value: value },
+        ]);
+    });
+};
+
+// Function to draw Elliott Wave
+const drawElliottWave = (chartData) => {
+    if (chartData.length < 5) return;
+
+    // Example logic for Elliott Wave (simplified)
+    const wavePoints = [
+        { time: chartData[0].time, value: chartData[0].low },
+        { time: chartData[1].time, value: chartData[1].high },
+        { time: chartData[2].time, value: chartData[2].low },
+        { time: chartData[3].time, value: chartData[3].high },
+        { time: chartData[4].time, value: chartData[4].low },
+    ];
+
+    const waveLine = chart.addLineSeries({
+        color: 'rgba(255, 0, 0, 0.5)', // Red for Elliott Wave
+        lineWidth: 2,
+    });
+
+    waveLine.setData(wavePoints);
+};
+
+// Update chart with Fibonacci and Elliott Wave
+const updateChartWithIndicators = (chartData) => {
+    if (document.getElementById('fibonacci').checked) {
+        drawFibonacci(chartData);
+    }
+    if (document.getElementById('elliot').checked) {
+        drawElliottWave(chartData);
+    }
+};
+
 // Fetch FX data and update the chart
 const fetchAndUpdateChart = async (pair, period) => {
     try {
@@ -220,7 +322,7 @@ const fetchAndUpdateChart = async (pair, period) => {
             lineSeries = null;
         }
         if (macdSeries) {
-            chart.removeSeries(macdSeries);
+            macdChart.removeSeries(macdSeries);
             macdSeries = null;
         }
         clearLines(); // Clear existing lines
@@ -239,19 +341,21 @@ const fetchAndUpdateChart = async (pair, period) => {
         const macdData = chartData.map((d, i) => ({
             time: d.time,
             value: histogram[i],
-            color: histogram[i] >= 0 ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)', // 50% transparent green/red
+            color: histogram[i] >= 0 ? `rgba(38, 166, 154, ${alphaSlider.value})` : `rgba(239, 83, 80, ${alphaSlider.value})`, // Dynamic transparency
         }));
-        macdSeries = chart.addHistogramSeries({
-            color: 'rgba(38, 166, 154, 0.5)',
+        macdSeries = macdChart.addHistogramSeries({
+            color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
             priceFormat: {
                 type: 'volume',
             },
-            priceScaleId: 'left',
         });
         macdSeries.setData(macdData);
 
         // Draw support and resistance lines
         drawSupportResistance(chartData);
+
+        // Draw Fibonacci and Elliott Wave
+        updateChartWithIndicators(chartData);
     } catch (error) {
         console.error('Error fetching FX data:', error);
         alert('Failed to fetch FX data. Check the console for details.');
@@ -273,4 +377,4 @@ fetchChartButton.addEventListener('click', async () => {
 });
 
 // Initialize chart when the page loads
-createChart();
+createCharts();

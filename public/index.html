@@ -56,11 +56,16 @@
         <label for="resolution">Resolution (bars): </label>
         <input type="number" id="resolution" value="6" min="1" max="50" />
     </div>
+    <div>
+        <label for="alphaSlider">MACD Histogram Transparency: </label>
+        <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.5">
+        <span id="alphaValue">0.5</span>
+    </div>
     <button id="fetchData">Fetch Data</button>
     <button id="fetchChartData">Update Chart</button> <!-- New button -->
 
     <!-- Chart Container -->
-    <div id="chart" style="height: 500px;"></div>
+    <div id="chart" style="height: 700px;"></div>
 
     <!-- Fundamentals Container -->
     <div id="fundamentals">
