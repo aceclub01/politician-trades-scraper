@@ -40,10 +40,6 @@ const createChart = () => {
             position: 'right', // Price scale on the right for the price chart
             borderColor: '#cccccc',
         },
-        overlayPriceScales: {
-            position: 'left', // Price scale on the left for the MACD histogram
-            borderColor: '#cccccc',
-        },
         timeScale: {
             borderColor: '#cccccc',
         },
@@ -54,13 +50,13 @@ const createChart = () => {
         priceScaleId: 'right', // Use the right price scale for the price chart
     });
 
-    // Add histogram series for the MACD
+    // Add histogram series for the MACD (plotted on the same axis)
     macdSeries = chart.addHistogramSeries({
-        color: 'rgba(38, 166, 154, 0.5)', // 50% transparent green
+        color: 'rgba(38, 166, 154, 0.3)', // 70% transparent green (faded)
         priceFormat: {
             type: 'volume',
         },
-        priceScaleId: 'left', // Use a separate price scale for MACD
+        priceScaleId: 'right', // Use the same price scale as the main chart
     });
 
     console.log('Chart initialized:', chart);
@@ -239,14 +235,14 @@ const fetchAndUpdateChart = async (pair, period) => {
         const macdData = chartData.map((d, i) => ({
             time: d.time,
             value: histogram[i],
-            color: histogram[i] >= 0 ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)', // 50% transparent green/red
+            color: histogram[i] >= 0 ? 'rgba(38, 166, 154, 0.3)' : 'rgba(239, 83, 80, 0.3)', // 70% transparent green/red
         }));
         macdSeries = chart.addHistogramSeries({
-            color: 'rgba(38, 166, 154, 0.5)',
+            color: 'rgba(38, 166, 154, 0.3)', // 70% transparent green
             priceFormat: {
                 type: 'volume',
             },
-            priceScaleId: 'left',
+            priceScaleId: 'right', // Use the same price scale as the main chart
         });
         macdSeries.setData(macdData);
 
