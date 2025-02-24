@@ -17,6 +17,8 @@ let lineSeries = null;
 let macdSeries = null;
 let supports = [];
 let resistances = [];
+let fibonacciLines = [];
+let elliotLines = [];
 
 // Initialize slider value display
 intervalSlider.addEventListener('input', () => {
@@ -158,8 +160,12 @@ const handleNullValue = (data, index, field) => {
 const clearLines = () => {
     supports.forEach(line => chart.removeSeries(line));
     resistances.forEach(line => chart.removeSeries(line));
+    fibonacciLines.forEach(line => chart.removeSeries(line));
+    elliotLines.forEach(line => chart.removeSeries(line));
     supports = [];
     resistances = [];
+    fibonacciLines = [];
+    elliotLines = [];
 };
 
 // Function to calculate price at a specific time
@@ -241,47 +247,64 @@ const drawSupportResistance = (chartData) => {
     }
 };
 
-// Function to draw Fibonacci levels
+// Draw Fibonacci levels
 const drawFibonacci = (chartData) => {
-    if (chartData.length < 2) return;
+    const minPrice = Math.min(...chartData.map(data => data.low));
+    const maxPrice = Math.max(...chartData.map(data => data.high));
 
-    const high = Math.max(...chartData.map(d => d.high));
-    const low = Math.min(...chartData.map(d => d.low));
-    const levels = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
+    const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
+    const fibonacciLinesArr = fibonacciLevels.map(level => ({
+        price: minPrice + (maxPrice - minPrice) * level,
+        label: `${(level * 100).toFixed(1)}%`
+    }));
 
-    levels.forEach(level => {
-        const line = chart.addLineSeries({
-            color: 'rgba(0, 0, 255, 0.5)', // Blue for Fibonacci levels
-            lineWidth: 1,
+    fibonacciLinesArr.forEach(level => {
+        const fibLine = chart.addLineSeries({
+            color: 'rgba(0, 255, 255, 0.8)',
+            lineWidth: 2,
         });
 
-        const value = low + (high - low) * level;
-        line.setData([
-            { time: chartData[0].time, value: value },
-            { time: chartData[chartData.length - 1].time, value: value },
+        // Draw the line across the chart time range
+        fibLine.setData([
+            { time: chartData[0].time, value: level.price },
+            { time: chartData[chartData.length - 1].time, value: level.price }
         ]);
+
+        fibonacciLines.push(fibLine);
     });
 };
 
-// Function to draw Elliott Wave
-const drawElliottWave = (chartData) => {
-    if (chartData.length < 5) return;
+// Draw Elliott Waves with null handling
+const drawElliotWave = (chartData) => {
+    if (chartData.length < 5) return; // Ensure we have enough data for waves
 
-    // Example logic for Elliott Wave (simplified)
-    const wavePoints = [
-        { time: chartData[0].time, value: chartData[0].low },
-        { time: chartData[1].time, value: chartData[1].high },
-        { time: chartData[2].time, value: chartData[2].low },
-        { time: chartData[3].time, value: chartData[3].high },
-        { time: chartData[4].time, value: chartData[4].low },
+    const cleanData = chartData.filter(data => data.close !== null); // Remove null values
+    if (cleanData.length < 5) return; // Ensure we have at least 5 valid points
+
+    const points = [
+        cleanData[0],  // Wave 1
+        cleanData[Math.floor(cleanData.length * 0.25)],  // Wave 2
+        cleanData[Math.floor(cleanData.length * 0.5)],   // Wave 3
+        cleanData[Math.floor(cleanData.length * 0.75)],  // Wave 4
+        cleanData[cleanData.length - 1]  // Wave 5
     ];
 
-    const waveLine = chart.addLineSeries({
-        color: 'rgba(255, 0, 0, 0.5)', // Red for Elliott Wave
-        lineWidth: 2,
-    });
+    points.forEach((point, index) => {
+        if (index < points.length - 1) {
+            const line = chart.addLineSeries({
+                color: 'rgba(255, 165, 0, 0.8)',
+                lineWidth: 2,
+            });
 
-    waveLine.setData(wavePoints);
+            // Set data for Elliot Wave lines
+            line.setData([
+                { time: point.time, value: point.close },
+                { time: points[index + 1].time, value: points[index + 1].close }
+            ]);
+
+            elliotLines.push(line);
+        }
+    });
 };
 
 // Update chart with Fibonacci and Elliott Wave
@@ -290,7 +313,7 @@ const updateChartWithIndicators = (chartData) => {
         drawFibonacci(chartData);
     }
     if (document.getElementById('elliot').checked) {
-        drawElliottWave(chartData);
+        drawElliotWave(chartData);
     }
 };
 
