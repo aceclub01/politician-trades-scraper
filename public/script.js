@@ -3,14 +3,22 @@ const fetchDataButton = document.getElementById('fetchData');
 const fetchChartButton = document.getElementById('fetchChartData');
 const pairInput = document.getElementById('pair');
 const periodInput = document.getElementById('period');
+const intervalSlider = document.getElementById('intervalSlider');
+const sliderValue = document.getElementById('sliderValue');
 const historyBarsInput = document.getElementById('historyBars');
 const resolutionInput = document.getElementById('resolution');
+const diagonalLinesInput = document.getElementById('diagonalLines');
 const chartDiv = document.getElementById('chart');
 let chart;
 let lineSeries = null;
 let macdSeries = null;
 let supports = [];
 let resistances = [];
+
+// Initialize slider value display
+intervalSlider.addEventListener('input', () => {
+    sliderValue.textContent = intervalSlider.value;
+});
 
 // Create chart instance
 const createChart = () => {
@@ -48,7 +56,7 @@ const createChart = () => {
 
     // Add histogram series for the MACD
     macdSeries = chart.addHistogramSeries({
-        color: '#26a69a', // Default color for MACD histogram
+        color: 'rgba(38, 166, 154, 0.5)', // 50% transparent green
         priceFormat: {
             type: 'volume',
         },
@@ -116,6 +124,7 @@ const drawSupportResistance = (chartData) => {
 
     const historyBars = parseInt(historyBarsInput.value, 10);
     const resolution = parseInt(resolutionInput.value, 10);
+    const diagonalLines = parseInt(diagonalLinesInput.value, 10);
     const x2 = Math.round(resolution / 2);
 
     // Find significant lows (supports)
@@ -137,7 +146,7 @@ const drawSupportResistance = (chartData) => {
     }
 
     // Draw support lines
-    for (let i = 0; i < minimums.length - 1; i++) {
+    for (let i = 0; i < Math.min(minimums.length - 1, diagonalLines); i++) {
         const start = minimums[i];
         const end = minimums[i + 1];
 
@@ -148,17 +157,19 @@ const drawSupportResistance = (chartData) => {
 
         // Extend the line into the future
         const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+        const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+
         line.setData([
             { time: start.time, value: start.value },
             { time: end.time, value: end.value },
-            { time: futureTime, value: priceAt(start.time, start.value, end.time, end.value, futureTime) },
+            { time: futureTime, value: futureValue },
         ]);
 
         supports.push(line);
     }
 
     // Draw resistance lines
-    for (let i = 0; i < maximums.length - 1; i++) {
+    for (let i = 0; i < Math.min(maximums.length - 1, diagonalLines); i++) {
         const start = maximums[i];
         const end = maximums[i + 1];
 
@@ -169,10 +180,12 @@ const drawSupportResistance = (chartData) => {
 
         // Extend the line into the future
         const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+        const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+
         line.setData([
             { time: start.time, value: start.value },
             { time: end.time, value: end.value },
-            { time: futureTime, value: priceAt(start.time, start.value, end.time, end.value, futureTime) },
+            { time: futureTime, value: futureValue },
         ]);
 
         resistances.push(line);
@@ -192,9 +205,6 @@ const fetchAndUpdateChart = async (pair, period) => {
             return;
         }
 
-        // Log the raw data returned by the API
-        console.log('Fetched data:', data);
-
         // Prepare data for chart with null handling
         const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
             time: timestamp,
@@ -204,23 +214,20 @@ const fetchAndUpdateChart = async (pair, period) => {
             close: handleNullValue(data, index, 'close'),
         }));
 
-        // Log the processed chart data
-        console.log('Chart data:', chartData);
-
         // Remove old data
         if (lineSeries) {
             chart.removeSeries(lineSeries);
-            lineSeries = null; // Reset the variable
+            lineSeries = null;
         }
         if (macdSeries) {
             chart.removeSeries(macdSeries);
-            macdSeries = null; // Reset the variable
+            macdSeries = null;
         }
         clearLines(); // Clear existing lines
 
         // Add new candlestick series
         lineSeries = chart.addCandlestickSeries({
-            priceScaleId: 'right', // Use the right price scale for the price chart
+            priceScaleId: 'right',
         });
         lineSeries.setData(chartData);
 
@@ -232,14 +239,14 @@ const fetchAndUpdateChart = async (pair, period) => {
         const macdData = chartData.map((d, i) => ({
             time: d.time,
             value: histogram[i],
-            color: histogram[i] >= 0 ? '#26a69a' : '#ef5350', // Green for positive, red for negative
+            color: histogram[i] >= 0 ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)', // 50% transparent green/red
         }));
         macdSeries = chart.addHistogramSeries({
-            color: '#26a69a',
+            color: 'rgba(38, 166, 154, 0.5)',
             priceFormat: {
                 type: 'volume',
             },
-            priceScaleId: 'left', // Use a separate price scale for MACD
+            priceScaleId: 'left',
         });
         macdSeries.setData(macdData);
 
@@ -255,26 +262,14 @@ const fetchAndUpdateChart = async (pair, period) => {
 fetchDataButton.addEventListener('click', async () => {
     const pair = pairInput.value.trim();
     const period = periodInput.value;
-
-    try {
-        // Fetch and update the chart
-        await fetchAndUpdateChart(pair, period);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
+    await fetchAndUpdateChart(pair, period);
 });
 
-// Handle the new "Update Chart" button click
+// Handle the "Update Chart" button click
 fetchChartButton.addEventListener('click', async () => {
     const pair = pairInput.value.trim();
     const period = periodInput.value;
-
-    try {
-        // Fetch and update the chart only
-        await fetchAndUpdateChart(pair, period);
-    } catch (error) {
-        console.error('Error updating chart:', error);
-    }
+    await fetchAndUpdateChart(pair, period);
 });
 
 // Initialize chart when the page loads
