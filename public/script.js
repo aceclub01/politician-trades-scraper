@@ -43,6 +43,7 @@ const updateResolution = () => {
 historyBarsInput.addEventListener('input', updateResolution);
 
 // Create chart instances
+// Create chart instances
 const createCharts = () => {
     // Main chart for price data
     chart = LightweightCharts.createChart(chartDiv, {
@@ -96,6 +97,18 @@ const createCharts = () => {
         },
     });
 
+    // Synchronize time scales
+    const mainTimeScale = chart.timeScale();
+    const macdTimeScale = macdChart.timeScale();
+
+    mainTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+        macdTimeScale.setVisibleLogicalRange(newRange);
+    });
+
+    macdTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+        mainTimeScale.setVisibleLogicalRange(newRange);
+    });
+
     // Add candlestick series for the price chart
     lineSeries = chart.addCandlestickSeries({
         priceScaleId: 'right',
@@ -111,7 +124,6 @@ const createCharts = () => {
 
     console.log('Charts initialized:', chart, macdChart);
 };
-
 // Update MACD histogram transparency
 const updateMACDTransparency = () => {
     const alpha = alphaSlider.value;
