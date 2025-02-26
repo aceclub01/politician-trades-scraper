@@ -43,6 +43,75 @@ const updateResolution = () => {
 historyBarsInput.addEventListener('input', updateResolution);
 
 // Create chart instances
+// const createCharts = () => {
+//     // Main chart for price data
+//     chart = LightweightCharts.createChart(chartDiv, {
+//         width: chartDiv.clientWidth,
+//         height: chartDiv.clientHeight * 0.7, // 70% height for main chart
+//         layout: {
+//             backgroundColor: '#ffffff',
+//             textColor: '#000000',
+//         },
+//         grid: {
+//             vertLines: { color: '#eeeeee' },
+//             horzLines: { color: '#eeeeee' },
+//         },
+//         crosshair: {
+//             mode: LightweightCharts.CrosshairMode.Normal,
+//         },
+//         priceScale: {
+//             position: 'right',
+//             borderColor: '#cccccc',
+//         },
+//         timeScale: {
+//             borderColor: '#cccccc',
+//         },
+//     });
+
+//     // Secondary chart for MACD histogram
+//     const macdChartDiv = document.createElement('div');
+//     macdChartDiv.style.height = `${chartDiv.clientHeight * 0.3}px`; // 30% height for MACD chart
+//     chartDiv.appendChild(macdChartDiv);
+
+//     macdChart = LightweightCharts.createChart(macdChartDiv, {
+//         width: chartDiv.clientWidth,
+//         height: chartDiv.clientHeight * 0.3,
+//         layout: {
+//             backgroundColor: '#ffffff',
+//             textColor: '#000000',
+//         },
+//         grid: {
+//             vertLines: { color: '#eeeeee' },
+//             horzLines: { color: '#eeeeee' },
+//         },
+//         crosshair: {
+//             mode: LightweightCharts.CrosshairMode.Normal,
+//         },
+//         priceScale: {
+//             position: 'right',
+//             borderColor: '#cccccc',
+//         },
+//         timeScale: {
+//             borderColor: '#cccccc',
+//         },
+//     });
+
+//     // Add candlestick series for the price chart
+//     lineSeries = chart.addCandlestickSeries({
+//         priceScaleId: 'right',
+//     });
+
+//     // Add histogram series for the MACD
+//     macdSeries = macdChart.addHistogramSeries({
+//         color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
+//         priceFormat: {
+//             type: 'volume',
+//         },
+//     });
+
+//     console.log('Charts initialized:', chart, macdChart);
+// };
+// Create chart instances
 const createCharts = () => {
     // Main chart for price data
     chart = LightweightCharts.createChart(chartDiv, {
@@ -96,6 +165,18 @@ const createCharts = () => {
         },
     });
 
+    // Synchronize time scales
+    const mainTimeScale = chart.timeScale();
+    const macdTimeScale = macdChart.timeScale();
+
+    mainTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+        macdTimeScale.setVisibleLogicalRange(newRange);
+    });
+
+    macdTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+        mainTimeScale.setVisibleLogicalRange(newRange);
+    });
+
     // Add candlestick series for the price chart
     lineSeries = chart.addCandlestickSeries({
         priceScaleId: 'right',
@@ -111,7 +192,6 @@ const createCharts = () => {
 
     console.log('Charts initialized:', chart, macdChart);
 };
-
 // Update MACD histogram transparency
 const updateMACDTransparency = () => {
     const alpha = alphaSlider.value;
