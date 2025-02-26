@@ -217,15 +217,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndUpdateChart = async (pair, period) => {
         try {
             console.log(`Fetching chart data for pair: ${pair}, period: ${period}`);
-
+    
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
-
+    
             if (data.error) {
                 alert('Failed to fetch data');
                 return;
             }
-
+    
             // Prepare data for chart with null handling
             const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
                 time: timestamp,
@@ -234,20 +234,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 low: handleNullValue(data, index, 'low'),
                 close: handleNullValue(data, index, 'close'),
             }));
-
+    
             // Remove old data
             if (lineSeries) {
                 chart.removeSeries(lineSeries);
                 lineSeries = null;
             }
             clearLines(); // Clear existing lines
-
+    
             // Add new candlestick series
             lineSeries = chart.addCandlestickSeries({
                 priceScaleId: 'right',
             });
             lineSeries.setData(chartData);
-
+    
             // Draw support and resistance lines
             drawSupportResistance(chartData);
         } catch (error) {
