@@ -112,7 +112,6 @@ historyBarsInput.addEventListener('input', updateResolution);
 //     console.log('Charts initialized:', chart, macdChart);
 // };
 // Create chart instances
-// Create chart instances
 const createCharts = () => {
     // Main chart for price data
     chart = LightweightCharts.createChart(chartDiv, {
