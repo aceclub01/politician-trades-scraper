@@ -57,7 +57,12 @@ const createCharts = () => {
     const syncCharts = (sourceChart, targetChart) => {
         sourceChart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
             if (timeRange && targetChart.timeScale()) {
-                targetChart.timeScale().setVisibleRange(timeRange);
+                if (timeRange && targetChart && targetChart.timeScale()) {
+                    targetChart.timeScale().setVisibleRange(timeRange);
+                } else {
+                    console.warn("timeRange is null or targetChart not initialized");
+                }
+                
             }
         });
     
