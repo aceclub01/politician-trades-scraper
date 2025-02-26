@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             lineSeries.setData(chartData);
     
-            // Draw support and resistance lines (based on updated slider values)
+            // Draw support and resistance lines
             drawSupportResistance(chartData);
     
             // Draw Fibonacci and Elliott Wave
