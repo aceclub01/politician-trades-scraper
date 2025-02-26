@@ -15,6 +15,9 @@ let chart;
 let macdChart;
 let lineSeries = null;
 let macdSeries = null;
+let sma7Series = null;
+let sma20Series = null;
+let sma50Series = null;
 let supports = [];
 let resistances = [];
 let fibonacciLines = [];
@@ -117,6 +120,16 @@ const updateMACDTransparency = () => {
     });
 };
 
+// Function to calculate SMA
+const calculateSMA = (data, period) => {
+    const sma = [];
+    for (let i = period - 1; i < data.length; i++) {
+        const sum = data.slice(i - period + 1, i + 1).reduce((acc, val) => acc + val, 0);
+        sma.push({ time: data[i].time, value: sum / period });
+    }
+    return sma;
+};
+
 // Function to calculate EMA
 const calculateEMA = (data, period) => {
     const k = 2 / (period + 1);
@@ -162,10 +175,16 @@ const clearLines = () => {
     resistances.forEach(line => chart.removeSeries(line));
     fibonacciLines.forEach(line => chart.removeSeries(line));
     elliotLines.forEach(line => chart.removeSeries(line));
+    if (sma7Series) chart.removeSeries(sma7Series);
+    if (sma20Series) chart.removeSeries(sma20Series);
+    if (sma50Series) chart.removeSeries(sma50Series);
     supports = [];
     resistances = [];
     fibonacciLines = [];
     elliotLines = [];
+    sma7Series = null;
+    sma20Series = null;
+    sma50Series = null;
 };
 
 // Function to calculate price at a specific time
@@ -373,6 +392,20 @@ const fetchAndUpdateChart = async (pair, period) => {
             },
         });
         macdSeries.setData(macdData);
+
+        // Calculate and plot SMAs
+        const sma7 = calculateSMA(chartData, 7);
+        const sma20 = calculateSMA(chartData, 20);
+        const sma50 = calculateSMA(chartData, 50);
+
+        sma7Series = chart.addLineSeries({ color: 'rgba(255, 0, 0, 0.8)', lineWidth: 1 }); // Red for SMA 7
+        sma7Series.setData(sma7);
+
+        sma20Series = chart.addLineSeries({ color: 'rgba(0, 255, 0, 0.8)', lineWidth: 1 }); // Green for SMA 20
+        sma20Series.setData(sma20);
+
+        sma50Series = chart.addLineSeries({ color: 'rgba(0, 0, 255, 0.8)', lineWidth: 1 }); // Blue for SMA 50
+        sma50Series.setData(sma50);
 
         // Draw support and resistance lines
         drawSupportResistance(chartData);
