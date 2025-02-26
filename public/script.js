@@ -27,7 +27,11 @@ let elliotLines = [];
 intervalSlider.addEventListener('input', () => {
     sliderValue.textContent = intervalSlider.value;
 });
-
+// Update diagonal lines input value
+diagonalLinesInput.addEventListener('input', () => {
+    // No need to update the display, but you can add logging if needed
+    console.log('Number of diagonal lines:', diagonalLinesInput.value);
+});
 // Initialize alpha slider value display
 alphaSlider.addEventListener('input', () => {
     alphaValue.textContent = alphaSlider.value;
