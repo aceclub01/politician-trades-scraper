@@ -149,60 +149,6 @@ const clearLines = () => {
         if (series) chart.removeSeries(series);
     });
 };
-
-// Fetch and Update Chart
-const fetchAndUpdateChart = async (pair, period) => {
-    try {
-        const response = await fetch(`${API_URL}?pair=${pair}&period=${period}`);
-        const data = await response.json();
-
-        if (data.error) {
-            alert('Failed to fetch data');
-            return;
-        }
-
-        const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
-            time: timestamp,
-            open: handleNullValue(data, index, 'open'),
-            high: handleNullValue(data, index, 'high'),
-            low: handleNullValue(data, index, 'low'),
-            close: handleNullValue(data, index, 'close'),
-        }));
-
-        clearLines();
-
-        lineSeries.setData(chartData);
-
-        const closePrices = chartData.map(d => d.close);
-        const { histogram } = calculateMACD(closePrices);
-
-        const macdData = chartData.map((d, i) => ({
-            time: d.time,
-            value: histogram[i],
-            color: histogram[i] >= 0 ? MACD_COLORS.positive : MACD_COLORS.negative,
-        }));
-        macdSeries.setData(macdData);
-
-        const sma7 = calculateSMA(chartData, 7);
-        const sma20 = calculateSMA(chartData, 20);
-        const sma50 = calculateSMA(chartData, 50);
-
-        sma7Series = chart.addLineSeries({ color: SMA_COLORS.sma7, lineWidth: 1 });
-        sma7Series.setData(sma7);
-
-        sma20Series = chart.addLineSeries({ color: SMA_COLORS.sma20, lineWidth: 1 });
-        sma20Series.setData(sma20);
-
-        sma50Series = chart.addLineSeries({ color: SMA_COLORS.sma50, lineWidth: 1 });
-        sma50Series.setData(sma50);
-
-        drawSupportResistance(chartData);
-        updateChartWithIndicators(chartData);
-    } catch (error) {
-        console.error('Error fetching FX data:', error);
-        alert('Failed to fetch FX data. Check the console for details.');
-    }
-};
 // Function to draw support and resistance lines
 const drawSupportResistance = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
@@ -276,6 +222,60 @@ const drawSupportResistance = (chartData) => {
         resistances.push(line);
     }
 };
+// Fetch and Update Chart
+const fetchAndUpdateChart = async (pair, period) => {
+    try {
+        const response = await fetch(`${API_URL}?pair=${pair}&period=${period}`);
+        const data = await response.json();
+
+        if (data.error) {
+            alert('Failed to fetch data');
+            return;
+        }
+
+        const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
+            time: timestamp,
+            open: handleNullValue(data, index, 'open'),
+            high: handleNullValue(data, index, 'high'),
+            low: handleNullValue(data, index, 'low'),
+            close: handleNullValue(data, index, 'close'),
+        }));
+
+        clearLines();
+
+        lineSeries.setData(chartData);
+
+        const closePrices = chartData.map(d => d.close);
+        const { histogram } = calculateMACD(closePrices);
+
+        const macdData = chartData.map((d, i) => ({
+            time: d.time,
+            value: histogram[i],
+            color: histogram[i] >= 0 ? MACD_COLORS.positive : MACD_COLORS.negative,
+        }));
+        macdSeries.setData(macdData);
+
+        const sma7 = calculateSMA(chartData, 7);
+        const sma20 = calculateSMA(chartData, 20);
+        const sma50 = calculateSMA(chartData, 50);
+
+        sma7Series = chart.addLineSeries({ color: SMA_COLORS.sma7, lineWidth: 1 });
+        sma7Series.setData(sma7);
+
+        sma20Series = chart.addLineSeries({ color: SMA_COLORS.sma20, lineWidth: 1 });
+        sma20Series.setData(sma20);
+
+        sma50Series = chart.addLineSeries({ color: SMA_COLORS.sma50, lineWidth: 1 });
+        sma50Series.setData(sma50);
+
+        drawSupportResistance(chartData);
+        updateChartWithIndicators(chartData);
+    } catch (error) {
+        console.error('Error fetching FX data:', error);
+        alert('Failed to fetch FX data. Check the console for details.');
+    }
+};
+
 
 // Function to calculate price at a specific time
 const priceAt = (t1, p1, t2, p2, t3) => {
