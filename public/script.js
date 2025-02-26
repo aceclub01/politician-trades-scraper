@@ -148,13 +148,39 @@ const fetchAndUpdateChart = async (pair, period) => {
     try {
         console.log(`Fetching chart data for pair: ${pair}, period: ${period}`);
 
-        const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
+        // Get the current values of historyBars and resolution
+        const historyBars = parseInt(historyBarsInput.value, 10);
+        const resolution = parseInt(resolutionInput.value, 10);
+
+        // Validate historyBars and resolution
+        if (isNaN(historyBars) || historyBars <= 0 || isNaN(resolution) || resolution <= 0) {
+            throw new Error('Invalid historyBars or resolution value');
+        }
+
+        // Log the parameters being sent to the API
+        console.log('API Request Parameters:', {
+            pair,
+            period,
+            historyBars,
+            resolution,
+        });
+
+        // Make the API request
+        const response = await fetch(
+            `https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}&historyBars=${historyBars}&resolution=${resolution}`
+        );
+
+        // Check if the response is OK
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch data');
+        }
+
+        // Parse the response data
         const data = await response.json();
 
-        if (data.error) {
-            alert('Failed to fetch data');
-            return;
-        }
+        // Log the fetched data for debugging
+        console.log('Fetched Data:', data);
 
         // Prepare data for chart with null handling
         const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
@@ -205,10 +231,6 @@ const fetchAndUpdateChart = async (pair, period) => {
         const sma20 = calculateSMA(chartData, 20);
         const sma50 = calculateSMA(chartData, 50);
 
-        console.log('SMA 7:', sma7); // Debugging
-        console.log('SMA 20:', sma20); // Debugging
-        console.log('SMA 50:', sma50); // Debugging
-
         sma7Series = chart.addLineSeries({ color: 'rgba(255, 0, 0, 0.8)', lineWidth: 1 }); // Red for SMA 7
         sma7Series.setData(sma7);
 
@@ -225,10 +247,9 @@ const fetchAndUpdateChart = async (pair, period) => {
         updateChartWithIndicators(chartData);
     } catch (error) {
         console.error('Error fetching FX data:', error);
-        alert('Failed to fetch FX data. Check the console for details.');
+        alert(`Failed to fetch FX data: ${error.message}`);
     }
 };
-
 // Function to calculate EMA
 const calculateEMA = (data, period) => {
     const k = 2 / (period + 1);
