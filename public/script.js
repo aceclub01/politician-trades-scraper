@@ -240,6 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 chart.removeSeries(lineSeries);
                 lineSeries = null;
             }
+            if (macdSeries) {
+                chart.removeSeries(macdSeries);
+                macdSeries = null;
+            }
             clearLines(); // Clear existing lines
     
             // Add new candlestick series
@@ -248,8 +252,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             lineSeries.setData(chartData);
     
-            // Draw support and resistance lines
+            // Draw support and resistance lines (based on updated slider values)
             drawSupportResistance(chartData);
+    
+            // Draw Fibonacci and Elliott Wave
+            updateChartWithIndicators(chartData);
         } catch (error) {
             console.error('Error fetching FX data:', error);
             alert('Failed to fetch FX data. Check the console for details.');
