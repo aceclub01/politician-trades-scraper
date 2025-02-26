@@ -63,12 +63,14 @@ async function fetchFundamentals(symbol) {
         console.log(`Fetching fundamentals for symbol: ${symbol}`);
 
         const response = await fetch(`${API_BASE_URL}/fetchFundamentals?symbol=${symbol}`);
+        console.log('API Response:', response);
+
         if (!response.ok) {
             throw new Error(`Failed to fetch fundamentals for ${symbol}: ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log('API Response:', data);
+        console.log('API Data:', data);
 
         // Handle FX pairs
         if (symbol.includes('=X')) {
@@ -117,3 +119,25 @@ async function fetchFundamentals(symbol) {
         }
     }
 }
+// Add event listener for the "Fetch Data" button
+document.getElementById('fetchData').addEventListener('click', async () => {
+    const pair = document.getElementById('pair').value; // Get the FX pair from the input field
+    console.log('Fetching data for symbol:', pair); // Log the symbol
+    const period = document.getElementById('period').value;
+    const newsLimit = document.getElementById('newsLimit').value;
+
+    try {
+        // Fetch FX data
+        const fxResponse = await fetch(`${API_BASE_URL}/fxdata?pair=${pair}&period=${period}`);
+        const fxData = await fxResponse.json();
+        console.log('FX Data:', fxData);
+
+        // Fetch fundamentals
+        await fetchFundamentals(pair);
+
+        // Fetch news
+        await fetchNews(pair, parseInt(newsLimit, 10));
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+});
