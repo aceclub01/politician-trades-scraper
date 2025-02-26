@@ -112,6 +112,7 @@ historyBarsInput.addEventListener('input', updateResolution);
 //     console.log('Charts initialized:', chart, macdChart);
 // };
 // Create chart instances
+// Create chart instances
 const createCharts = () => {
     // Main chart for price data
     chart = LightweightCharts.createChart(chartDiv, {
@@ -446,7 +447,7 @@ const drawFibonacci = (chartData) => {
 
     fibonacciLinesArr.forEach(level => {
         const fibLine = chart.addLineSeries({
-            color: 'rgba(0, 255, 255, 0.8)',
+            color: 'rgba(0, 0, 0, 0.8)',
             lineWidth: 2,
         });
 
