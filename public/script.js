@@ -101,6 +101,25 @@ const priceAt = (t1, p1, t2, p2, t3) => {
     return p1 + (p2 - p1) * (t3 - t1) / (t2 - t1);
 };
 
+// Function to handle null values (interpolation or previous value)
+const handleNullValue = (data, index, field) => {
+    const quote = data.chart.result[0].indicators.quote[0][field];
+    let value = quote[index];
+
+    if (value === null) {
+        // Look for the last valid value
+        for (let i = index - 1; i >= 0; i--) {
+            if (quote[i] !== null) return quote[i];
+        }
+        // If no previous value, use the next valid value
+        for (let i = index + 1; i < quote.length; i++) {
+            if (quote[i] !== null) return quote[i];
+        }
+        return 0; // Default fallback
+    }
+    return value;
+};
+
 // Function to draw support and resistance lines
 const drawSupportResistance = (chartData) => {
     if (chartData.length < 2) return; // Need at least 2 points to draw a line
