@@ -56,12 +56,18 @@ const createCharts = () => {
     // ✅ Synchronize the time scales
     const syncCharts = (sourceChart, targetChart) => {
         sourceChart.timeScale().subscribeVisibleTimeRangeChange((timeRange) => {
-            if (timeRange) targetChart.timeScale().setVisibleRange(timeRange);
+            if (timeRange && targetChart.timeScale()) {
+                targetChart.timeScale().setVisibleRange(timeRange);
+            }
         });
+    
         sourceChart.timeScale().subscribeVisibleLogicalRangeChange((logicalRange) => {
-            if (logicalRange) targetChart.timeScale().setVisibleLogicalRange(logicalRange);
+            if (logicalRange && targetChart.timeScale()) {
+                targetChart.timeScale().setVisibleLogicalRange(logicalRange);
+            }
         });
     };
+    
 
     syncCharts(chart, macdChart);    // Main chart to MACD
     syncCharts(macdChart, chart);    // MACD to main chart
