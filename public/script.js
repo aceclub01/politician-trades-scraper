@@ -424,86 +424,86 @@ const updateChartWithIndicators = (chartData) => {
 };
 
 // Fetch FX data and update the chart
-const fetchAndUpdateChart = async (pair, period) => {
-    try {
-        console.log(`Fetching chart data for pair: ${pair}, period: ${period}`);
+// const fetchAndUpdateChart = async (pair, period) => {
+//     try {
+//         console.log(`Fetching chart data for pair: ${pair}, period: ${period}`);
 
-        const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-        const data = await response.json();
+//         const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
+//         const data = await response.json();
 
-        if (data.error) {
-            alert('Failed to fetch data');
-            return;
-        }
+//         if (data.error) {
+//             alert('Failed to fetch data');
+//             return;
+//         }
 
-        // Prepare data for chart with null handling
-        const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
-            time: timestamp,
-            open: handleNullValue(data, index, 'open'),
-            high: handleNullValue(data, index, 'high'),
-            low: handleNullValue(data, index, 'low'),
-            close: handleNullValue(data, index, 'close'),
-        }));
+//         // Prepare data for chart with null handling
+//         const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
+//             time: timestamp,
+//             open: handleNullValue(data, index, 'open'),
+//             high: handleNullValue(data, index, 'high'),
+//             low: handleNullValue(data, index, 'low'),
+//             close: handleNullValue(data, index, 'close'),
+//         }));
 
-        // Remove old data
-        if (lineSeries) {
-            chart.removeSeries(lineSeries);
-            lineSeries = null;
-        }
-        if (macdSeries) {
-            macdChart.removeSeries(macdSeries);
-            macdSeries = null;
-        }
-        clearLines(); // Clear existing lines
+//         // Remove old data
+//         if (lineSeries) {
+//             chart.removeSeries(lineSeries);
+//             lineSeries = null;
+//         }
+//         if (macdSeries) {
+//             macdChart.removeSeries(macdSeries);
+//             macdSeries = null;
+//         }
+//         clearLines(); // Clear existing lines
 
-        // Add new candlestick series
-        lineSeries = chart.addCandlestickSeries({
-            priceScaleId: 'right',
-        });
-        lineSeries.setData(chartData);
+//         // Add new candlestick series
+//         lineSeries = chart.addCandlestickSeries({
+//             priceScaleId: 'right',
+//         });
+//         lineSeries.setData(chartData);
 
-        // Calculate MACD values
-        const closePrices = chartData.map(d => d.close);
-        const { macd, signal, histogram } = calculateMACD(closePrices);
+//         // Calculate MACD values
+//         const closePrices = chartData.map(d => d.close);
+//         const { macd, signal, histogram } = calculateMACD(closePrices);
 
-        // Plot MACD histogram
-        const macdData = chartData.map((d, i) => ({
-            time: d.time,
-            value: histogram[i],
-            color: histogram[i] >= 0 ? `rgba(38, 166, 154, ${alphaSlider.value})` : `rgba(239, 83, 80, ${alphaSlider.value})`, // Dynamic transparency
-        }));
-        macdSeries = macdChart.addHistogramSeries({
-            color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
-            priceFormat: {
-                type: 'volume',
-            },
-        });
-        macdSeries.setData(macdData);
+//         // Plot MACD histogram
+//         const macdData = chartData.map((d, i) => ({
+//             time: d.time,
+//             value: histogram[i],
+//             color: histogram[i] >= 0 ? `rgba(38, 166, 154, ${alphaSlider.value})` : `rgba(239, 83, 80, ${alphaSlider.value})`, // Dynamic transparency
+//         }));
+//         macdSeries = macdChart.addHistogramSeries({
+//             color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
+//             priceFormat: {
+//                 type: 'volume',
+//             },
+//         });
+//         macdSeries.setData(macdData);
 
-        // Calculate and plot SMAs
-        const sma7 = calculateSMA(chartData, 7);
-        const sma20 = calculateSMA(chartData, 20);
-        const sma50 = calculateSMA(chartData, 50);
+//         // Calculate and plot SMAs
+//         const sma7 = calculateSMA(chartData, 7);
+//         const sma20 = calculateSMA(chartData, 20);
+//         const sma50 = calculateSMA(chartData, 50);
 
-        sma7Series = chart.addLineSeries({ color: 'rgba(255, 0, 0, 0.8)', lineWidth: 1 }); // Red for SMA 7
-        sma7Series.setData(sma7);
+//         sma7Series = chart.addLineSeries({ color: 'rgba(255, 0, 0, 0.8)', lineWidth: 1 }); // Red for SMA 7
+//         sma7Series.setData(sma7);
 
-        sma20Series = chart.addLineSeries({ color: 'rgba(0, 255, 0, 0.8)', lineWidth: 1 }); // Green for SMA 20
-        sma20Series.setData(sma20);
+//         sma20Series = chart.addLineSeries({ color: 'rgba(0, 255, 0, 0.8)', lineWidth: 1 }); // Green for SMA 20
+//         sma20Series.setData(sma20);
 
-        sma50Series = chart.addLineSeries({ color: 'rgba(0, 0, 255, 0.8)', lineWidth: 1 }); // Blue for SMA 50
-        sma50Series.setData(sma50);
+//         sma50Series = chart.addLineSeries({ color: 'rgba(0, 0, 255, 0.8)', lineWidth: 1 }); // Blue for SMA 50
+//         sma50Series.setData(sma50);
 
-        // Draw support and resistance lines
-        drawSupportResistance(chartData);
+//         // Draw support and resistance lines
+//         drawSupportResistance(chartData);
 
-        // Draw Fibonacci and Elliott Wave
-        updateChartWithIndicators(chartData);
-    } catch (error) {
-        console.error('Error fetching FX data:', error);
-        alert('Failed to fetch FX data. Check the console for details.');
-    }
-};
+//         // Draw Fibonacci and Elliott Wave
+//         updateChartWithIndicators(chartData);
+//     } catch (error) {
+//         console.error('Error fetching FX data:', error);
+//         alert('Failed to fetch FX data. Check the console for details.');
+//     }
+// };
 
 // Handle the fetch button click
 fetchDataButton.addEventListener('click', async () => {
