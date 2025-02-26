@@ -30,6 +30,87 @@ async function fetchNews(query, limit) {
 
 
 // Fetch and display fundamentals using FMP
+// async function fetchFundamentals(symbol) {
+//     try {
+//         console.log(`Fetching fundamentals for symbol: ${symbol}`);
+
+//         // Step 1: Fetch data from the API
+//         const response = await fetch(`http://localhost:3000/fetchFundamentals?symbol=${symbol}`);
+//         console.log('API Response:', response);
+
+//         // Step 2: Parse the response as JSON
+//         const data = await response.json();
+//         console.log('Parsed API Data:', data);
+
+//         // Step 3: Check if the symbol is an FX pair
+//         if (symbol.includes('=X')) {
+//             console.log('Symbol is an FX pair. Skipping stock fundamentals.');
+//             document.getElementById('mktCap').textContent = 'N/A (FX Pair)';
+//             document.getElementById('targetPE').textContent = 'N/A (FX Pair)';
+//             document.getElementById('eps').textContent = 'N/A (FX Pair)';
+//             document.getElementById('oneYearTargetEst').textContent = 'N/A (FX Pair)';
+//             document.getElementById('exDividendDate').textContent = 'N/A (FX Pair)';
+//             document.getElementById('earningsDate').textContent = 'N/A (FX Pair)';
+//             document.getElementById('fiftyTwoWeekRange').textContent = 'N/A (FX Pair)';
+//             return;
+//         }
+
+//         // Step 4: Handle stock data
+//         if (!Array.isArray(data) || data.length === 0) {
+//             throw new Error('Invalid or missing data from Financial Modeling Prep');
+//         }
+
+//         const fundamentals = data[0];
+//         console.log('Fundamentals Object:', fundamentals);
+
+//         // Step 5: Extract and display relevant fields
+//         const {
+//             mktCap,
+//             price,
+//             beta,
+//             lastDiv,
+//             range,
+//             companyName,
+//             exchange,
+//             industry,
+//             website,
+//             description,
+//             ceo,
+//             sector,
+//             image
+//         } = fundamentals;
+
+//         console.log('Extracted Fields:', {
+//             mktCap,
+//             price,
+//             beta,
+//             lastDiv,
+//             range,
+//             companyName,
+//             exchange,
+//             industry,
+//             website,
+//             description,
+//             ceo,
+//             sector,
+//             image
+//         });
+
+//         document.getElementById('mktCap').textContent = mktCap ? `$${mktCap.toLocaleString()}` : 'N/A';
+//         document.getElementById('targetPE').textContent = beta || 'N/A';
+//         document.getElementById('eps').textContent = price || 'N/A';
+//         document.getElementById('oneYearTargetEst').textContent = range || 'N/A';
+//         document.getElementById('exDividendDate').textContent = lastDiv || 'N/A';
+//         document.getElementById('earningsDate').textContent = range || 'N/A';
+//         document.getElementById('fiftyTwoWeekRange').textContent = range || 'N/A';
+
+//         // Step 6: Log all available fields in the fundamentals object
+//         console.log('All Available Fields:', Object.keys(fundamentals));
+//     } catch (error) {
+//         console.error('Error fetching fundamentals:', error);
+//         document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+//     }
+// }
 async function fetchFundamentals(symbol) {
     try {
         console.log(`Fetching fundamentals for symbol: ${symbol}`);
@@ -55,9 +136,9 @@ async function fetchFundamentals(symbol) {
             return;
         }
 
-        // Step 4: Handle stock data
+        // Step 4: Validate the API response
         if (!Array.isArray(data) || data.length === 0) {
-            throw new Error('Invalid or missing data from Financial Modeling Prep');
+            throw new Error('No fundamental data found for the given symbol.');
         }
 
         const fundamentals = data[0];
@@ -111,7 +192,6 @@ async function fetchFundamentals(symbol) {
         document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
-
 // Fetch data when the "Fetch Data" button is clicked
 document.getElementById('fetchData').addEventListener('click', async () => {
     const pair = document.getElementById('pair').value; // Get the FX pair from the input field

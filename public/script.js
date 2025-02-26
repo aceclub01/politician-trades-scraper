@@ -144,7 +144,7 @@ const createCharts = () => {
     // Add histogram series for the MACD (overlay on the main chart)
     macdSeries = chart.addHistogramSeries({
         priceScaleId: 'left', // Use a separate price scale for MACD
-        color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
+        color: `(rgba38, 166, 154, ${alphaSlider.value})`, // Initial transparency
         priceFormat: {
             type: 'volume',
         },
