@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fibonacciLinesArr.forEach(level => {
             const fibLine = chart.addLineSeries({
-                color: 'rgba(0, 255, 255, 0.8)', // Cyan for Fibonacci levels
+                color: 'rgba(0, 0, 0, 0.8)', // Cyan for Fibonacci levels
                 lineWidth: 2,
             });
 
