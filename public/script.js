@@ -122,79 +122,127 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Function to draw support and resistance lines
-    const drawSupportResistance = (chartData) => {
-        if (chartData.length < 2) return; // Need at least 2 points to draw a line
+    // const drawSupportResistance = (chartData) => {
+    //     if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
+    //     const historyBars = parseInt(historyBarsInput.value, 10);
+    //     const resolution = parseInt(resolutionInput.value, 10);
+    //     const diagonalLines = parseInt(diagonalLinesInput.value, 10);
+    //     const x2 = Math.round(resolution / 2);
+
+    //     // Find significant lows (supports)
+    //     let minimums = [];
+    //     for (let i = 0; i < chartData.length; i++) {
+    //         if (i >= historyBars) break;
+    //         if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
+    //             minimums.push({ time: chartData[i].time, value: chartData[i].low });
+    //         }
+    //     }
+
+    //     // Find significant highs (resistances)
+    //     let maximums = [];
+    //     for (let i = 0; i < chartData.length; i++) {
+    //         if (i >= historyBars) break;
+    //         if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+    //             maximums.push({ time: chartData[i].time, value: chartData[i].high });
+    //         }
+    //     }
+
+    //     // Draw support lines (connecting lows)
+    //     for (let i = 0; i < Math.min(minimums.length - 1, diagonalLines); i++) {
+    //         const start = minimums[i];
+    //         const end = minimums[i + 1];
+
+    //         const line = chart.addLineSeries({
+    //             color: 'rgba(23, 255, 39, 0.5)', // Green for support
+    //             lineWidth: 2,
+    //         });
+
+    //         // Extend the line into the future (3 months beyond today)
+    //         const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+    //         const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+
+    //         line.setData([
+    //             { time: start.time, value: start.value },
+    //             { time: end.time, value: end.value },
+    //             { time: futureTime, value: futureValue },
+    //         ]);
+
+    //         supports.push(line);
+    //     }
+
+    //     // Draw resistance lines (connecting highs)
+    //     for (let i = 0; i < Math.min(maximums.length - 1, diagonalLines); i++) {
+    //         const start = maximums[i];
+    //         const end = maximums[i + 1];
+
+    //         const line = chart.addLineSeries({
+    //             color: 'rgba(255, 119, 173, 0.5)', // Pink for resistance
+    //             lineWidth: 2,
+    //         });
+
+    //         // Extend the line into the future (3 months beyond today)
+    //         const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
+    //         const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+
+    //         line.setData([
+    //             { time: start.time, value: start.value },
+    //             { time: end.time, value: end.value },
+    //             { time: futureTime, value: futureValue },
+    //         ]);
+
+    //         resistances.push(line);
+    //     }
+    // };
+    const drawSupportResistance = (chartData) => {
+        if (chartData.length < 2) return;
+    
         const historyBars = parseInt(historyBarsInput.value, 10);
         const resolution = parseInt(resolutionInput.value, 10);
         const diagonalLines = parseInt(diagonalLinesInput.value, 10);
         const x2 = Math.round(resolution / 2);
-
-        // Find significant lows (supports)
+        const threeMonthsInSeconds = 90 * 24 * 60 * 60; // 90 days in seconds
+    
         let minimums = [];
+        let maximums = [];
+    
         for (let i = 0; i < chartData.length; i++) {
             if (i >= historyBars) break;
             if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
                 minimums.push({ time: chartData[i].time, value: chartData[i].low });
             }
-        }
-
-        // Find significant highs (resistances)
-        let maximums = [];
-        for (let i = 0; i < chartData.length; i++) {
-            if (i >= historyBars) break;
             if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
                 maximums.push({ time: chartData[i].time, value: chartData[i].high });
             }
         }
-
-        // Draw support lines (connecting lows)
+    
+        // Function to extend lines
+        const extendLine = (start, end, color) => {
+            const line = chart.addLineSeries({ color, lineWidth: 2 });
+    
+            // Extend line in the same direction for 3 months
+            const futureTime = end.time + threeMonthsInSeconds;
+            const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+    
+            line.setData([
+                { time: start.time, value: start.value },
+                { time: end.time, value: end.value },
+                { time: futureTime, value: futureValue }
+            ]);
+            return line;
+        };
+    
+        // Draw support lines
         for (let i = 0; i < Math.min(minimums.length - 1, diagonalLines); i++) {
-            const start = minimums[i];
-            const end = minimums[i + 1];
-
-            const line = chart.addLineSeries({
-                color: 'rgba(23, 255, 39, 0.5)', // Green for support
-                lineWidth: 2,
-            });
-
-            // Extend the line into the future (3 months beyond today)
-            const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
-            const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
-
-            line.setData([
-                { time: start.time, value: start.value },
-                { time: end.time, value: end.value },
-                { time: futureTime, value: futureValue },
-            ]);
-
-            supports.push(line);
+            supports.push(extendLine(minimums[i], minimums[i + 1], 'rgba(23, 255, 39, 0.5)'));
         }
-
-        // Draw resistance lines (connecting highs)
+    
+        // Draw resistance lines
         for (let i = 0; i < Math.min(maximums.length - 1, diagonalLines); i++) {
-            const start = maximums[i];
-            const end = maximums[i + 1];
-
-            const line = chart.addLineSeries({
-                color: 'rgba(255, 119, 173, 0.5)', // Pink for resistance
-                lineWidth: 2,
-            });
-
-            // Extend the line into the future (3 months beyond today)
-            const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
-            const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
-
-            line.setData([
-                { time: start.time, value: start.value },
-                { time: end.time, value: end.value },
-                { time: futureTime, value: futureValue },
-            ]);
-
-            resistances.push(line);
+            resistances.push(extendLine(maximums[i], maximums[i + 1], 'rgba(255, 119, 173, 0.5)'));
         }
     };
-
+    
     // Function to draw Fibonacci levels
     const drawFibonacci = (chartData) => {
         const minPrice = Math.min(...chartData.map(data => data.low));
