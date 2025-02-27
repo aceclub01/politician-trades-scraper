@@ -195,6 +195,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Function to draw Fibonacci levels
+    const drawFibonacci = (chartData) => {
+        const minPrice = Math.min(...chartData.map(data => data.low));
+        const maxPrice = Math.max(...chartData.map(data => data.high));
+
+        const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
+        const fibonacciLinesArr = fibonacciLevels.map(level => ({
+            price: minPrice + (maxPrice - minPrice) * level,
+            label: `${(level * 100).toFixed(1)}%`
+        }));
+
+        fibonacciLinesArr.forEach(level => {
+            const fibLine = chart.addLineSeries({
+                color: 'rgba(0, 255, 255, 0.8)', // Cyan for Fibonacci levels
+                lineWidth: 2,
+            });
+
+            // Draw the line across the chart time range
+            fibLine.setData([
+                { time: chartData[0].time, value: level.price },
+                { time: chartData[chartData.length - 1].time, value: level.price }
+            ]);
+
+            fibonacciLines.push(fibLine);
+        });
+    };
+
+    // Function to draw Elliott Waves
+    const drawElliotWave = (chartData) => {
+        if (chartData.length < 5) return; // Ensure we have enough data for waves
+
+        const cleanData = chartData.filter(data => data.close !== null); // Remove null values
+        if (cleanData.length < 5) return; // Ensure we have at least 5 valid points
+
+        const points = [
+            cleanData[0],  // Wave 1
+            cleanData[Math.floor(cleanData.length * 0.25)],  // Wave 2
+            cleanData[Math.floor(cleanData.length * 0.5)],   // Wave 3
+            cleanData[Math.floor(cleanData.length * 0.75)],  // Wave 4
+            cleanData[cleanData.length - 1]  // Wave 5
+        ];
+
+        points.forEach((point, index) => {
+            if (index < points.length - 1) {
+                const line = chart.addLineSeries({
+                    color: 'rgba(255, 165, 0, 0.8)', // Orange for Elliott Waves
+                    lineWidth: 2,
+                });
+
+                // Set data for Elliot Wave lines
+                line.setData([
+                    { time: point.time, value: point.close },
+                    { time: points[index + 1].time, value: points[index + 1].close }
+                ]);
+
+                elliotLines.push(line);
+            }
+        });
+    };
+
     // Function to clear all lines
     const clearLines = () => {
         supports.forEach(line => chart.removeSeries(line));
@@ -250,6 +310,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Draw support and resistance lines
             drawSupportResistance(chartData);
+
+            // Draw Fibonacci levels
+            drawFibonacci(chartData);
+
+            // Draw Elliott Waves
+            drawElliotWave(chartData);
         } catch (error) {
             console.error('Error fetching FX data:', error);
             alert('Failed to fetch FX data. Check the console for details.');
