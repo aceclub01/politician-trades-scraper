@@ -318,40 +318,33 @@ const drawSupportResistance = (chartData) => {
     
         if (filteredData.length === 0) return null;
     
-        // Find the starting point (6 months ago)
-        const startTime = sixMonthsAgo;
-    
-        // Find two significant highs starting from 6 months ago
+        // Find two significant highs using closing prices
         const highs = filteredData
-            .map(data => ({ time: data.time, value: data.high }))
+            .map(data => ({ time: data.time, value: data.close })) // Use closing prices
             .sort((a, b) => b.value - a.value); // Sort descending by value
     
         const significantHighs = [];
         for (let i = 0; i < highs.length; i++) {
-            if (highs[i].time >= startTime) {
-                if (significantHighs.length === 0) {
-                    significantHighs.push(highs[i]);
-                } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                    significantHighs.push(highs[i]);
-                    break;
-                }
+            if (significantHighs.length === 0) {
+                significantHighs.push(highs[i]);
+            } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantHighs.push(highs[i]);
+                break;
             }
         }
     
-        // Find two significant lows starting from 6 months ago
+        // Find two significant lows using closing prices
         const lows = filteredData
-            .map(data => ({ time: data.time, value: data.low }))
+            .map(data => ({ time: data.time, value: data.close })) // Use closing prices
             .sort((a, b) => a.value - b.value); // Sort ascending by value
     
         const significantLows = [];
         for (let i = 0; i < lows.length; i++) {
-            if (lows[i].time >= startTime) {
-                if (significantLows.length === 0) {
-                    significantLows.push(lows[i]);
-                } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                    significantLows.push(lows[i]);
-                    break;
-                }
+            if (significantLows.length === 0) {
+                significantLows.push(lows[i]);
+            } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantLows.push(lows[i]);
+                break;
             }
         }
     

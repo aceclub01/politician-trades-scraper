@@ -5,87 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto Analyser Assistant</title>
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.4.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .controls-fundamentals {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .controls, .fundamentals {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .top-news {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f1f1f1;
+        }
+        #chart {
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+        }
+        @media (min-width: 600px) {
+            .controls-fundamentals {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .controls, .fundamentals {
+                width: 48%;
+            }
+        }
+    </style>
 </head>
 <body>
     <h1>Auto Analyser Assistant</h1>
-    <div>
-        <label for="pair">FX Pair: </label>
-        <input type="text" id="pair" value="USDSGD=X" />
+    <div class="container">
+        <div class="controls-fundamentals">
+            <div class="controls">
+                <label for="pair">FX Pair: </label>
+                <input type="text" id="pair" value="USDSGD=X" />
+                <label for="period">Period: </label>
+                <select id="period">
+                    <option value="1d">1 Day</option>
+                    <option value="1mo">1 Month</option>
+                    <option value="3mo">3 Months</option>
+                    <option value="6mo">6 Months</option>
+                    <option value="1y" selected>1 Year</option>
+                    <option value="2y">2 Years</option>
+                </select>
+                <label for="newsLimit">Number of News Articles: </label>
+                <select id="newsLimit">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+                <label for="intervalSlider">Interval: </label>
+                <input type="range" id="intervalSlider" min="10" max="300" value="100">
+                <span id="sliderValue">100</span>
+                <button id="fetchData">Fetch Data</button>
+                <button id="fetchChartData">Update Chart</button>
+            </div>
+            <div class="fundamentals">
+                <h2>Fundamentals</h2>
+                <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
+                <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+                <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+                <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+                <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
+            </div>
+        </div>
+        <div class="top-news">
+            <h2>Top News</h2>
+            <ul id="newsHeadlines"></ul>
+        </div>
+        <div id="chart"></div>
     </div>
-    <div>
-        <label for="period">Period: </label>
-        <select id="period">
-            <option value="1d">1 Day</option>
-            <option value="1mo">1 Month</option>
-            <option value="3mo">3 Months</option>
-            <option value="6mo">6 Months</option>
-            <option value="1y" selected>1 Year</option>
-            <option value="2y">2 Years</option>
-        </select>
-    </div>
-    <div>
-        <label for="newsLimit">Number of News Articles: </label>
-        <select id="newsLimit">
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
-        </select>
-    </div>
-    <div>
-        <label for="intervalSlider">Interval (number of periods to consider): </label>
-        <input type="range" id="intervalSlider" min="10" max="300" value="100">
-        <span id="sliderValue">100</span>
-    </div>
-    <!-- <div>
-        <label for="fibonacci">Show Fibonacci</label>
-        <input type="checkbox" id="fibonacci" checked/>
-    </div>
-    <div>
-        <label for="elliot">Show Elliott Wave</label>
-        <input type="checkbox" id="elliot" checked/>
-    </div> -->
-    <div>
-        <label for="diagonalLines">Number of Diagonal Lines: </label>
-        <input type="number" id="diagonalLines" value="3" min="1" max="10" />
-    </div>
-    <div>
-        <label for="historyBars">History Bars: </label>
-        <input type="number" id="historyBars" value="280" min="1" max="1000" />
-    </div>
-    <div>
-        <label for="resolution">Resolution (bars): </label>
-        <input type="number" id="resolution" value="40" min="1" max="50" />
-    </div>
-    <div>
-        <label for="alphaSlider">MACD Histogram Transparency: </label>
-        <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.2">
-        <span id="alphaValue">0.2</span>
-    </div>
-    <button id="fetchData">Fetch Fundaments and Top News</button>
-    <button id="fetchChartData">Update Chart</button> <!-- New button -->
-
-    <!-- Chart Container -->
-    <div id="chart" style="height: 700px;"></div>
-
-    <!-- Fundamentals Container -->
-    <div id="fundamentals">
-        <h2>Fundamentals</h2>
-        <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-        <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
-        <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-        <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-        <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-        <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
-        <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-    </div>
-
-    <!-- Top News Container -->
-    <div id="topNews">
-        <h2>Top News</h2>
-        <ul id="newsHeadlines"></ul>
-    </div>
-
-    <!-- Scripts -->
     <script src="/extractYahooFundamental.js"></script>
     <script src="/script.js"></script>
 </body>
