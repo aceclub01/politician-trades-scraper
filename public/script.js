@@ -318,33 +318,40 @@ const drawSupportResistance = (chartData) => {
     
         if (filteredData.length === 0) return null;
     
-        // Find two significant highs at least 1 month apart
+        // Find the starting point (6 months ago)
+        const startTime = sixMonthsAgo;
+    
+        // Find two significant highs starting from 6 months ago
         const highs = filteredData
             .map(data => ({ time: data.time, value: data.high }))
             .sort((a, b) => b.value - a.value); // Sort descending by value
     
         const significantHighs = [];
         for (let i = 0; i < highs.length; i++) {
-            if (significantHighs.length === 0) {
-                significantHighs.push(highs[i]);
-            } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                significantHighs.push(highs[i]);
-                break;
+            if (highs[i].time >= startTime) {
+                if (significantHighs.length === 0) {
+                    significantHighs.push(highs[i]);
+                } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                    significantHighs.push(highs[i]);
+                    break;
+                }
             }
         }
     
-        // Find two significant lows at least 1 month apart
+        // Find two significant lows starting from 6 months ago
         const lows = filteredData
             .map(data => ({ time: data.time, value: data.low }))
             .sort((a, b) => a.value - b.value); // Sort ascending by value
     
         const significantLows = [];
         for (let i = 0; i < lows.length; i++) {
-            if (significantLows.length === 0) {
-                significantLows.push(lows[i]);
-            } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                significantLows.push(lows[i]);
-                break;
+            if (lows[i].time >= startTime) {
+                if (significantLows.length === 0) {
+                    significantLows.push(lows[i]);
+                } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                    significantLows.push(lows[i]);
+                    break;
+                }
             }
         }
     
@@ -375,7 +382,7 @@ const drawSupportResistance = (chartData) => {
     
         // Draw diagonal line for significant lows
         const lowLine = chart.addLineSeries({
-            color: 'rgba(0, 129, 235, 0.8)', // Green for significant lows
+            color: 'rgba(0, 255, 0, 0.8)', // Green for significant lows
             lineWidth: 2,
         });
     
@@ -433,7 +440,7 @@ const drawSupportResistance = (chartData) => {
                 close: handleNullValue(data, index, 'close'),
             }));
     
-            // Filter outliers
+            // Filter outliers based on closing prices
             chartData = filterOutliers(chartData);
     
             // Remove old data
@@ -499,11 +506,11 @@ const drawSupportResistance = (chartData) => {
     });
 
     // Handle the "Update Chart" button click
-    fetchChartButton.addEventListener('click', async () => {
-        const pair = pairInput.value.trim();
-        const period = periodInput.value;
-        await fetchAndUpdateChart(pair, period);
-    });
+    // fetchChartButton.addEventListener('click', async () => {
+    //     const pair = pairInput.value.trim();
+    //     const period = periodInput.value;
+    //     await fetchAndUpdateChart(pair, period);
+    // });
 
     // Initialize chart when the page loads
     createChart();
