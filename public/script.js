@@ -255,7 +255,7 @@ const drawSupportResistance = (chartData) => {
 
         fibonacciLinesArr.forEach(level => {
             const fibLine = chart.addLineSeries({
-                color: 'rgba(0, 255, 255, 0.8)', // Cyan for Fibonacci levels
+                color: 'rgba(57, 57, 57, 0.46)', // Cyan for Fibonacci levels
                 lineWidth: 2,
             });
 
@@ -348,7 +348,7 @@ const drawSupportResistance = (chartData) => {
     
         // Draw diagonal line for significant lows
         const lowLine = chart.addLineSeries({
-            color: 'rgba(0, 255, 0, 0.8)', // Green for significant lows
+            color: 'rgba(0, 129, 235, 0.8)', // Green for significant lows
             lineWidth: 2,
         });
     
