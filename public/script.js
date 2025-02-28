@@ -312,91 +312,164 @@ const drawSupportResistance = (chartData) => {
         });
     };
     // Function to get significant highs and lows over the last 6 months
-    const getSignificantHighLow = (chartData) => {
-        const sixMonthsAgo = Date.now() / 1000 - 6 * 30 * 24 * 60 * 60; // 6 months ago in seconds
-        const filteredData = chartData.filter(data => data.time >= sixMonthsAgo);
+    const getSignificantHighLow = (chartData, sixMonthsAgo) => {
+        const allData = chartData; // Entire chart data
+        const recentData = chartData.filter(data => data.time >= sixMonthsAgo); // Recent 6 months data
     
-        if (filteredData.length === 0) return null;
+        if (allData.length === 0 || recentData.length === 0) return null;
     
-        // Find two significant highs using closing prices
-        const highs = filteredData
+        // Find two significant highs using closing prices (entire chart)
+        const allHighs = allData
             .map(data => ({ time: data.time, value: data.close })) // Use closing prices
             .sort((a, b) => b.value - a.value); // Sort descending by value
     
-        const significantHighs = [];
-        for (let i = 0; i < highs.length; i++) {
-            if (significantHighs.length === 0) {
-                significantHighs.push(highs[i]);
-            } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                significantHighs.push(highs[i]);
+        const significantAllHighs = [];
+        for (let i = 0; i < allHighs.length; i++) {
+            if (significantAllHighs.length === 0) {
+                significantAllHighs.push(allHighs[i]);
+            } else if (Math.abs(allHighs[i].time - significantAllHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantAllHighs.push(allHighs[i]);
                 break;
             }
         }
     
-        // Find two significant lows using closing prices
-        const lows = filteredData
+        // Find two significant lows using closing prices (entire chart)
+        const allLows = allData
             .map(data => ({ time: data.time, value: data.close })) // Use closing prices
             .sort((a, b) => a.value - b.value); // Sort ascending by value
     
-        const significantLows = [];
-        for (let i = 0; i < lows.length; i++) {
-            if (significantLows.length === 0) {
-                significantLows.push(lows[i]);
-            } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
-                significantLows.push(lows[i]);
+        const significantAllLows = [];
+        for (let i = 0; i < allLows.length; i++) {
+            if (significantAllLows.length === 0) {
+                significantAllLows.push(allLows[i]);
+            } else if (Math.abs(allLows[i].time - significantAllLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantAllLows.push(allLows[i]);
                 break;
             }
         }
     
-        return { highs: significantHighs, lows: significantLows };
+        // Find two significant highs using closing prices (recent 6 months)
+        const recentHighs = recentData
+            .map(data => ({ time: data.time, value: data.close })) // Use closing prices
+            .sort((a, b) => b.value - a.value); // Sort descending by value
+    
+        const significantRecentHighs = [];
+        for (let i = 0; i < recentHighs.length; i++) {
+            if (significantRecentHighs.length === 0) {
+                significantRecentHighs.push(recentHighs[i]);
+            } else if (Math.abs(recentHighs[i].time - significantRecentHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantRecentHighs.push(recentHighs[i]);
+                break;
+            }
+        }
+    
+        // Find two significant lows using closing prices (recent 6 months)
+        const recentLows = recentData
+            .map(data => ({ time: data.time, value: data.close })) // Use closing prices
+            .sort((a, b) => a.value - b.value); // Sort ascending by value
+    
+        const significantRecentLows = [];
+        for (let i = 0; i < recentLows.length; i++) {
+            if (significantRecentLows.length === 0) {
+                significantRecentLows.push(recentLows[i]);
+            } else if (Math.abs(recentLows[i].time - significantRecentLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantRecentLows.push(recentLows[i]);
+                break;
+            }
+        }
+    
+        return {
+            allHighs: significantAllHighs,
+            allLows: significantAllLows,
+            recentHighs: significantRecentHighs,
+            recentLows: significantRecentLows,
+        };
     };
 
     // Function to draw diagonal lines for significant highs and lows
     const drawDiagonalLines = (chartData) => {
-        const significantPoints = getSignificantHighLow(chartData);
-        if (!significantPoints || significantPoints.highs.length < 2 || significantPoints.lows.length < 2) return;
+        const sixMonthsAgo = Date.now() / 1000 - 6 * 30 * 24 * 60 * 60; // 6 months ago in seconds
+        const significantPoints = getSignificantHighLow(chartData, sixMonthsAgo);
     
-        const { highs, lows } = significantPoints;
+        if (!significantPoints) return;
     
-        // Ensure the starting points for highs and lows are different
-        if (highs[0].time === lows[0].time) {
-            console.warn('Starting points for highs and lows are the same. Skipping diagonal lines.');
-            return;
+        const { allHighs, allLows, recentHighs, recentLows } = significantPoints;
+    
+        // Draw diagonal lines for significant highs (entire chart)
+        if (allHighs.length >= 2) {
+            const highLine = chart.addLineSeries({
+                color: 'rgba(255, 0, 0, 0.8)', // Red for significant highs
+                lineWidth: 2,
+            });
+    
+            const highFutureTime = allHighs[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+            const highFutureValue = priceAt(allHighs[0].time, allHighs[0].value, allHighs[1].time, allHighs[1].value, highFutureTime);
+    
+            highLine.setData([
+                { time: allHighs[0].time, value: allHighs[0].value },
+                { time: allHighs[1].time, value: allHighs[1].value },
+                { time: highFutureTime, value: highFutureValue },
+            ]);
+    
+            resistances.push(highLine);
         }
     
-        // Draw diagonal line for significant highs
-        const highLine = chart.addLineSeries({
-            color: 'rgba(255, 0, 0, 0.8)', // Red for significant highs
-            lineWidth: 2,
-        });
+        // Draw diagonal lines for significant lows (entire chart)
+        if (allLows.length >= 2) {
+            const lowLine = chart.addLineSeries({
+                color: 'rgba(0, 255, 0, 0.8)', // Green for significant lows
+                lineWidth: 2,
+            });
     
-        const highFutureTime = highs[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
-        const highFutureValue = priceAt(highs[0].time, highs[0].value, highs[1].time, highs[1].value, highFutureTime);
+            const lowFutureTime = allLows[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+            const lowFutureValue = priceAt(allLows[0].time, allLows[0].value, allLows[1].time, allLows[1].value, lowFutureTime);
     
-        highLine.setData([
-            { time: highs[0].time, value: highs[0].value },
-            { time: highs[1].time, value: highs[1].value },
-            { time: highFutureTime, value: highFutureValue },
-        ]);
+            lowLine.setData([
+                { time: allLows[0].time, value: allLows[0].value },
+                { time: allLows[1].time, value: allLows[1].value },
+                { time: lowFutureTime, value: lowFutureValue },
+            ]);
     
-        // Draw diagonal line for significant lows
-        const lowLine = chart.addLineSeries({
-            color: 'rgba(0, 255, 0, 0.8)', // Green for significant lows
-            lineWidth: 2,
-        });
+            supports.push(lowLine);
+        }
     
-        const lowFutureTime = lows[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
-        const lowFutureValue = priceAt(lows[0].time, lows[0].value, lows[1].time, lows[1].value, lowFutureTime);
+        // Draw diagonal lines for significant highs (recent 6 months)
+        if (recentHighs.length >= 2) {
+            const recentHighLine = chart.addLineSeries({
+                color: 'rgba(255, 0, 0, 0.5)', // Light red for recent significant highs
+                lineWidth: 2,
+            });
     
-        lowLine.setData([
-            { time: lows[0].time, value: lows[0].value },
-            { time: lows[1].time, value: lows[1].value },
-            { time: lowFutureTime, value: lowFutureValue },
-        ]);
+            const recentHighFutureTime = recentHighs[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+            const recentHighFutureValue = priceAt(recentHighs[0].time, recentHighs[0].value, recentHighs[1].time, recentHighs[1].value, recentHighFutureTime);
     
-        // Store the lines for later removal
-        supports.push(lowLine);
-        resistances.push(highLine);
+            recentHighLine.setData([
+                { time: recentHighs[0].time, value: recentHighs[0].value },
+                { time: recentHighs[1].time, value: recentHighs[1].value },
+                { time: recentHighFutureTime, value: recentHighFutureValue },
+            ]);
+    
+            resistances.push(recentHighLine);
+        }
+    
+        // Draw diagonal lines for significant lows (recent 6 months)
+        if (recentLows.length >= 2) {
+            const recentLowLine = chart.addLineSeries({
+                color: 'rgba(0, 255, 0, 0.5)', // Light green for recent significant lows
+                lineWidth: 2,
+            });
+    
+            const recentLowFutureTime = recentLows[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+            const recentLowFutureValue = priceAt(recentLows[0].time, recentLows[0].value, recentLows[1].time, recentLows[1].value, recentLowFutureTime);
+    
+            recentLowLine.setData([
+                { time: recentLows[0].time, value: recentLows[0].value },
+                { time: recentLows[1].time, value: recentLows[1].value },
+                { time: recentLowFutureTime, value: recentLowFutureValue },
+            ]);
+    
+            supports.push(recentLowLine);
+        }
     };
     // Function to clear all lines
     const clearLines = () => {
