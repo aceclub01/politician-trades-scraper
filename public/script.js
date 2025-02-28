@@ -150,78 +150,97 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Function to draw support and resistance lines
-    const drawSupportResistance = (chartData) => {
-        if (chartData.length < 2) return; // Need at least 2 points to draw a line
+    // Function to draw support and resistance lines
+const drawSupportResistance = (chartData) => {
+    if (chartData.length < 2) return; // Need at least 2 points to draw a line
 
-        const historyBars = parseInt(historyBarsInput.value, 10);
-        const resolution = parseInt(resolutionInput.value, 10);
-        const diagonalLines = parseInt(diagonalLinesInput.value, 10);
-        const x2 = Math.round(resolution / 2);
+    const historyBars = parseInt(historyBarsInput.value, 10);
+    const resolution = parseInt(resolutionInput.value, 10);
+    const diagonalLines = parseInt(diagonalLinesInput.value, 10);
+    const x2 = Math.round(resolution / 2);
 
-        // Find significant lows (supports)
-        let minimums = [];
-        for (let i = 0; i < chartData.length; i++) {
-            if (i >= historyBars) break;
-            if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
-                minimums.push({ time: chartData[i].time, value: chartData[i].low });
-            }
+    // Find significant lows (supports)
+    let minimums = [];
+    for (let i = 0; i < chartData.length; i++) {
+        if (i >= historyBars) break;
+        if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
+            minimums.push({ time: chartData[i].time, value: chartData[i].low });
         }
+    }
 
-        // Find significant highs (resistances)
-        let maximums = [];
-        for (let i = 0; i < chartData.length; i++) {
-            if (i >= historyBars) break;
-            if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
-                maximums.push({ time: chartData[i].time, value: chartData[i].high });
-            }
+    // Find significant highs (resistances)
+    let maximums = [];
+    for (let i = 0; i < chartData.length; i++) {
+        if (i >= historyBars) break;
+        if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+            maximums.push({ time: chartData[i].time, value: chartData[i].high });
         }
+    }
 
-        // Draw support lines (connecting lows)
-        for (let i = 0; i < Math.min(minimums.length - 1, diagonalLines); i++) {
-            const start = minimums[i];
-            const end = minimums[i + 1];
+    // Draw support lines (connecting lows)
+    for (let i = 0; i < Math.min(minimums.length - 1, diagonalLines); i++) {
+        const start = minimums[i];
+        const end = minimums[i + 1];
 
-            const line = chart.addLineSeries({
-                color: 'rgba(23, 255, 39, 0.5)', // Green for support
-                lineWidth: 2,
-            });
+        const line = chart.addLineSeries({
+            color: 'rgba(23, 255, 39, 0.5)', // Green for support
+            lineWidth: 2,
+        });
 
-            // Extend the line into the future (3 months beyond today)
-            const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
-            const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+        // Extend the line into the future based on months
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth(); // Current month (0-11)
+        const currentYear = currentDate.getFullYear(); // Current year
+        const lastBarDate = new Date(end.time * 1000); // Convert Unix time to JavaScript Date object
+        const lastBarMonth = lastBarDate.getMonth();
+        const lastBarYear = lastBarDate.getFullYear();
 
-            line.setData([
-                { time: start.time, value: start.value },
-                { time: end.time, value: end.value },
-                { time: futureTime, value: futureValue },
-            ]);
+        // Calculate how many months to extend the line to
+        const monthDifference = (currentYear - lastBarYear) * 12 + currentMonth - lastBarMonth;
+        const futureTime = end.time + monthDifference * 30 * 24 * 60 * 60; // Approximate month in seconds
+        const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
 
-            supports.push(line);
-        }
+        line.setData([
+            { time: start.time, value: start.value },
+            { time: end.time, value: end.value },
+            { time: futureTime, value: futureValue },
+        ]);
 
-        // Draw resistance lines (connecting highs)
-        for (let i = 0; i < Math.min(maximums.length - 1, diagonalLines); i++) {
-            const start = maximums[i];
-            const end = maximums[i + 1];
+        supports.push(line);
+    }
 
-            const line = chart.addLineSeries({
-                color: 'rgba(255, 119, 173, 0.5)', // Pink for resistance
-                lineWidth: 2,
-            });
+    // Draw resistance lines (connecting highs)
+    for (let i = 0; i < Math.min(maximums.length - 1, diagonalLines); i++) {
+        const start = maximums[i];
+        const end = maximums[i + 1];
 
-            // Extend the line into the future (3 months beyond today)
-            const futureTime = end.time + 90 * 24 * 60 * 60; // 90 days in seconds
-            const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+        const line = chart.addLineSeries({
+            color: 'rgba(255, 119, 173, 0.5)', // Pink for resistance
+            lineWidth: 2,
+        });
 
-            line.setData([
-                { time: start.time, value: start.value },
-                { time: end.time, value: end.value },
-                { time: futureTime, value: futureValue },
-            ]);
+        // Extend the line into the future based on months
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth(); // Current month (0-11)
+        const currentYear = currentDate.getFullYear(); // Current year
+        const lastBarDate = new Date(end.time * 1000); // Convert Unix time to JavaScript Date object
+        const lastBarMonth = lastBarDate.getMonth();
+        const lastBarYear = lastBarDate.getFullYear();
 
-            resistances.push(line);
-        }
-    };
+        // Calculate how many months to extend the line to
+        const monthDifference = (currentYear - lastBarYear) * 12 + currentMonth - lastBarMonth;
+        const futureTime = end.time + monthDifference * 30 * 24 * 60 * 60; // Approximate month in seconds
+        const futureValue = priceAt(start.time, start.value, end.time, end.value, futureTime);
+
+        line.setData([
+            { time: start.time, value: start.value },
+            { time: end.time, value: end.value },
+            { time: futureTime, value: futureValue },
+        ]);
+
+        resistances.push(line);
+    }
+};
 
     // Function to draw Fibonacci levels
     const drawFibonacci = (chartData) => {
