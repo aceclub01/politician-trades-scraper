@@ -506,11 +506,11 @@ const drawSupportResistance = (chartData) => {
     });
 
     // Handle the "Update Chart" button click
-    // fetchChartButton.addEventListener('click', async () => {
-    //     const pair = pairInput.value.trim();
-    //     const period = periodInput.value;
-    //     await fetchAndUpdateChart(pair, period);
-    // });
+    fetchChartButton.addEventListener('click', async () => {
+        const pair = pairInput.value.trim();
+        const period = periodInput.value;
+        await fetchAndUpdateChart(pair, period);
+    });
 
     // Initialize chart when the page loads
     createChart();
