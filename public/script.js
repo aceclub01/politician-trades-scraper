@@ -69,12 +69,60 @@ document.addEventListener('DOMContentLoaded', () => {
             },
         });
 
+        // Secondary chart for MACD histogram
+        const macdChartDiv = document.createElement('div');
+        macdChartDiv.style.height = `${chartDiv.clientHeight * 0.3}px`; // 30% height for MACD chart
+        chartDiv.appendChild(macdChartDiv);
+
+        macdChart = LightweightCharts.createChart(macdChartDiv, {
+            width: chartDiv.clientWidth,
+            height: chartDiv.clientHeight * 0.3,
+            layout: {
+                backgroundColor: '#ffffff',
+                textColor: '#000000',
+            },
+            grid: {
+                vertLines: { color: '#eeeeee' },
+                horzLines: { color: '#eeeeee' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            priceScale: {
+                position: 'right',
+                borderColor: '#cccccc',
+            },
+            timeScale: {
+                borderColor: '#cccccc',
+            },
+        });
+
+        // Synchronize time scales
+        const mainTimeScale = chart.timeScale();
+        const macdTimeScale = macdChart.timeScale();
+
+        mainTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+            macdTimeScale.setVisibleLogicalRange(newRange);
+        });
+
+        macdTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
+            mainTimeScale.setVisibleLogicalRange(newRange);
+        });
+
         // Add candlestick series for the price chart
         lineSeries = chart.addCandlestickSeries({
             priceScaleId: 'right',
         });
 
-        console.log('Chart initialized:', chart);
+        // Add histogram series for the MACD
+        macdSeries = macdChart.addHistogramSeries({
+            color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
+            priceFormat: {
+                type: 'volume',
+            },
+        });
+
+        console.log('Charts initialized:', chart, macdChart);
     };
 
     // Update MACD histogram transparency
@@ -85,6 +133,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 color: `rgba(38, 166, 154, ${alpha})`, // Update transparency
             });
         }
+    };
+
+    // Function to calculate EMA
+    const calculateEMA = (data, period) => {
+        const k = 2 / (period + 1);
+        let ema = [data[0]];
+        for (let i = 1; i < data.length; i++) {
+            ema.push(data[i] * k + ema[i - 1] * (1 - k));
+        }
+        return ema;
+    };
+
+    // Function to calculate MACD
+    const calculateMACD = (data, fastLength = 12, slowLength = 26, signalLength = 9) => {
+        const fastEMA = calculateEMA(data, fastLength);
+        const slowEMA = calculateEMA(data, slowLength);
+        const macd = fastEMA.map((fast, i) => fast - slowEMA[i]);
+        const signal = calculateEMA(macd, signalLength);
+        const histogram = macd.map((macdVal, i) => macdVal - signal[i]);
+        return { macd, signal, histogram };
     };
 
     // Function to calculate SMA
@@ -300,6 +368,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 chart.removeSeries(lineSeries);
                 lineSeries = null;
             }
+            if (macdSeries) {
+                macdChart.removeSeries(macdSeries);
+                macdSeries = null;
+            }
             clearLines(); // Clear existing lines
 
             // Add new candlestick series
@@ -307,6 +379,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 priceScaleId: 'right',
             });
             lineSeries.setData(chartData);
+
+            // Calculate MACD values
+            const closePrices = chartData.map(d => d.close);
+            const { macd, signal, histogram } = calculateMACD(closePrices);
+
+            // Plot MACD histogram
+            const macdData = chartData.map((d, i) => ({
+                time: d.time,
+                value: histogram[i],
+                color: histogram[i] >= 0 ? `rgba(38, 166, 154, ${alphaSlider.value})` : `rgba(239, 83, 80, ${alphaSlider.value})`, // Dynamic transparency
+            }));
+            macdSeries = macdChart.addHistogramSeries({
+                color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
+                priceFormat: {
+                    type: 'volume',
+                },
+            });
+            macdSeries.setData(macdData);
 
             // Calculate and plot SMAs
             const sma7 = calculateSMA(chartData, 7);
