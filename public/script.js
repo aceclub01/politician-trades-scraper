@@ -95,6 +95,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Function to calculate EMA
+    const calculateEMA = (data, period) => {
+        const k = 2 / (period + 1);
+        let ema = [data[0]];
+        for (let i = 1; i < data.length; i++) {
+            ema.push(data[i] * k + ema[i - 1] * (1 - k));
+        }
+        return ema;
+    };
+
+    // Function to calculate MACD
+    const calculateMACD = (data, fastLength = 12, slowLength = 26, signalLength = 9) => {
+        const fastEMA = calculateEMA(data, fastLength);
+        const slowEMA = calculateEMA(data, slowLength);
+        const macd = fastEMA.map((fast, i) => fast - slowEMA[i]);
+        const signal = calculateEMA(macd, signalLength);
+        const histogram = macd.map((macdVal, i) => macdVal - signal[i]);
+        return { macd, signal, histogram };
+    };
+
     // Function to calculate SMA
     const calculateSMA = (data, period) => {
         const sma = [];
