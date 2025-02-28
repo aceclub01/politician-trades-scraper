@@ -306,53 +306,61 @@ const drawSupportResistance = (chartData) => {
     const getSignificantHighLow = (chartData) => {
         const sixMonthsAgo = Date.now() / 1000 - 6 * 30 * 24 * 60 * 60; // 6 months ago in seconds
         const filteredData = chartData.filter(data => data.time >= sixMonthsAgo);
-
+    
         if (filteredData.length === 0) return null;
-
-        const significantHigh = filteredData.reduce((max, data) => data.high > max.high ? data : max, filteredData[0]);
-        const significantLow = filteredData.reduce((min, data) => data.low < min.low ? data : min, filteredData[0]);
-
-        return {
-            high: { time: significantHigh.time, value: significantHigh.high },
-            low: { time: significantLow.time, value: significantLow.low },
-        };
+    
+        // Find two significant highs
+        const highs = filteredData
+            .map(data => ({ time: data.time, value: data.high }))
+            .sort((a, b) => b.value - a.value) // Sort descending by value
+            .slice(0, 2); // Take the top two
+    
+        // Find two significant lows
+        const lows = filteredData
+            .map(data => ({ time: data.time, value: data.low }))
+            .sort((a, b) => a.value - b.value) // Sort ascending by value
+            .slice(0, 2); // Take the bottom two
+    
+        return { highs, lows };
     };
 
     // Function to draw diagonal lines for significant highs and lows
     const drawDiagonalLines = (chartData) => {
         const significantPoints = getSignificantHighLow(chartData);
-        if (!significantPoints) return;
-
-        const { high, low } = significantPoints;
-
-        // Draw diagonal line for significant high
+        if (!significantPoints || significantPoints.highs.length < 2 || significantPoints.lows.length < 2) return;
+    
+        const { highs, lows } = significantPoints;
+    
+        // Draw diagonal line for significant highs
         const highLine = chart.addLineSeries({
-            color: 'rgba(255, 0, 0, 0.8)', // Red for significant high
+            color: 'rgba(255, 0, 0, 0.8)', // Red for significant highs
             lineWidth: 2,
         });
-
-        const highFutureTime = high.time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
-        const highFutureValue = priceAt(high.time, high.value, high.time + 1, high.value, highFutureTime); // Horizontal line
-
+    
+        const highFutureTime = highs[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+        const highFutureValue = priceAt(highs[0].time, highs[0].value, highs[1].time, highs[1].value, highFutureTime);
+    
         highLine.setData([
-            { time: high.time, value: high.value },
+            { time: highs[0].time, value: highs[0].value },
+            { time: highs[1].time, value: highs[1].value },
             { time: highFutureTime, value: highFutureValue },
         ]);
-
-        // Draw diagonal line for significant low
+    
+        // Draw diagonal line for significant lows
         const lowLine = chart.addLineSeries({
-            color: 'rgba(0, 255, 0, 0.8)', // Green for significant low
+            color: 'rgba(0, 255, 0, 0.8)', // Green for significant lows
             lineWidth: 2,
         });
-
-        const lowFutureTime = low.time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
-        const lowFutureValue = priceAt(low.time, low.value, low.time + 1, low.value, lowFutureTime); // Horizontal line
-
+    
+        const lowFutureTime = lows[1].time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+        const lowFutureValue = priceAt(lows[0].time, lows[0].value, lows[1].time, lows[1].value, lowFutureTime);
+    
         lowLine.setData([
-            { time: low.time, value: low.value },
+            { time: lows[0].time, value: lows[0].value },
+            { time: lows[1].time, value: lows[1].value },
             { time: lowFutureTime, value: lowFutureValue },
         ]);
-
+    
         // Store the lines for later removal
         supports.push(lowLine);
         resistances.push(highLine);
