@@ -283,6 +283,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Function to get significant highs and lows over the last 6 months
+    const getSignificantHighLow = (chartData) => {
+        const sixMonthsAgo = Date.now() / 1000 - 6 * 30 * 24 * 60 * 60; // 6 months ago in seconds
+        const filteredData = chartData.filter(data => data.time >= sixMonthsAgo);
+
+        if (filteredData.length === 0) return null;
+
+        const significantHigh = filteredData.reduce((max, data) => data.high > max.high ? data : max, filteredData[0]);
+        const significantLow = filteredData.reduce((min, data) => data.low < min.low ? data : min, filteredData[0]);
+
+        return {
+            high: { time: significantHigh.time, value: significantHigh.high },
+            low: { time: significantLow.time, value: significantLow.low },
+        };
+    };
+
+    // Function to draw diagonal lines for significant highs and lows
+    const drawDiagonalLines = (chartData) => {
+        const significantPoints = getSignificantHighLow(chartData);
+        if (!significantPoints) return;
+
+        const { high, low } = significantPoints;
+
+        // Draw diagonal line for significant high
+        const highLine = chart.addLineSeries({
+            color: 'rgba(255, 0, 0, 0.8)', // Red for significant high
+            lineWidth: 2,
+        });
+
+        const highFutureTime = high.time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+        const highFutureValue = priceAt(high.time, high.value, high.time + 1, high.value, highFutureTime); // Horizontal line
+
+        highLine.setData([
+            { time: high.time, value: high.value },
+            { time: highFutureTime, value: highFutureValue },
+        ]);
+
+        // Draw diagonal line for significant low
+        const lowLine = chart.addLineSeries({
+            color: 'rgba(0, 255, 0, 0.8)', // Green for significant low
+            lineWidth: 2,
+        });
+
+        const lowFutureTime = low.time + 3 * 30 * 24 * 60 * 60; // 3 months in seconds
+        const lowFutureValue = priceAt(low.time, low.value, low.time + 1, low.value, lowFutureTime); // Horizontal line
+
+        lowLine.setData([
+            { time: low.time, value: low.value },
+            { time: lowFutureTime, value: lowFutureValue },
+        ]);
+
+        // Store the lines for later removal
+        supports.push(lowLine);
+        resistances.push(highLine);
+    };
+
     // Function to clear all lines
     const clearLines = () => {
         supports.forEach(line => chart.removeSeries(line));
@@ -370,6 +426,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Draw Elliott Waves
             drawElliotWave(chartData);
+
+            // Draw diagonal lines for significant highs and lows
+            drawDiagonalLines(chartData);
         } catch (error) {
             console.error('Error fetching FX data:', error);
             alert('Failed to fetch FX data. Check the console for details.');
