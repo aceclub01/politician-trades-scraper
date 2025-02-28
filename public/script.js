@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const alphaValue = document.getElementById('alphaValue');
     const chartDiv = document.getElementById('chart');
     let chart;
-    let macdChart;
     let lineSeries = null;
     let macdSeries = null;
     let sma7Series = null;
@@ -43,12 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     historyBarsInput.addEventListener('input', updateResolution);
 
-    // Create chart instances
-    const createCharts = () => {
+    // Create chart instance
+    const createChart = () => {
         // Main chart for price data
         chart = LightweightCharts.createChart(chartDiv, {
             width: chartDiv.clientWidth,
-            height: chartDiv.clientHeight * 0.7, // 70% height for main chart
+            height: chartDiv.clientHeight,
             layout: {
                 backgroundColor: '#ffffff',
                 textColor: '#000000',
@@ -67,46 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
             timeScale: {
                 borderColor: '#cccccc',
             },
-        });
-
-        // Secondary chart for MACD histogram
-        const macdChartDiv = document.createElement('div');
-        macdChartDiv.style.height = `${chartDiv.clientHeight * 0.3}px`; // 30% height for MACD chart
-        chartDiv.appendChild(macdChartDiv);
-
-        macdChart = LightweightCharts.createChart(macdChartDiv, {
-            width: chartDiv.clientWidth,
-            height: chartDiv.clientHeight * 0.3,
-            layout: {
-                backgroundColor: '#ffffff',
-                textColor: '#000000',
-            },
-            grid: {
-                vertLines: { color: '#eeeeee' },
-                horzLines: { color: '#eeeeee' },
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-            },
-            priceScale: {
-                position: 'right',
-                borderColor: '#cccccc',
-            },
-            timeScale: {
-                borderColor: '#cccccc',
-            },
-        });
-
-        // Synchronize time scales
-        const mainTimeScale = chart.timeScale();
-        const macdTimeScale = macdChart.timeScale();
-
-        mainTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
-            macdTimeScale.setVisibleLogicalRange(newRange);
-        });
-
-        macdTimeScale.subscribeVisibleLogicalRangeChange((newRange) => {
-            mainTimeScale.setVisibleLogicalRange(newRange);
         });
 
         // Add candlestick series for the price chart
@@ -114,15 +73,16 @@ document.addEventListener('DOMContentLoaded', () => {
             priceScaleId: 'right',
         });
 
-        // Add histogram series for the MACD
-        macdSeries = macdChart.addHistogramSeries({
+        // Add histogram series for the MACD (background of the main chart)
+        macdSeries = chart.addHistogramSeries({
             color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
             priceFormat: {
                 type: 'volume',
             },
+            priceScaleId: 'left', // Use a separate price scale for MACD
         });
 
-        console.log('Charts initialized:', chart, macdChart);
+        console.log('Chart initialized:', chart);
     };
 
     // Update MACD histogram transparency
@@ -133,26 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 color: `rgba(38, 166, 154, ${alpha})`, // Update transparency
             });
         }
-    };
-
-    // Function to calculate EMA
-    const calculateEMA = (data, period) => {
-        const k = 2 / (period + 1);
-        let ema = [data[0]];
-        for (let i = 1; i < data.length; i++) {
-            ema.push(data[i] * k + ema[i - 1] * (1 - k));
-        }
-        return ema;
-    };
-
-    // Function to calculate MACD
-    const calculateMACD = (data, fastLength = 12, slowLength = 26, signalLength = 9) => {
-        const fastEMA = calculateEMA(data, fastLength);
-        const slowEMA = calculateEMA(data, slowLength);
-        const macd = fastEMA.map((fast, i) => fast - slowEMA[i]);
-        const signal = calculateEMA(macd, signalLength);
-        const histogram = macd.map((macdVal, i) => macdVal - signal[i]);
-        return { macd, signal, histogram };
     };
 
     // Function to calculate SMA
@@ -368,10 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 chart.removeSeries(lineSeries);
                 lineSeries = null;
             }
-            if (macdSeries) {
-                macdChart.removeSeries(macdSeries);
-                macdSeries = null;
-            }
             clearLines(); // Clear existing lines
 
             // Add new candlestick series
@@ -384,18 +320,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const closePrices = chartData.map(d => d.close);
             const { macd, signal, histogram } = calculateMACD(closePrices);
 
-            // Plot MACD histogram
+            // Plot MACD histogram (background of the main chart)
             const macdData = chartData.map((d, i) => ({
                 time: d.time,
                 value: histogram[i],
                 color: histogram[i] >= 0 ? `rgba(38, 166, 154, ${alphaSlider.value})` : `rgba(239, 83, 80, ${alphaSlider.value})`, // Dynamic transparency
             }));
-            macdSeries = macdChart.addHistogramSeries({
-                color: `rgba(38, 166, 154, ${alphaSlider.value})`, // Initial transparency
-                priceFormat: {
-                    type: 'volume',
-                },
-            });
             macdSeries.setData(macdData);
 
             // Calculate and plot SMAs
@@ -441,5 +371,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize chart when the page loads
-    createCharts();
+    createChart();
 });
