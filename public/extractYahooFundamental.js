@@ -134,8 +134,8 @@ document.getElementById('fetchData').addEventListener('click', async () => {
 });
 
 // Example usage (initial load with default pair and limit)
-const defaultPair = document.getElementById('pair').value; // Get the default pair value
-const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10); // Get the default limit
+// const defaultPair = document.getElementById('pair').value; // Get the default pair value
+// const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10); // Get the default limit
 fetchFundamentals(defaultPair); // Fetch fundamentals for the default pair
 fetchNews(defaultPair, defaultLimit); // Fetch news for the default pair and limit
 
