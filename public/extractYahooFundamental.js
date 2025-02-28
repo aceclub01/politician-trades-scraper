@@ -1,42 +1,16 @@
-const API_BASE_URL = 'https://politician-trades-scraper.onrender.com';
-
-// Helper function to safely set text content
-const setTextContent = (elementId, value) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = value;
-    } else {
-        console.error(`Element with ID '${elementId}' not found.`);
-    }
-};
-
 // Fetch and display news using NewsAPI
 async function fetchNews(query, limit) {
     try {
-        console.log(`Fetching news for: ${query}`);
-        const response = await fetch(`${API_BASE_URL}/fetchNews?symbol=${query}&limit=${limit}`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch news: ${response.statusText}`);
-        }
-
+        const response = await fetch(`http://localhost:3000/fetchNews?symbol=${query}&limit=${limit}`);
         const data = await response.json();
-        console.log('API Response:', data);
 
-        // Check if the response is valid
+        // Check if the response is an array
         if (!Array.isArray(data)) {
             throw new Error('Invalid or missing news data from NewsAPI');
         }
 
-        // Get the news container
-        const newsList = document.getElementById('newsHeadlines');
-        const topNews = document.getElementById('topNews');
-
-        if (!newsList || !topNews) {
-            throw new Error('News container elements not found in the DOM.');
-        }
-
         // Extract news headlines, dates, and links
+        const newsList = document.getElementById('newsHeadlines');
         newsList.innerHTML = data
             .slice(0, limit) // Limit the number of news articles
             .map(article => `
@@ -48,12 +22,7 @@ async function fetchNews(query, limit) {
             .join('');
     } catch (error) {
         console.error('Error fetching news:', error);
-        const topNews = document.getElementById('topNews');
-        if (topNews) {
-            topNews.innerHTML = `<p>Error: ${error.message}</p>`;
-        } else {
-            console.error('Top news container not found.');
-        }
+        document.getElementById('topNews').innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
 
@@ -62,82 +31,106 @@ async function fetchFundamentals(symbol) {
     try {
         console.log(`Fetching fundamentals for symbol: ${symbol}`);
 
-        const response = await fetch(`${API_BASE_URL}/fetchFundamentals?symbol=${symbol}`);
-        console.log('API Response:', response);
+        // Step 1: Fetch profile data from the API
+        const profileResponse = await fetch(`http://localhost:3000/fetchFundamentals?symbol=${symbol}`);
+        const profileData = await profileResponse.json();
+        console.log('Profile Data:', profileData);
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch fundamentals for ${symbol}: ${response.statusText}`);
-        }
+        // Step 2: Fetch key statistics
+        const keyStatsResponse = await fetch(`http://localhost:3000/fetchKeyStatistics?symbol=${symbol}`);
+        const keyStatsData = await keyStatsResponse.json();
+        console.log('Key Statistics Data:', keyStatsData);
 
-        const data = await response.json();
-        console.log('API Data:', data);
+        // Step 3: Fetch income statement data
+        const incomeStatementResponse = await fetch(`http://localhost:3000/fetchIncomeStatement?symbol=${symbol}`);
+        const incomeStatementData = await incomeStatementResponse.json();
+        console.log('Income Statement Data:', incomeStatementData);
 
-        // Handle FX pairs
+        // Step 4: Fetch dividend data
+        const dividendResponse = await fetch(`http://localhost:3000/fetchDividendData?symbol=${symbol}`);
+        const dividendData = await dividendResponse.json();
+        console.log('Dividend Data:', dividendData);
+
+        // Step 5: Check if the symbol is an FX pair
         if (symbol.includes('=X')) {
             console.log('Symbol is an FX pair. Skipping stock fundamentals.');
-            setTextContent('mktCap', 'N/A (FX Pair)');
-            setTextContent('targetPE', 'N/A (FX Pair)');
-            setTextContent('eps', 'N/A (FX Pair)');
-            setTextContent('oneYearTargetEst', 'N/A (FX Pair)');
-            setTextContent('exDividendDate', 'N/A (FX Pair)');
-            setTextContent('earningsDate', 'N/A (FX Pair)');
-            setTextContent('fiftyTwoWeekRange', 'N/A (FX Pair)');
+            document.getElementById('mktCap').textContent = 'N/A (FX Pair)';
+            document.getElementById('targetPE').textContent = 'N/A (FX Pair)';
+            document.getElementById('eps').textContent = 'N/A (FX Pair)';
+            document.getElementById('oneYearTargetEst').textContent = 'N/A (FX Pair)';
+            document.getElementById('exDividendDate').textContent = 'N/A (FX Pair)';
+            document.getElementById('earningsDate').textContent = 'N/A (FX Pair)';
+            document.getElementById('fiftyTwoWeekRange').textContent = 'N/A (FX Pair)';
             return;
         }
 
-        // Handle stock data
-        if (!Array.isArray(data) || data.length === 0) {
+        // Step 6: Handle stock data
+        if (!Array.isArray(profileData) || profileData.length === 0) {
             throw new Error('Invalid or missing data from Financial Modeling Prep');
         }
 
-        const fundamentals = data[0];
-        console.log('Fundamentals Object:', fundamentals);
+        const profile = profileData[0];
+        const keyStats = keyStatsData[0];
+        const incomeStatement = incomeStatementData[0];
+        const dividend = dividendData.historical?.[0]; // Get the latest dividend data
 
-        const {
-            mktCap,
-            price,
-            beta,
-            lastDiv,
-            range,
-        } = fundamentals;
+        console.log('Profile:', profile);
+        console.log('Key Stats:', keyStats);
+        console.log('Income Statement:', incomeStatement);
+        console.log('Dividend:', dividend);
 
-        // Update the fundamentals display
-        setTextContent('mktCap', mktCap ? `$${mktCap.toLocaleString()}` : 'N/A');
-        setTextContent('targetPE', beta || 'N/A');
-        setTextContent('eps', price || 'N/A');
-        setTextContent('oneYearTargetEst', range || 'N/A');
-        setTextContent('exDividendDate', lastDiv || 'N/A');
-        setTextContent('earningsDate', range || 'N/A');
-        setTextContent('fiftyTwoWeekRange', range || 'N/A');
+        // Step 7: Extract and display relevant fields
+        document.getElementById('mktCap').textContent = profile.mktCap ? `$${profile.mktCap.toLocaleString()}` : 'N/A';
+        document.getElementById('targetPE').textContent = keyStats?.peRatio || 'N/A';
+        document.getElementById('eps').textContent = incomeStatement?.eps || 'N/A';
+        document.getElementById('oneYearTargetEst').textContent = profile.price || 'N/A';
+        document.getElementById('exDividendDate').textContent = dividend?.date || 'N/A';
+        document.getElementById('earningsDate').textContent = profile.lastDiv || 'N/A';
+        document.getElementById('fiftyTwoWeekRange').textContent = profile.range || 'N/A';
+
+        // Additional fields for key statistics
+        document.getElementById('profitMargin').textContent = keyStats?.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A';
+        document.getElementById('quarterlyRevenueGrowth').textContent = keyStats?.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A';
+        document.getElementById('returnOnEquity').textContent = keyStats?.roe ? `${(keyStats.roe * 100).toFixed(2)}%` : 'N/A';
+        document.getElementById('quarterlyEarningsGrowth').textContent = keyStats?.netIncomeGrowth ? `${(keyStats.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A';
+        document.getElementById('shortRatio').textContent = keyStats?.shortRatio || 'N/A';
+
+        // Log all available fields in the data objects
+        console.log('All Available Profile Fields:', Object.keys(profile));
+        console.log('All Available Key Stats Fields:', Object.keys(keyStats));
+        console.log('All Available Income Statement Fields:', Object.keys(incomeStatement));
+        console.log('All Available Dividend Fields:', Object.keys(dividend));
     } catch (error) {
         console.error('Error fetching fundamentals:', error);
-        const fundamentalsContainer = document.getElementById('fundamentals');
-        if (fundamentalsContainer) {
-            fundamentalsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
-        } else {
-            console.error('Fundamentals container not found.');
-        }
+        document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
-// Add event listener for the "Fetch Data" button
+
+// Fetch data when the "Fetch Data" button is clicked
 document.getElementById('fetchData').addEventListener('click', async () => {
     const pair = document.getElementById('pair').value; // Get the FX pair from the input field
-    console.log('Fetching data for symbol:', pair); // Log the symbol
     const period = document.getElementById('period').value;
-    const newsLimit = document.getElementById('newsLimit').value;
+    const newsLimit = document.getElementById('newsLimit').value; // Get the selected news limit
 
     try {
         // Fetch FX data
-        const fxResponse = await fetch(`${API_BASE_URL}/fxdata?pair=${pair}&period=${period}`);
+        const fxResponse = await fetch(`http://localhost:3000/fxdata?pair=${pair}&period=${period}`);
         const fxData = await fxResponse.json();
         console.log('FX Data:', fxData);
+        // Render your chart here using the FX data
 
-        // Fetch fundamentals
-        await fetchFundamentals(pair);
+        // Fetch fundamentals based on the FX pair
+        fetchFundamentals(pair);
 
-        // Fetch news
-        await fetchNews(pair, parseInt(newsLimit, 10));
+        // Fetch news based on the FX pair and selected limit
+        fetchNews(pair, parseInt(newsLimit, 10));
     } catch (error) {
         console.error('Error fetching data:', error);
     }
 });
+
+// Example usage (initial load with default pair and limit)
+const defaultPair = document.getElementById('pair').value; // Get the default pair value
+const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10); // Get the default limit
+fetchFundamentals(defaultPair); // Fetch fundamentals for the default pair
+fetchNews(defaultPair, defaultLimit); // Fetch news for the default pair and limit
