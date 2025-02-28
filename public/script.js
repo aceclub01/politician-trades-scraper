@@ -162,7 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let minimums = [];
         for (let i = 0; i < chartData.length; i++) {
             if (i >= historyBars) break;
-            if (chartData[i].low === Math.min(...chartData.slice(i - x2, i + x2 + 1).map(d => d.low))) {
+            const sliceStart = Math.max(0, i - x2);
+            const sliceEnd = Math.min(chartData.length, i + x2 + 1);
+            if (chartData[i].low === Math.min(...chartData.slice(sliceStart, sliceEnd).map(d => d.low))) {
                 minimums.push({ time: chartData[i].time, value: chartData[i].low });
             }
         }
@@ -171,7 +173,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let maximums = [];
         for (let i = 0; i < chartData.length; i++) {
             if (i >= historyBars) break;
-            if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+            const sliceStart = Math.max(0, i - x2);
+            const sliceEnd = Math.min(chartData.length, i + x2 + 1);
+            if (chartData[i].high === Math.max(...chartData.slice(sliceStart, sliceEnd).map(d => d.high))) {
                 maximums.push({ time: chartData[i].time, value: chartData[i].high });
             }
         }
