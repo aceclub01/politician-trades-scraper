@@ -358,6 +358,12 @@ const drawSupportResistance = (chartData) => {
     
         const { highs, lows } = significantPoints;
     
+        // Ensure the starting points for highs and lows are different
+        if (highs[0].time === lows[0].time) {
+            console.warn('Starting points for highs and lows are the same. Skipping diagonal lines.');
+            return;
+        }
+    
         // Draw diagonal line for significant highs
         const highLine = chart.addLineSeries({
             color: 'rgba(255, 0, 0, 0.8)', // Red for significant highs
@@ -392,7 +398,6 @@ const drawSupportResistance = (chartData) => {
         supports.push(lowLine);
         resistances.push(highLine);
     };
-
     // Function to clear all lines
     const clearLines = () => {
         supports.forEach(line => chart.removeSeries(line));
