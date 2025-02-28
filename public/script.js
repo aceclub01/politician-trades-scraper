@@ -245,8 +245,9 @@ const drawSupportResistance = (chartData) => {
     // Function to draw Fibonacci levels
     const drawFibonacci = (chartData) => {
         const filteredData = filterOutliers(chartData); // Apply outlier filtering
-        const minPrice = Math.min(...filteredData.map(data => data.low));
-        const maxPrice = Math.max(...filteredData.map(data => data.high));
+        const closePrices = filteredData.map(d => d.close); // Use closing prices
+        const minPrice = Math.min(...closePrices);
+        const maxPrice = Math.max(...closePrices);
     
         const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
         const fibonacciLinesArr = fibonacciLevels.map(level => ({
@@ -272,32 +273,32 @@ const drawSupportResistance = (chartData) => {
 
     // Function to draw Elliott Waves
     const drawElliotWave = (chartData) => {
-        if (chartData.length < 5) return; // Ensure we have enough data for waves
-
-        const cleanData = chartData.filter(data => data.close !== null); // Remove null values
-        if (cleanData.length < 5) return; // Ensure we have at least 5 valid points
-
+        const filteredData = filterOutliers(chartData); // Apply outlier filtering
+        const closePrices = filteredData.map(d => d.close); // Use closing prices
+    
+        if (closePrices.length < 5) return; // Ensure we have enough data for waves
+    
         const points = [
-            cleanData[0],  // Wave 1
-            cleanData[Math.floor(cleanData.length * 0.25)],  // Wave 2
-            cleanData[Math.floor(cleanData.length * 0.5)],   // Wave 3
-            cleanData[Math.floor(cleanData.length * 0.75)],  // Wave 4
-            cleanData[cleanData.length - 1]  // Wave 5
+            { time: filteredData[0].time, value: closePrices[0] }, // Wave 1
+            { time: filteredData[Math.floor(filteredData.length * 0.25)].time, value: closePrices[Math.floor(closePrices.length * 0.25)] }, // Wave 2
+            { time: filteredData[Math.floor(filteredData.length * 0.5)].time, value: closePrices[Math.floor(closePrices.length * 0.5)] }, // Wave 3
+            { time: filteredData[Math.floor(filteredData.length * 0.75)].time, value: closePrices[Math.floor(closePrices.length * 0.75)] }, // Wave 4
+            { time: filteredData[filteredData.length - 1].time, value: closePrices[closePrices.length - 1] }, // Wave 5
         ];
-
+    
         points.forEach((point, index) => {
             if (index < points.length - 1) {
                 const line = chart.addLineSeries({
                     color: 'rgba(255, 165, 0, 0.8)', // Orange for Elliott Waves
                     lineWidth: 2,
                 });
-
+    
                 // Set data for Elliot Wave lines
                 line.setData([
-                    { time: point.time, value: point.close },
-                    { time: points[index + 1].time, value: points[index + 1].close }
+                    { time: point.time, value: point.value },
+                    { time: points[index + 1].time, value: points[index + 1].value }
                 ]);
-
+    
                 elliotLines.push(line);
             }
         });
