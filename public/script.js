@@ -244,27 +244,28 @@ const drawSupportResistance = (chartData) => {
 
     // Function to draw Fibonacci levels
     const drawFibonacci = (chartData) => {
-        const minPrice = Math.min(...chartData.map(data => data.low));
-        const maxPrice = Math.max(...chartData.map(data => data.high));
-
+        const filteredData = filterOutliers(chartData); // Apply outlier filtering
+        const minPrice = Math.min(...filteredData.map(data => data.low));
+        const maxPrice = Math.max(...filteredData.map(data => data.high));
+    
         const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
         const fibonacciLinesArr = fibonacciLevels.map(level => ({
             price: minPrice + (maxPrice - minPrice) * level,
             label: `${(level * 100).toFixed(1)}%`
         }));
-
+    
         fibonacciLinesArr.forEach(level => {
             const fibLine = chart.addLineSeries({
-                color: 'rgba(57, 57, 57, 0.46)', // Cyan for Fibonacci levels
+                color: 'rgba(0, 255, 255, 0.8)', // Cyan for Fibonacci levels
                 lineWidth: 2,
             });
-
+    
             // Draw the line across the chart time range
             fibLine.setData([
-                { time: chartData[0].time, value: level.price },
-                { time: chartData[chartData.length - 1].time, value: level.price }
+                { time: filteredData[0].time, value: level.price },
+                { time: filteredData[filteredData.length - 1].time, value: level.price }
             ]);
-
+    
             fibonacciLines.push(fibLine);
         });
     };
@@ -301,7 +302,15 @@ const drawSupportResistance = (chartData) => {
             }
         });
     };
-
+    const filterOutliers = (data, threshold = 0.1) => {
+        const closePrices = data.map(d => d.close);
+        const average = closePrices.reduce((sum, price) => sum + price, 0) / closePrices.length;
+    
+        return data.filter(d => {
+            const deviation = Math.abs(d.close - average) / average;
+            return deviation <= threshold;
+        });
+    };
     // Function to get significant highs and lows over the last 6 months
     const getSignificantHighLow = (chartData) => {
         const sixMonthsAgo = Date.now() / 1000 - 6 * 30 * 24 * 60 * 60; // 6 months ago in seconds
@@ -309,19 +318,37 @@ const drawSupportResistance = (chartData) => {
     
         if (filteredData.length === 0) return null;
     
-        // Find two significant highs
+        // Find two significant highs at least 1 month apart
         const highs = filteredData
             .map(data => ({ time: data.time, value: data.high }))
-            .sort((a, b) => b.value - a.value) // Sort descending by value
-            .slice(0, 2); // Take the top two
+            .sort((a, b) => b.value - a.value); // Sort descending by value
     
-        // Find two significant lows
+        const significantHighs = [];
+        for (let i = 0; i < highs.length; i++) {
+            if (significantHighs.length === 0) {
+                significantHighs.push(highs[i]);
+            } else if (Math.abs(highs[i].time - significantHighs[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantHighs.push(highs[i]);
+                break;
+            }
+        }
+    
+        // Find two significant lows at least 1 month apart
         const lows = filteredData
             .map(data => ({ time: data.time, value: data.low }))
-            .sort((a, b) => a.value - b.value) // Sort ascending by value
-            .slice(0, 2); // Take the bottom two
+            .sort((a, b) => a.value - b.value); // Sort ascending by value
     
-        return { highs, lows };
+        const significantLows = [];
+        for (let i = 0; i < lows.length; i++) {
+            if (significantLows.length === 0) {
+                significantLows.push(lows[i]);
+            } else if (Math.abs(lows[i].time - significantLows[0].time) >= 30 * 24 * 60 * 60) { // At least 1 month apart
+                significantLows.push(lows[i]);
+                break;
+            }
+        }
+    
+        return { highs: significantHighs, lows: significantLows };
     };
 
     // Function to draw diagonal lines for significant highs and lows
@@ -398,13 +425,16 @@ const drawSupportResistance = (chartData) => {
             }
     
             // Prepare data for chart with null handling
-            const chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
+            let chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
                 time: timestamp,
                 open: handleNullValue(data, index, 'open'),
                 high: handleNullValue(data, index, 'high'),
                 low: handleNullValue(data, index, 'low'),
                 close: handleNullValue(data, index, 'close'),
             }));
+    
+            // Filter outliers
+            chartData = filterOutliers(chartData);
     
             // Remove old data
             if (lineSeries) {
