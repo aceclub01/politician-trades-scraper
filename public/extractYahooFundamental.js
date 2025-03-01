@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
             console.log('Fundamentals API Response:', response);
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
             const data = await response.json();
             console.log('Fundamentals Data:', data);
 
@@ -29,7 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
         } catch (error) {
             console.error('Error fetching fundamentals:', error);
-            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+            const fundamentalsContainer = document.getElementById('fundamentals');
+            if (fundamentalsContainer) {
+                fundamentalsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+            } else {
+                console.error('Fundamentals container not found.');
+            }
         }
     }
 
@@ -40,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
             console.log('Key Statistics API Response:', response);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
             const data = await response.json();
             console.log('Key Statistics Data:', data);
@@ -59,33 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('shortRatio').textContent = keyStats.shortRatio || 'N/A';
         } catch (error) {
             console.error('Error fetching key statistics:', error);
-            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
-        }
-    }
-
-    // Fetch and display income statement
-    async function fetchIncomeStatement(symbol) {
-        try {
-            console.log(`Fetching income statement for symbol: ${symbol}`);
-
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
-            console.log('Income Statement API Response:', response);
-
-            const data = await response.json();
-            console.log('Income Statement Data:', data);
-
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Invalid or missing income statement data');
+            const fundamentalsContainer = document.getElementById('fundamentals');
+            if (fundamentalsContainer) {
+                fundamentalsContainer.innerHTML += `<p>Error: ${error.message}</p>`;
+            } else {
+                console.error('Fundamentals container not found.');
             }
-
-            const incomeStatement = data[0];
-            console.log('Income Statement Object:', incomeStatement);
-
-            // Update the DOM with income statement data
-            document.getElementById('eps').textContent = incomeStatement.eps || 'N/A';
-        } catch (error) {
-            console.error('Error fetching income statement:', error);
-            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
         }
     }
 
@@ -96,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchNews?symbol=${query}&limit=${limit}`);
             console.log('News API Response:', response);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
 
             const data = await response.json();
             console.log('News Data:', data);
@@ -137,25 +133,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Fetch Data button clicked');
 
         const pair = document.getElementById('pair').value;
-        const period = document.getElementById('period').value;
         const newsLimit = document.getElementById('newsLimit').value;
 
         try {
-            console.log(`Fetching FX data for pair: ${pair}, period: ${period}`);
-
-            // Fetch FX data
-            const fxResponse = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-            const fxData = await fxResponse.json();
-            console.log('FX Data:', fxData);
-
             // Fetch fundamentals
             fetchFundamentals(pair);
 
             // Fetch key statistics
             fetchKeyStatistics(pair);
-
-            // Fetch income statement
-            fetchIncomeStatement(pair);
 
             // Fetch news
             fetchNews(pair, parseInt(newsLimit, 10));
@@ -171,6 +156,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchFundamentals(defaultPair);
     fetchKeyStatistics(defaultPair);
-    fetchIncomeStatement(defaultPair);
     fetchNews(defaultPair, defaultLimit);
 });
