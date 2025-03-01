@@ -15,14 +15,12 @@
             align-items: center;
         }
         .fundamentals-container {
-    display: flex;
-    gap: 20px; /* Space between columns */
-}
-
-.column {
-    flex: 1; /* Each column takes equal width */
-}
-
+            display: flex;
+            gap: 20px; /* Space between columns */
+        }
+        .column {
+            flex: 1; /* Each column takes equal width */
+        }
         h1 {
             text-align: center;
             margin: 20px 0;
@@ -68,7 +66,7 @@
         <div class="controls">
             <div>
                 <label for="pair">FX Pair: </label>
-                <input type="text" id="pair" value="USDSGD=X" />
+                <input type="text" id="pair" value="AVGO" />
             </div>
             <div>
                 <label for="period">Period: </label>
@@ -115,7 +113,7 @@
             <button id="fetchChartData">Update Chart</button>
         </div>
         <div class="fundamentals">
-            <h2>Fundamentals</h2>
+            <h2>Fundamentals <span id="lastClosePrice"></span></h2>
             <div class="fundamentals-container">
                 <div class="column">
                     <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
@@ -135,7 +133,6 @@
                 </div>
             </div>
         </div>
-        
     </div>
     <div class="top-news">
         <h2>Top News</h2>
@@ -143,8 +140,59 @@
     </div>
     <div id="chart" style="height: 400px;"></div>
 
-    <!-- Scripts -->
+    <!-- External Scripts -->
     <script src="/extractYahooFundamental.js"></script>
     <script src="/script.js"></script>
+
+    <!-- Internal Script for New Features -->
+    <script>
+        // Fetch and display data
+        async function fetchData() {
+            const pair = document.getElementById("pair").value;
+            const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${pair}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.quoteResponse.result.length > 0) {
+                const result = data.quoteResponse.result[0];
+
+                // Display last close price
+                const lastClosePrice = result.regularMarketPreviousClose;
+                document.getElementById("lastClosePrice").textContent = `(Last Close: ${lastClosePrice})`;
+
+                // Format market cap
+                const marketCap = result.marketCap;
+                let formattedMarketCap;
+                if (marketCap >= 1e12) {
+                    formattedMarketCap = `${(marketCap / 1e12).toFixed(2)}T`;
+                } else if (marketCap >= 1e9) {
+                    formattedMarketCap = `${(marketCap / 1e9).toFixed(2)}B`;
+                } else if (marketCap >= 1e6) {
+                    formattedMarketCap = `${(marketCap / 1e6).toFixed(2)}M`;
+                } else {
+                    formattedMarketCap = marketCap;
+                }
+                document.getElementById("mktCap").textContent = formattedMarketCap;
+
+                // Display other data
+                document.getElementById("targetPE").textContent = result.targetMeanPrice || "N/A";
+                document.getElementById("eps").textContent = result.epsTrailingTwelveMonths || "N/A";
+                document.getElementById("oneYearTargetEst").textContent = result.targetHighPrice || "N/A";
+                document.getElementById("exDividendDate").textContent = result.exDividendDate ? new Date(result.exDividendDate * 1000).toLocaleDateString() : "N/A";
+                document.getElementById("earningsDate").textContent = result.earningsTimestamp ? new Date(result.earningsTimestamp * 1000).toLocaleDateString() : "N/A";
+                document.getElementById("fiftyTwoWeekRange").textContent = `${result.fiftyTwoWeekLow} - ${result.fiftyTwoWeekHigh}`;
+                document.getElementById("profitMargin").textContent = result.profitMargins ? `${(result.profitMargins * 100).toFixed(2)}%` : "N/A";
+                document.getElementById("quarterlyRevenueGrowth").textContent = result.revenueQuarterlyGrowth ? `${(result.revenueQuarterlyGrowth * 100).toFixed(2)}%` : "N/A";
+                document.getElementById("returnOnEquity").textContent = result.returnOnEquity ? `${(result.returnOnEquity * 100).toFixed(2)}%` : "N/A";
+                document.getElementById("quarterlyEarningsGrowth").textContent = result.earningsQuarterlyGrowth ? `${(result.earningsQuarterlyGrowth * 100).toFixed(2)}%` : "N/A";
+                document.getElementById("shortRatio").textContent = result.shortRatio || "N/A";
+            } else {
+                alert("No data found for the given symbol.");
+            }
+        }
+
+        // Attach event listener to the fetch button
+        document.getElementById("fetchData").addEventListener("click", fetchData);
+    </script>
 </body>
 </html>
