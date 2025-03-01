@@ -44,6 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
         }
     }
+ // Fetch and display fundamentals using FMP
+ async function fetchFundamentals(symbol) {
+    try {
+        const profileResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
+        const profileData = await profileResponse.json();
+
+        if (!Array.isArray(profileData) || profileData.length === 0) {
+            throw new Error('Invalid or missing data from Financial Modeling Prep');
+        }
+
+        const profile = profileData[0];
+        document.getElementById('mktCap').textContent = profile.mktCap ? `$${profile.mktCap.toLocaleString()}` : 'N/A';
+        document.getElementById('targetPE').textContent = profile.peRatio || 'N/A';
+        document.getElementById('eps').textContent = profile.eps || 'N/A';
+        document.getElementById('oneYearTargetEst').textContent = profile.price || 'N/A';
+        document.getElementById('exDividendDate').textContent = profile.lastDiv || 'N/A';
+        document.getElementById('earningsDate').textContent = profile.range || 'N/A';
+        document.getElementById('fiftyTwoWeekRange').textContent = profile.range || 'N/A';
+    } catch (error) {
+        console.error('Error fetching fundamentals:', error);
+        document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
 
     // Fetch data when the "Fetch Data" button is clicked
     document.getElementById('fetchData').addEventListener('click', async () => {
