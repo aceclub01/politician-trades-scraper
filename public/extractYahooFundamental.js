@@ -1,8 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
-
-    
     // Fetch and display fundamentals using FMP
     async function fetchFundamentals(symbol) {
         try {
