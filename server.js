@@ -5,12 +5,60 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Environment variables for API keys
+// Your FMP API key (for fundamentals)
+//const FMP_API_KEY = 'dJUE3rYqnvX5i2kg0TN7b3XxsVMuOdO5'; // Replace with your FMP API key
+// Your NewsAPI key
+//const NEWS_API_KEY = 'a791888a5f4b4ee0b87a5c40e4b16dcf'; // Replace with your NewsAPI key
 const FMP_API_KEY = process.env.FMP_API_KEY;
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-app.use(express.static('public'));
 
+app.use(express.static('public'));
+// Enable CORS for your frontend domain
+app.use(cors({
+    origin: 'https://politician-trades-scraper.onrender.com', // Replace with your frontend URL
+    methods: ['GET', 'POST'], // Allowed HTTP methods
+    credentials: true // Allow cookies and credentials
+}));
+
+// Existing FX data endpoint (unchanged)
+app.get('/fxdata', async (req, res) => {
+    const { pair, period } = req.query; // Example: pair=USDSGD=X, period=1mo
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${pair}?interval=1d&range=${period}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch FX data' });
+    }
+});
+app.get('/fetchKeyStatistics', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/key-metrics/${symbol}?apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching key statistics:', error.message);
+        res.status(500).json({ error: 'Failed to fetch key statistics' });
+    }
+});
+
+// Endpoint for fetching income statement
+app.get('/fetchIncomeStatement', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching income statement:', error.message);
+        res.status(500).json({ error: 'Failed to fetch income statement' });
+    }
+});
 // Endpoint for fetching fundamentals using FMP
 app.get('/fetchFundamentals', async (req, res) => {
     const { symbol } = req.query;
@@ -29,23 +77,6 @@ app.get('/fetchFundamentals', async (req, res) => {
     } catch (error) {
         console.error('Error fetching fundamentals:', error.response?.data || error.message);
         res.status(500).json({ error: error.response?.data?.message || 'Failed to fetch fundamentals' });
-    }
-});
-
-// Endpoint for fetching key statistics
-app.get('/fetchKeyStatistics', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/key-metrics/${symbol}?apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        if (!Array.isArray(response.data) || response.data.length === 0) {
-            return res.status(404).json({ error: 'No key statistics data available' });
-        }
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching key statistics:', error.message);
-        res.status(500).json({ error: 'Failed to fetch key statistics' });
     }
 });
 
