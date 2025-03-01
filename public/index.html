@@ -14,6 +14,15 @@
             flex-direction: column;
             align-items: center;
         }
+        .fundamentals-container {
+    display: flex;
+    gap: 20px; /* Space between columns */
+}
+
+.column {
+    flex: 1; /* Each column takes equal width */
+}
+
         h1 {
             text-align: center;
             margin: 20px 0;
@@ -107,19 +116,26 @@
         </div>
         <div class="fundamentals">
             <h2>Fundamentals</h2>
-            <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-            <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
-            <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-            <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-            <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-            <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
-            <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-            <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
-            <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
-            <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
-            <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
-            <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
+            <div class="fundamentals-container">
+                <div class="column">
+                    <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                    <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
+                    <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                    <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+                    <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+                    <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+                </div>
+                <div class="column">
+                    <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
+                    <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
+                    <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
+                    <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
+                    <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
+                    <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
+                </div>
+            </div>
         </div>
+        
     </div>
     <div class="top-news">
         <h2>Top News</h2>
