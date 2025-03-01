@@ -2,27 +2,43 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
     // Fetch and display fundamentals using FMP
-    app.get('/fetchFundamentals', async (req, res) => {
-        const { symbol } = req.query;
-        const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${FMP_API_KEY}`;
-    
+    async function fetchFundamentals(symbol) {
         try {
-            const response = await axios.get(url);
-            const data = response.data;
+            console.log(`Fetching fundamentals for symbol: ${symbol}`);
+    
+            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
+            console.log('Fundamentals API Response:', response);
+    
+            const data = await response.json();
+            console.log('Fundamentals Data:', data);
     
             if (!Array.isArray(data) || data.length === 0) {
-                return res.status(404).json({ error: 'Symbol not found or no data available' });
+                throw new Error('Invalid or missing fundamentals data');
             }
     
             const fundamentals = data[0];
-            const exDividendDate = fundamentals.lastDiv ? new Date(fundamentals.lastDiv * 1000).toLocaleDateString() : 'N/A';
+            console.log('Fundamentals Object:', fundamentals);
     
-            res.json([{ ...fundamentals, exDividendDate }]);
+            // Format market cap
+            const marketCap = fundamentals.mktCap;
+            const formattedMarketCap = marketCap >= 1e12 ? `${(marketCap / 1e12).toFixed(1)}T` :
+                                       marketCap >= 1e9 ? `${(marketCap / 1e9).toFixed(1)}B` :
+                                       marketCap >= 1e6 ? `${(marketCap / 1e6).toFixed(1)}M` :
+                                       marketCap >= 1e3 ? `${(marketCap / 1e3).toFixed(1)}K` : marketCap;
+    
+            // Update the DOM with fundamentals data
+            document.getElementById('mktCap').textContent = `$${formattedMarketCap}`;
+            document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
+            document.getElementById('eps').textContent = fundamentals.eps || 'N/A';
+            document.getElementById('oneYearTargetEst').textContent = fundamentals.price || 'N/A';
+            document.getElementById('exDividendDate').textContent = fundamentals.exDividendDate || 'N/A';
+            document.getElementById('earningsDate').textContent = fundamentals.earningsDate || 'N/A';
+            document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
         } catch (error) {
-            console.error('Error fetching fundamentals:', error.message);
-            res.status(500).json({ error: 'Failed to fetch fundamentals' });
+            console.error('Error fetching fundamentals:', error);
+            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
         }
-    });
+    }
 
     // Fetch and display key statistics
     async function fetchKeyStatistics(symbol) {
