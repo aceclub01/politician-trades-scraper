@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
             const data = await response.json();
+            console.log('Server Response:', data); // Debugging
 
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing fundamentals data');
@@ -22,7 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
         } catch (error) {
             console.error('Error fetching fundamentals:', error);
-            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+            const fundamentalsElement = document.getElementById('fundamentals');
+            if (fundamentalsElement) {
+                fundamentalsElement.innerHTML = `<p>Error: ${error.message}</p>`;
+            } else {
+                console.error('Element with ID "fundamentals" not found');
+            }
         }
     }
 
@@ -48,7 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 .join('');
         } catch (error) {
             console.error('Error fetching news:', error);
-            document.getElementById('topNews').innerHTML = `<p>Error: ${error.message}</p>`;
+            const topNewsElement = document.getElementById('topNews');
+            if (topNewsElement) {
+                topNewsElement.innerHTML = `<p>Error: ${error.message}</p>`;
+            } else {
+                console.error('Element with ID "topNews" not found');
+            }
         }
     }
 
