@@ -9,10 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
             console.log('Fundamentals API Response:', response);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch fundamentals: ${response.statusText}`);
-            }
-
             const data = await response.json();
             console.log('Fundamentals Data:', data);
 
@@ -23,28 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const fundamentals = data[0];
             console.log('Fundamentals Object:', fundamentals);
 
-            // Update the DOM with fundamentals data (check if elements exist first)
-            const mktCapElement = document.getElementById('mktCap');
-            const targetPEElement = document.getElementById('targetPE');
-            const epsElement = document.getElementById('eps');
-            const oneYearTargetEstElement = document.getElementById('oneYearTargetEst');
-            const exDividendDateElement = document.getElementById('exDividendDate');
-            const earningsDateElement = document.getElementById('earningsDate');
-            const fiftyTwoWeekRangeElement = document.getElementById('fiftyTwoWeekRange');
-
-            if (mktCapElement) mktCapElement.textContent = fundamentals.mktCap ? `$${fundamentals.mktCap.toLocaleString()}` : 'N/A';
-            if (targetPEElement) targetPEElement.textContent = fundamentals.peRatio || 'N/A';
-            if (epsElement) epsElement.textContent = fundamentals.eps || 'N/A';
-            if (oneYearTargetEstElement) oneYearTargetEstElement.textContent = fundamentals.price || 'N/A';
-            if (exDividendDateElement) exDividendDateElement.textContent = fundamentals.lastDiv || 'N/A';
-            if (earningsDateElement) earningsDateElement.textContent = fundamentals.range || 'N/A';
-            if (fiftyTwoWeekRangeElement) fiftyTwoWeekRangeElement.textContent = fundamentals.range || 'N/A';
+            // Update the DOM with fundamentals data
+            document.getElementById('mktCap').textContent = fundamentals.mktCap ? `$${fundamentals.mktCap.toLocaleString()}` : 'N/A';
+            document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
+            document.getElementById('eps').textContent = fundamentals.eps || 'N/A';
+            document.getElementById('oneYearTargetEst').textContent = fundamentals.price || 'N/A';
+            document.getElementById('exDividendDate').textContent = fundamentals.lastDiv || 'N/A';
+            document.getElementById('earningsDate').textContent = fundamentals.range || 'N/A';
+            document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
         } catch (error) {
             console.error('Error fetching fundamentals:', error);
-            const fundamentalsContainer = document.getElementById('fundamentals');
-            if (fundamentalsContainer) {
-                fundamentalsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
-            }
+            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
         }
     }
 
@@ -56,10 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
             console.log('Key Statistics API Response:', response);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch key statistics: ${response.statusText}`);
-            }
-
             const data = await response.json();
             console.log('Key Statistics Data:', data);
 
@@ -70,24 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const keyStats = data[0];
             console.log('Key Statistics Object:', keyStats);
 
-            // Update the DOM with key statistics (check if elements exist first)
-            const profitMarginElement = document.getElementById('profitMargin');
-            const quarterlyRevenueGrowthElement = document.getElementById('quarterlyRevenueGrowth');
-            const returnOnEquityElement = document.getElementById('returnOnEquity');
-            const quarterlyEarningsGrowthElement = document.getElementById('quarterlyEarningsGrowth');
-            const shortRatioElement = document.getElementById('shortRatio');
-
-            if (profitMarginElement) profitMarginElement.textContent = keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A';
-            if (quarterlyRevenueGrowthElement) quarterlyRevenueGrowthElement.textContent = keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A';
-            if (returnOnEquityElement) returnOnEquityElement.textContent = keyStats.roe ? `${(keyStats.roe * 100).toFixed(2)}%` : 'N/A';
-            if (quarterlyEarningsGrowthElement) quarterlyEarningsGrowthElement.textContent = keyStats.netIncomeGrowth ? `${(keyStats.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A';
-            if (shortRatioElement) shortRatioElement.textContent = keyStats.shortRatio || 'N/A';
+            // Update the DOM with key statistics
+            document.getElementById('profitMargin').textContent = keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('quarterlyRevenueGrowth').textContent = keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('returnOnEquity').textContent = keyStats.roe ? `${(keyStats.roe * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('quarterlyEarningsGrowth').textContent = keyStats.netIncomeGrowth ? `${(keyStats.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('shortRatio').textContent = keyStats.shortRatio || 'N/A';
         } catch (error) {
             console.error('Error fetching key statistics:', error);
-            const fundamentalsContainer = document.getElementById('fundamentals');
-            if (fundamentalsContainer) {
-                fundamentalsContainer.innerHTML += `<p>Error: ${error.message}</p>`;
-            }
+            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
         }
     }
 
@@ -99,10 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
             console.log('Income Statement API Response:', response);
 
-            if (!response.ok) {
-                throw new Error(`Failed to fetch income statement: ${response.statusText}`);
-            }
-
             const data = await response.json();
             console.log('Income Statement Data:', data);
 
@@ -113,15 +81,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const incomeStatement = data[0];
             console.log('Income Statement Object:', incomeStatement);
 
-            // Update the DOM with income statement data (check if elements exist first)
-            const epsElement = document.getElementById('eps');
-            if (epsElement) epsElement.textContent = incomeStatement.eps || 'N/A';
+            // Update the DOM with income statement data
+            document.getElementById('eps').textContent = incomeStatement.eps || 'N/A';
         } catch (error) {
             console.error('Error fetching income statement:', error);
-            const fundamentalsContainer = document.getElementById('fundamentals');
-            if (fundamentalsContainer) {
-                fundamentalsContainer.innerHTML += `<p>Error: ${error.message}</p>`;
-            }
+            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
         }
     }
 
@@ -132,10 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchNews?symbol=${query}&limit=${limit}`);
             console.log('News API Response:', response);
-
-            if (!response.ok) {
-                throw new Error(`Failed to fetch news: ${response.statusText}`);
-            }
 
             const data = await response.json();
             console.log('News Data:', data);
@@ -185,23 +145,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Fetch FX data
             const fxResponse = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-            if (!fxResponse.ok) {
-                throw new Error(`Failed to fetch FX data: ${fxResponse.statusText}`);
-            }
             const fxData = await fxResponse.json();
             console.log('FX Data:', fxData);
 
             // Fetch fundamentals
-            await fetchFundamentals(pair);
+            fetchFundamentals(pair);
 
             // Fetch key statistics
-            await fetchKeyStatistics(pair);
+            fetchKeyStatistics(pair);
 
             // Fetch income statement
-            await fetchIncomeStatement(pair);
+            fetchIncomeStatement(pair);
 
             // Fetch news
-            await fetchNews(pair, parseInt(newsLimit, 10));
+            fetchNews(pair, parseInt(newsLimit, 10));
         } catch (error) {
             console.error('Error fetching data:', error);
         }
