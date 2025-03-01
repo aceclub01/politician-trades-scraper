@@ -26,32 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fetch and display news using NewsAPI
-    async function fetchNews(query, limit) {
-        try {
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchNews?symbol=${query}&limit=${limit}`);
-            const data = await response.json();
-
-            if (!Array.isArray(data)) {
-                throw new Error('Invalid or missing news data from NewsAPI');
-            }
-
-            const newsList = document.getElementById('newsHeadlines');
-            newsList.innerHTML = data
-                .slice(0, limit)
-                .map(article => `
-                    <li>
-                        <a href="${article.url}" target="_blank">${article.title}</a>
-                        <span> - ${new Date(article.publishedAt).toLocaleDateString()}</span>
-                    </li>
-                `)
-                .join('');
-        } catch (error) {
-            console.error('Error fetching news:', error);
-            document.getElementById('topNews').innerHTML = `<p>Error: ${error.message}</p>`;
-        }
-    }
-
     // Fetch data when the "Fetch Data" button is clicked
     document.getElementById('fetchData').addEventListener('click', async () => {
         const pair = document.getElementById('pair').value;
