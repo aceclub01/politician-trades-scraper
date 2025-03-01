@@ -172,7 +172,9 @@ const drawSupportResistance = (chartData) => {
     let maximums = [];
     for (let i = 0; i < chartData.length; i++) {
         if (i >= historyBars) break;
-        if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+        // if (chartData[i].high === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.high))) {
+            if (chartData[i].close === Math.max(...chartData.slice(i - x2, i + x2 + 1).map(d => d.close))) {
+
             maximums.push({ time: chartData[i].time, value: chartData[i].high });
         }
     }
