@@ -465,6 +465,9 @@ const drawSupportResistance = (chartData) => {
                 return;
             }
     
+            // Log the raw data fetched from the API
+            console.log('Raw data fetched:', data);
+    
             // Prepare data for chart with null handling
             let chartData = data.chart.result[0].timestamp.map((timestamp, index) => ({
                 time: timestamp,
@@ -474,8 +477,14 @@ const drawSupportResistance = (chartData) => {
                 close: handleNullValue(data, index, 'close'),
             }));
     
+            // Log the processed chart data (after handling null values)
+            console.log('Processed chart data:', chartData);
+    
             // Filter outliers based on closing prices
             chartData = filterOutliers(chartData);
+    
+            // Log the chart data after filtering outliers
+            console.log('Chart data after filtering outliers:', chartData);
     
             // Remove old data
             if (lineSeries) {
