@@ -61,15 +61,23 @@
     </style>
 </head>
 <body>
-    <h1>Auto Analyser Assistant</h1>
+    <h1 id="title">Auto Analyser Assistant</h1>
+    <div>
+        <label for="language">Language: </label>
+        <select id="language">
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+        </select>
+    </div>
     <div class="controls-fundamentals">
         <div class="controls">
             <div>
-                <label for="pair">FX Pair: </label>
+                <label for="pair" id="pairLabel">FX Pair: </label>
                 <input type="text" id="pair" value="AVGO" />
             </div>
             <div>
-                <label for="period">Period: </label>
+                <label for="period" id="periodLabel">Period: </label>
                 <select id="period">
                     <option value="1d">1 Day</option>
                     <option value="1mo">1 Month</option>
@@ -80,7 +88,7 @@
                 </select>
             </div>
             <div>
-                <label for="newsLimit">Number of News Articles: </label>
+                <label for="newsLimit" id="newsLimitLabel">Number of News Articles: </label>
                 <select id="newsLimit">
                     <option value="5">5</option>
                     <option value="10">10</option>
@@ -88,24 +96,24 @@
                 </select>
             </div>
             <div>
-                <label for="intervalSlider">Interval (number of periods to consider): </label>
+                <label for="intervalSlider" id="intervalSliderLabel">Interval (number of periods to consider): </label>
                 <input type="range" id="intervalSlider" min="10" max="300" value="100">
                 <span id="sliderValue">100</span>
             </div>
             <div>
-                <label for="diagonalLines">Number of Diagonal Lines: </label>
+                <label for="diagonalLines" id="diagonalLinesLabel">Number of Diagonal Lines: </label>
                 <input type="number" id="diagonalLines" value="3" min="1" max="10" />
             </div>
             <div>
-                <label for="historyBars">History Bars: </label>
+                <label for="historyBars" id="historyBarsLabel">History Bars: </label>
                 <input type="number" id="historyBars" value="280" min="1" max="1000" />
             </div>
             <div>
-                <label for="resolution">Resolution (bars): </label>
+                <label for="resolution" id="resolutionLabel">Resolution (bars): </label>
                 <input type="number" id="resolution" value="40" min="1" max="50" />
             </div>
             <div>
-                <label for="alphaSlider">MACD Histogram Transparency: </label>
+                <label for="alphaSlider" id="alphaSliderLabel">MACD Histogram Transparency: </label>
                 <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.2">
                 <span id="alphaValue">0.2</span>
             </div>
@@ -113,29 +121,29 @@
             <button id="fetchChartData">Update Chart</button>
         </div>
         <div class="fundamentals">
-            <h2>Fundamentals <span id="lastClosePrice"></span></h2>
+            <h2 id="fundamentalsTitle">Fundamentals <span id="lastClosePrice"></span></h2>
             <div class="fundamentals-container">
                 <div class="column">
-                    <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-                    <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
-                    <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-                    <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-                    <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-                    <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+                    <p><strong id="mktCapLabel">Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                    <p><strong id="targetPELabel">Target PE:</strong> <span id="targetPE">Loading...</span></p>
+                    <p><strong id="epsLabel">EPS:</strong> <span id="eps">Loading...</span></p>
+                    <p><strong id="oneYearTargetEstLabel">1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+                    <p><strong id="exDividendDateLabel">Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+                    <p><strong id="earningsDateLabel">Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
                 </div>
                 <div class="column">
-                    <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-                    <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
-                    <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
-                    <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
-                    <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
-                    <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
+                    <p><strong id="fiftyTwoWeekRangeLabel">52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
+                    <p><strong id="profitMarginLabel">Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
+                    <p><strong id="quarterlyRevenueGrowthLabel">Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
+                    <p><strong id="returnOnEquityLabel">Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
+                    <p><strong id="quarterlyEarningsGrowthLabel">Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
+                    <p><strong id="shortRatioLabel">Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
                 </div>
             </div>
         </div>
     </div>
     <div class="top-news">
-        <h2>Top News</h2>
+        <h2 id="topNewsTitle">Top News</h2>
         <ul id="newsHeadlines"></ul>
     </div>
     <div id="chart" style="height: 400px;"></div>
@@ -146,6 +154,129 @@
 
     <!-- Internal Script for New Features -->
     <script>
+        // Translations for different languages
+        const translations = {
+            en: {
+                title: "Auto Analyser Assistant",
+                pairLabel: "FX Pair:",
+                periodLabel: "Period:",
+                newsLimitLabel: "Number of News Articles:",
+                intervalSliderLabel: "Interval (number of periods to consider):",
+                diagonalLinesLabel: "Number of Diagonal Lines:",
+                historyBarsLabel: "History Bars:",
+                resolutionLabel: "Resolution (bars):",
+                alphaSliderLabel: "MACD Histogram Transparency:",
+                fetchData: "Fetch Fundaments and Top News",
+                fetchChartData: "Update Chart",
+                fundamentalsTitle: "Fundamentals",
+                mktCapLabel: "Market Cap:",
+                targetPELabel: "Target PE:",
+                epsLabel: "EPS:",
+                oneYearTargetEstLabel: "1y Target Est:",
+                exDividendDateLabel: "Ex-Dividend Date:",
+                earningsDateLabel: "Earnings Date:",
+                fiftyTwoWeekRangeLabel: "52-Week Range:",
+                profitMarginLabel: "Profit Margin:",
+                quarterlyRevenueGrowthLabel: "Quarterly Revenue Growth:",
+                returnOnEquityLabel: "Return on Equity:",
+                quarterlyEarningsGrowthLabel: "Quarterly Earnings Growth:",
+                shortRatioLabel: "Short Ratio:",
+                topNewsTitle: "Top News"
+            },
+            zh: {
+                title: "自动分析助手",
+                pairLabel: "外汇对:",
+                periodLabel: "期间:",
+                newsLimitLabel: "新闻文章数量:",
+                intervalSliderLabel: "间隔（考虑的期间数）:",
+                diagonalLinesLabel: "对角线数量:",
+                historyBarsLabel: "历史柱:",
+                resolutionLabel: "分辨率（柱）:",
+                alphaSliderLabel: "MACD 直方图透明度:",
+                fetchData: "获取基本面和头条新闻",
+                fetchChartData: "更新图表",
+                fundamentalsTitle: "基本面",
+                mktCapLabel: "市值:",
+                targetPELabel: "目标市盈率:",
+                epsLabel: "每股收益:",
+                oneYearTargetEstLabel: "1年目标估计:",
+                exDividendDateLabel: "除息日期:",
+                earningsDateLabel: "收益日期:",
+                fiftyTwoWeekRangeLabel: "52周范围:",
+                profitMarginLabel: "利润率:",
+                quarterlyRevenueGrowthLabel: "季度收入增长:",
+                returnOnEquityLabel: "股本回报率:",
+                quarterlyEarningsGrowthLabel: "季度收益增长:",
+                shortRatioLabel: "卖空比率:",
+                topNewsTitle: "头条新闻"
+            },
+            ja: {
+                title: "自動分析アシスタント",
+                pairLabel: "通貨ペア:",
+                periodLabel: "期間:",
+                newsLimitLabel: "ニュース記事数:",
+                intervalSliderLabel: "間隔（考慮する期間数）:",
+                diagonalLinesLabel: "対角線の数:",
+                historyBarsLabel: "歴史バー:",
+                resolutionLabel: "解像度（バー）:",
+                alphaSliderLabel: "MACD ヒストグラム透明度:",
+                fetchData: "ファンダメンタルズとトップニュースを取得",
+                fetchChartData: "チャートを更新",
+                fundamentalsTitle: "ファンダメンタルズ",
+                mktCapLabel: "時価総額:",
+                targetPELabel: "目標株価収益率:",
+                epsLabel: "1株当たり利益:",
+                oneYearTargetEstLabel: "1年目標推定:",
+                exDividendDateLabel: "配当落ち日:",
+                earningsDateLabel: "決算日:",
+                fiftyTwoWeekRangeLabel: "52週間範囲:",
+                profitMarginLabel: "利益率:",
+                quarterlyRevenueGrowthLabel: "四半期収益成長率:",
+                returnOnEquityLabel: "自己資本利益率:",
+                quarterlyEarningsGrowthLabel: "四半期利益成長率:",
+                shortRatioLabel: "空売り比率:",
+                topNewsTitle: "トップニュース"
+            }
+        };
+
+        // Change language function
+        function changeLanguage(lang) {
+            document.getElementById("title").textContent = translations[lang].title;
+            document.getElementById("pairLabel").textContent = translations[lang].pairLabel;
+            document.getElementById("periodLabel").textContent = translations[lang].periodLabel;
+            document.getElementById("newsLimitLabel").textContent = translations[lang].newsLimitLabel;
+            document.getElementById("intervalSliderLabel").textContent = translations[lang].intervalSliderLabel;
+            document.getElementById("diagonalLinesLabel").textContent = translations[lang].diagonalLinesLabel;
+            document.getElementById("historyBarsLabel").textContent = translations[lang].historyBarsLabel;
+            document.getElementById("resolutionLabel").textContent = translations[lang].resolutionLabel;
+            document.getElementById("alphaSliderLabel").textContent = translations[lang].alphaSliderLabel;
+            document.getElementById("fetchData").textContent = translations[lang].fetchData;
+            document.getElementById("fetchChartData").textContent = translations[lang].fetchChartData;
+            document.getElementById("fundamentalsTitle").textContent = translations[lang].fundamentalsTitle;
+            document.getElementById("mktCapLabel").textContent = translations[lang].mktCapLabel;
+            document.getElementById("targetPELabel").textContent = translations[lang].targetPELabel;
+            document.getElementById("epsLabel").textContent = translations[lang].epsLabel;
+            document.getElementById("oneYearTargetEstLabel").textContent = translations[lang].oneYearTargetEstLabel;
+            document.getElementById("exDividendDateLabel").textContent = translations[lang].exDividendDateLabel;
+            document.getElementById("earningsDateLabel").textContent = translations[lang].earningsDateLabel;
+            document.getElementById("fiftyTwoWeekRangeLabel").textContent = translations[lang].fiftyTwoWeekRangeLabel;
+            document.getElementById("profitMarginLabel").textContent = translations[lang].profitMarginLabel;
+            document.getElementById("quarterlyRevenueGrowthLabel").textContent = translations[lang].quarterlyRevenueGrowthLabel;
+            document.getElementById("returnOnEquityLabel").textContent = translations[lang].returnOnEquityLabel;
+            document.getElementById("quarterlyEarningsGrowthLabel").textContent = translations[lang].quarterlyEarningsGrowthLabel;
+            document.getElementById("shortRatioLabel").textContent = translations[lang].shortRatioLabel;
+            document.getElementById("topNewsTitle").textContent = translations[lang].topNewsTitle;
+        }
+
+        // Attach event listener to the language dropdown
+        document.getElementById("language").addEventListener("change", function() {
+            const selectedLanguage = this.value;
+            changeLanguage(selectedLanguage);
+        });
+
+        // Set default language to English
+        changeLanguage("en");
+
         // Fetch and display data
         async function fetchData() {
             const pair = document.getElementById("pair").value;
