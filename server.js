@@ -90,7 +90,19 @@ app.get('/fetchFundamentals', async (req, res) => {
         res.status(500).json({ error: error.response?.data?.message || 'Failed to fetch fundamentals' });
     }
 });
+// Endpoint for fetching earningsdate
+app.get('/fetchEarningsDate', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/earning_calendar/${symbol}?apikey=${FMP_API_KEY}`;
 
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching earnings date:', error.message);
+        res.status(500).json({ error: 'Failed to fetch earnings date' });
+    }
+});
 // Endpoint for fetching news using NewsAPI
 app.get('/fetchNews', async (req, res) => {
     const { symbol, limit } = req.query;

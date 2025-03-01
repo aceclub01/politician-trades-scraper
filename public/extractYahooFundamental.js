@@ -2,62 +2,46 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
     // Fetch and display fundamentals using FMP
-    async function fetchFundamentals(symbol) {
+    app.get('/fetchFundamentals', async (req, res) => {
+        const { symbol } = req.query;
+        const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${FMP_API_KEY}`;
+    
         try {
-            console.log(`Fetching fundamentals for symbol: ${symbol}`);
-
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
-            console.log('Fundamentals API Response:', response);
-
-            const data = await response.json();
-            console.log('Fundamentals Data:', data);
-
+            const response = await axios.get(url);
+            const data = response.data;
+    
             if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Invalid or missing fundamentals data');
+                return res.status(404).json({ error: 'Symbol not found or no data available' });
             }
-
+    
             const fundamentals = data[0];
-            console.log('Fundamentals Object:', fundamentals);
-
-            // Format market cap
-            const marketCap = fundamentals.mktCap;
-            const formattedMarketCap = marketCap >= 1e12 ? `${(marketCap / 1e12).toFixed(1)}T` :
-                                   marketCap >= 1e9 ? `${(marketCap / 1e9).toFixed(1)}B` :
-                                   marketCap >= 1e6 ? `${(marketCap / 1e6).toFixed(1)}M` :
-                                   marketCap >= 1e3 ? `${(marketCap / 1e3).toFixed(1)}K` : marketCap;
-
-            // Update the DOM with fundamentals data
-            document.getElementById('mktCap').textContent = `$${formattedMarketCap}`;
-            document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
-            document.getElementById('eps').textContent = fundamentals.eps || 'N/A';
-            document.getElementById('oneYearTargetEst').textContent = fundamentals.price || 'N/A';
-            document.getElementById('exDividendDate').textContent = fundamentals.lastDiv || 'N/A';
-            document.getElementById('earningsDate').textContent = fundamentals.earningsDate || 'N/A';
-            document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
+            const exDividendDate = fundamentals.lastDiv ? new Date(fundamentals.lastDiv * 1000).toLocaleDateString() : 'N/A';
+    
+            res.json([{ ...fundamentals, exDividendDate }]);
         } catch (error) {
-            console.error('Error fetching fundamentals:', error);
-            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+            console.error('Error fetching fundamentals:', error.message);
+            res.status(500).json({ error: 'Failed to fetch fundamentals' });
         }
-    }
+    });
 
     // Fetch and display key statistics
     async function fetchKeyStatistics(symbol) {
         try {
             console.log(`Fetching key statistics for symbol: ${symbol}`);
-
+    
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
             console.log('Key Statistics API Response:', response);
-
+    
             const data = await response.json();
             console.log('Key Statistics Data:', data);
-
+    
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing key statistics data');
             }
-
+    
             const keyStats = data[0];
             console.log('Key Statistics Object:', keyStats);
-
+    
             // Update the DOM with key statistics
             document.getElementById('profitMargin').textContent = keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A';
             document.getElementById('quarterlyRevenueGrowth').textContent = keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A';
@@ -96,6 +80,53 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('threeYOperatingCFGrowthPerShare').textContent = growthData.threeYOperatingCFGrowthPerShare ? `${(growthData.threeYOperatingCFGrowthPerShare * 100).toFixed(2)}%` : 'N/A';
         } catch (error) {
             console.error('Error fetching financial growth data:', error);
+            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
+        }
+    }
+     // Fetch and display financial income data
+    async function fetchIncomeStatement(symbol) {
+        try {
+            console.log(`Fetching income statement for symbol: ${symbol}`);
+    
+            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
+            console.log('Income Statement API Response:', response);
+    
+            const data = await response.json();
+            console.log('Income Statement Data:', data);
+    
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error('Invalid or missing income statement data');
+            }
+    
+            const incomeStatement = data[0];
+            console.log('Income Statement Object:', incomeStatement);
+    
+            // Update the DOM with income statement data
+            document.getElementById('eps').textContent = incomeStatement.eps || 'N/A';
+        } catch (error) {
+            console.error('Error fetching income statement:', error);
+            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
+        }
+    }
+    //Fetch earnings date
+    async function fetchEarningsDate(symbol) {
+        try {
+            console.log(`Fetching earnings date for symbol: ${symbol}`);
+    
+            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchEarningsDate?symbol=${symbol}`);
+            console.log('Earnings Date API Response:', response);
+    
+            const data = await response.json();
+            console.log('Earnings Date Data:', data);
+    
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error('Invalid or missing earnings date data');
+            }
+    
+            const earningsDate = data[0].date ? new Date(data[0].date).toLocaleDateString() : 'N/A';
+            document.getElementById('earningsDate').textContent = earningsDate;
+        } catch (error) {
+            console.error('Error fetching earnings date:', error);
             document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
         }
     }
