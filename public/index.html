@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自动分析助手</title>
+    <title>Auto Analyser Assistant</title>
     <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.4.0/dist/lightweight-charts.standalone.production.js"></script>
     <style>
         body {
@@ -14,7 +14,10 @@
             flex-direction: column;
             align-items: center;
         }
-        .fundamentals-container {
+        .language-selector {
+            margin: 10px;
+        }
+        .controls-fundamentals {
             display: flex;
             gap: 20px;
         }
@@ -25,123 +28,93 @@
             text-align: center;
             margin: 20px 0;
         }
-        .controls-fundamentals {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
         .controls, .fundamentals {
             width: 100%;
             margin-bottom: 20px;
         }
-        .top-news {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        #chart {
-            width: 100%;
-            height: 400px;
-            margin-top: 20px;
-        }
-        @media (min-width: 600px) {
-            .controls-fundamentals {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-            .controls {
-                width: 48%;
-            }
-            .fundamentals {
-                width: 48%;
-            }
-        }
     </style>
 </head>
 <body>
-    <h1>自动分析助手</h1>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <label for="language">Language: </label>
+        <select id="language">
+            <option value="en">English</option>
+            <option value="zh">中文 (Chinese)</option>
+            <option value="ja">日本語 (Japanese)</option>
+        </select>
+    </div>
+
+    <h1 id="title">Auto Analyser Assistant</h1>
+
     <div class="controls-fundamentals">
         <div class="controls">
             <div>
-                <label for="pair">外汇货币对: </label>
+                <label for="pair" id="label-pair">FX Pair: </label>
                 <input type="text" id="pair" value="USDSGD=X" />
             </div>
             <div>
-                <label for="period">时间周期: </label>
+                <label for="period" id="label-period">Period: </label>
                 <select id="period">
-                    <option value="1d">1 天</option>
-                    <option value="1mo">1 个月</option>
-                    <option value="3mo">3 个月</option>
-                    <option value="6mo">6 个月</option>
-                    <option value="1y" selected>1 年</option>
-                    <option value="2y">2 年</option>
+                    <option value="1d">1 Day</option>
+                    <option value="1mo">1 Month</option>
+                    <option value="3mo">3 Months</option>
+                    <option value="6mo">6 Months</option>
+                    <option value="1y" selected>1 Year</option>
+                    <option value="2y">2 Years</option>
                 </select>
             </div>
-            <div>
-                <label for="newsLimit">新闻文章数量: </label>
-                <select id="newsLimit">
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="15">15</option>
-                </select>
-            </div>
-            <div>
-                <label for="intervalSlider">时间间隔 (周期数): </label>
-                <input type="range" id="intervalSlider" min="10" max="300" value="100">
-                <span id="sliderValue">100</span>
-            </div>
-            <div>
-                <label for="diagonalLines">对角线数量: </label>
-                <input type="number" id="diagonalLines" value="3" min="1" max="10" />
-            </div>
-            <div>
-                <label for="historyBars">历史数据条数: </label>
-                <input type="number" id="historyBars" value="280" min="1" max="1000" />
-            </div>
-            <div>
-                <label for="resolution">分辨率 (柱状图): </label>
-                <input type="number" id="resolution" value="40" min="1" max="50" />
-            </div>
-            <div>
-                <label for="alphaSlider">MACD 直方图透明度: </label>
-                <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.2">
-                <span id="alphaValue">0.2</span>
-            </div>
-            <button id="fetchData">获取基本面数据和头条新闻</button>
-            <button id="fetchChartData">更新图表</button>
-        </div>
-        <div class="fundamentals">
-            <h2>基本面数据</h2>
-            <div class="fundamentals-container">
-                <div class="column">
-                    <p><strong>市值:</strong> <span id="mktCap">加载中...</span></p>
-                    <p><strong>目标市盈率:</strong> <span id="targetPE">加载中...</span></p>
-                    <p><strong>每股收益 (EPS):</strong> <span id="eps">加载中...</span></p>
-                    <p><strong>1 年目标估值:</strong> <span id="oneYearTargetEst">加载中...</span></p>
-                    <p><strong>除息日:</strong> <span id="exDividendDate">加载中...</span></p>
-                    <p><strong>财报公布日:</strong> <span id="earningsDate">加载中...</span></p>
-                </div>
-                <div class="column">
-                    <p><strong>52 周最高最低价:</strong> <span id="fiftyTwoWeekRange">加载中...</span></p>
-                    <p><strong>利润率:</strong> <span id="profitMargin">加载中...</span></p>
-                    <p><strong>季度收入增长:</strong> <span id="quarterlyRevenueGrowth">加载中...</span></p>
-                    <p><strong>股本回报率:</strong> <span id="returnOnEquity">加载中...</span></p>
-                    <p><strong>季度收益增长:</strong> <span id="quarterlyEarningsGrowth">加载中...</span></p>
-                    <p><strong>空头比例:</strong> <span id="shortRatio">加载中...</span></p>
-                </div>
-            </div>
+            <button id="fetchData">Fetch Fundamentals and News</button>
         </div>
     </div>
-    <div class="top-news">
-        <h2>头条新闻</h2>
-        <ul id="newsHeadlines"></ul>
-    </div>
-    <div id="chart" style="height: 400px;"></div>
 
-    <!-- Scripts -->
-    <script src="/extractYahooFundamental.js"></script>
-    <script src="/script.js"></script>
+    <div class="fundamentals">
+        <h2 id="fundamentals-title">Fundamentals</h2>
+        <p><strong id="mktCap-label">Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                title: "Auto Analyser Assistant",
+                "label-pair": "FX Pair:",
+                "label-period": "Period:",
+                "fetchData": "Fetch Fundamentals and News",
+                "fundamentals-title": "Fundamentals",
+                "mktCap-label": "Market Cap:"
+            },
+            zh: {
+                title: "自动分析助手",
+                "label-pair": "外汇对:",
+                "label-period": "周期:",
+                "fetchData": "获取基本面和新闻",
+                "fundamentals-title": "基本面",
+                "mktCap-label": "市值:"
+            },
+            ja: {
+                title: "オートアナライザーアシスタント",
+                "label-pair": "通貨ペア:",
+                "label-period": "期間:",
+                "fetchData": "ファンダメンタルズとニュースを取得",
+                "fundamentals-title": "ファンダメンタル",
+                "mktCap-label": "時価総額:"
+            }
+        };
+
+        // Function to update language
+        function updateLanguage() {
+            const lang = document.getElementById("language").value;
+            document.getElementById("title").textContent = translations[lang].title;
+            document.getElementById("label-pair").textContent = translations[lang]["label-pair"];
+            document.getElementById("label-period").textContent = translations[lang]["label-period"];
+            document.getElementById("fetchData").textContent = translations[lang].fetchData;
+            document.getElementById("fundamentals-title").textContent = translations[lang]["fundamentals-title"];
+            document.getElementById("mktCap-label").textContent = translations[lang]["mktCap-label"];
+        }
+
+        // Add event listener to language selector
+        document.getElementById("language").addEventListener("change", updateLanguage);
+    </script>
 </body>
 </html>
