@@ -1,6 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
+
+    async function fetchStockData() {
+        const pair = document.getElementById("pair").value;
+        const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${pair}`;
+    
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.quoteResponse.result.length > 0) {
+                const lastClose = data.quoteResponse.result[0].regularMarketPreviousClose;
+                document.getElementById("lastClosePrice").innerText = `Last Close: $${lastClose.toFixed(2)}`;
+            } else {
+                document.getElementById("lastClosePrice").innerText = "No Data Found";
+            }
+        } catch (error) {
+            console.error("Error fetching stock data:", error);
+            document.getElementById("lastClosePrice").innerText = "Error fetching data";
+        }
+    }
+    
+    document.getElementById("fetchData").addEventListener("click", fetchStockData);
+
+    
     // Fetch and display fundamentals using FMP
     async function fetchFundamentals(symbol) {
         try {
