@@ -67,8 +67,8 @@ app.get('/fetchFundamentals', async (req, res) => {
     const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${FMP_API_KEY}`;
     try {
         const response = await axios.get(url);
+        console.log('FMP API Response:', response.data); // Log the response
 
-        // Check if the response is valid
         if (!Array.isArray(response.data) || response.data.length === 0) {
             return res.status(404).json({ error: 'Symbol not found or no data available' });
         }

@@ -3,16 +3,22 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchFundamentals(symbol) {
         try {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
+            console.log('Server Response:', response); // Debugging
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
             const data = await response.json();
-            console.log('Server Response:', data); // Debugging
-
+            console.log('Fundamentals Data:', data); // Debugging
+    
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing fundamentals data');
             }
-
+    
             const fundamentals = data[0];
-            console.log('Fundamentals:', fundamentals);
-
+            console.log('Fundamentals:', fundamentals); // Debugging
+    
             // Update the DOM with fundamentals data
             document.getElementById('mktCap').textContent = fundamentals.mktCap ? `$${fundamentals.mktCap.toLocaleString()}` : 'N/A';
             document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
