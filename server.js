@@ -14,12 +14,6 @@ const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
 
 app.use(express.static('public'));
-// Enable CORS for your frontend domain
-app.use(cors({
-    origin: 'https://politician-trades-scraper.onrender.com', // Replace with your frontend URL
-    methods: ['GET', 'POST'], // Allowed HTTP methods
-    credentials: true // Allow cookies and credentials
-}));
 
 // Existing FX data endpoint (unchanged)
 app.get('/fxdata', async (req, res) => {
