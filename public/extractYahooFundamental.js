@@ -19,13 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const fundamentals = data[0];
             console.log('Fundamentals Object:', fundamentals);
 
+            // Format market cap
+            const marketCap = fundamentals.mktCap;
+            const formattedMarketCap = marketCap >= 1e12 ? `${(marketCap / 1e12).toFixed(1)}T` :
+                                   marketCap >= 1e9 ? `${(marketCap / 1e9).toFixed(1)}B` :
+                                   marketCap >= 1e6 ? `${(marketCap / 1e6).toFixed(1)}M` :
+                                   marketCap >= 1e3 ? `${(marketCap / 1e3).toFixed(1)}K` : marketCap;
+
             // Update the DOM with fundamentals data
-            document.getElementById('mktCap').textContent = fundamentals.mktCap ? `$${fundamentals.mktCap.toLocaleString()}` : 'N/A';
+            document.getElementById('mktCap').textContent = `$${formattedMarketCap}`;
             document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
             document.getElementById('eps').textContent = fundamentals.eps || 'N/A';
             document.getElementById('oneYearTargetEst').textContent = fundamentals.price || 'N/A';
             document.getElementById('exDividendDate').textContent = fundamentals.lastDiv || 'N/A';
-            document.getElementById('earningsDate').textContent = fundamentals.range || 'N/A';
+            document.getElementById('earningsDate').textContent = fundamentals.earningsDate || 'N/A';
             document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
         } catch (error) {
             console.error('Error fetching fundamentals:', error);
@@ -63,72 +70,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Fetch and display income statement
-    async function fetchIncomeStatement(symbol) {
+    // Fetch and display financial growth data
+    async function fetchFinancialGrowth(symbol) {
         try {
-            console.log(`Fetching income statement for symbol: ${symbol}`);
+            console.log(`Fetching financial growth data for symbol: ${symbol}`);
 
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
-            console.log('Income Statement API Response:', response);
+            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
+            console.log('Financial Growth API Response:', response);
 
             const data = await response.json();
-            console.log('Income Statement Data:', data);
+            console.log('Financial Growth Data:', data);
 
             if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Invalid or missing income statement data');
+                throw new Error('Invalid or missing financial growth data');
             }
 
-            const incomeStatement = data[0];
-            console.log('Income Statement Object:', incomeStatement);
+            const growthData = data[0];
+            console.log('Financial Growth Object:', growthData);
 
-            // Update the DOM with income statement data
-            document.getElementById('eps').textContent = incomeStatement.eps || 'N/A';
+            // Update the DOM with financial growth data
+            document.getElementById('freeCashFlowGrowth').textContent = growthData.freeCashFlowGrowth ? `${(growthData.freeCashFlowGrowth * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('netIncomeGrowth').textContent = growthData.netIncomeGrowth ? `${(growthData.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('threeYRevenueGrowthPerShare').textContent = growthData.threeYRevenueGrowthPerShare ? `${(growthData.threeYRevenueGrowthPerShare * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('threeYNetIncomeGrowthPerShare').textContent = growthData.threeYNetIncomeGrowthPerShare ? `${(growthData.threeYNetIncomeGrowthPerShare * 100).toFixed(2)}%` : 'N/A';
+            document.getElementById('threeYOperatingCFGrowthPerShare').textContent = growthData.threeYOperatingCFGrowthPerShare ? `${(growthData.threeYOperatingCFGrowthPerShare * 100).toFixed(2)}%` : 'N/A';
         } catch (error) {
-            console.error('Error fetching income statement:', error);
+            console.error('Error fetching financial growth data:', error);
             document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
-        }
-    }
-
-    // Fetch and display news using NewsAPI
-    async function fetchNews(query, limit) {
-        try {
-            console.log(`Fetching news for query: ${query}, limit: ${limit}`);
-
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchNews?symbol=${query}&limit=${limit}`);
-            console.log('News API Response:', response);
-
-            const data = await response.json();
-            console.log('News Data:', data);
-
-            if (!Array.isArray(data)) {
-                throw new Error('Invalid or missing news data from NewsAPI');
-            }
-
-            const newsList = document.getElementById('newsHeadlines');
-            if (!newsList) {
-                throw new Error('News container element not found in the DOM');
-            }
-
-            // Clear previous news
-            newsList.innerHTML = '';
-
-            // Add news articles to the list
-            data.slice(0, limit).forEach(article => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <a href="${article.url}" target="_blank">${article.title}</a>
-                    <span> - ${new Date(article.publishedAt).toLocaleDateString()}</span>
-                `;
-                newsList.appendChild(listItem);
-            });
-        } catch (error) {
-            console.error('Error fetching news:', error);
-            const topNewsContainer = document.getElementById('topNews');
-            if (topNewsContainer) {
-                topNewsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
-            } else {
-                console.error('Top news container not found.');
-            }
         }
     }
 
@@ -154,8 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fetch key statistics
             fetchKeyStatistics(pair);
 
-            // Fetch income statement
-            fetchIncomeStatement(pair);
+            // Fetch financial growth data
+            fetchFinancialGrowth(pair);
 
             // Fetch news
             fetchNews(pair, parseInt(newsLimit, 10));
@@ -171,6 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchFundamentals(defaultPair);
     fetchKeyStatistics(defaultPair);
-    fetchIncomeStatement(defaultPair);
+    fetchFinancialGrowth(defaultPair);
     fetchNews(defaultPair, defaultLimit);
 });
