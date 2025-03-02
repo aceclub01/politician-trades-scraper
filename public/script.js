@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+        // Function to parse query parameters from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+    
+        // Automatically populate the input field and trigger button click
+        const stock = getQueryParam('stocks');
+        if (stock) {
+            const pairInput = document.getElementById('pair');
+            pairInput.value = stock;
+    
+            // Trigger the appropriate button click
+            const fetchDataButton = document.getElementById('fetchData');
+            const fetchChartButton = document.getElementById('fetchChartData');
+    
+            // Choose which button to trigger based on your logic
+            fetchDataButton.click(); // or fetchChartButton.click();
+        }
     // DOM Elements
     const fetchDataButton = document.getElementById('fetchData');
     const fetchChartButton = document.getElementById('fetchChartData');
@@ -22,6 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let resistances = [];
     let fibonacciLines = [];
     let elliotLines = [];
+
+
+    
 
     // Initialize slider value display
     intervalSlider.addEventListener('input', () => {

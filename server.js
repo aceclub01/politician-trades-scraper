@@ -8,7 +8,11 @@ app.use(cors());
 const FMP_API_KEY = process.env.FMP_API_KEY;
 
 // Serve static files from the "public" directory
-app.use(express.static('public'));
+// app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 
 // Endpoint for fetching news using NewsAPI
 app.get('/fetchNews', async (req, res) => {

@@ -229,5 +229,28 @@
     <!-- Scripts -->
     <script src="/extractYahooFundamental.js"></script>
     <script src="/script.js"></script>
+    <script>
+        // Function to parse query parameters from the URL
+        function getQueryParam(param) {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(param);
+        }
+    
+        // Automatically populate the input field and trigger button click
+        window.onload = function () {
+          const stock = getQueryParam('stocks');
+          if (stock) {
+            const inputField = document.getElementById('pair');
+            inputField.value = stock;
+    
+            // Trigger the appropriate button click
+            const fetchDataButton = document.getElementById('fetchData');
+            const fetchChartButton = document.getElementById('fetchChartData');
+    
+            // Choose which button to trigger based on your logic
+            fetchDataButton.click(); // or fetchChartButton.click();
+          }
+        };
+      </script>
 </body>
 </html>
