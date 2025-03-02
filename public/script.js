@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching FX data:', error);
         }
     };
-    
+
     // Read the stock ticker from the URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const stockTicker = urlParams.get('stock');
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const priceLevel = minPrice + priceDiff * level;
 
             const fibLine = chart.addLineSeries({
-                color: 'rgba(0, 255, 255, 0.8)',
+                color: 'rgba(96, 99, 99, 0.8)',
                 lineWidth: 2,
                 crosshairMarkerVisible: true,
             });
