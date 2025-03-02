@@ -173,6 +173,7 @@ if (stock) {
     const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10);
     console.log(`Initial load with default pair: ${defaultPair}, limit: ${defaultLimit}`);
 
-    fetchAllData(defaultPair);
     fetchNews(defaultPair, defaultLimit);
+    fetchAllData(defaultPair);
+    
 });
