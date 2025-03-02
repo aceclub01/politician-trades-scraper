@@ -10,6 +10,20 @@ const FMP_API_KEY = process.env.FMP_API_KEY;
 // Serve static files from the "public" directory
 app.use(express.static('public'));
 
+// Endpoint for fetching quote data
+app.get('/fetchQuote', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/quote-order/${symbol}?apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching quote data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch quote data' });
+    }
+});
+
 // Endpoint for fetching FX data
 app.get('/fxdata', async (req, res) => {
     const { pair, period } = req.query;
@@ -100,6 +114,49 @@ app.get('/fetchEarningsDate', async (req, res) => {
     } catch (error) {
         console.error('Error fetching earnings date:', error.message);
         res.status(500).json({ error: 'Failed to fetch earnings date' });
+    }
+});
+
+// Endpoint for fetching cash flow statement growth data
+app.get('/fetchCashFlowGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/cash-flow-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching cash flow growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch cash flow growth data' });
+    }
+});
+
+
+// Endpoint for fetching income statement growth data
+app.get('/fetchIncomeStatementGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/income-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching income statement growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch income statement growth data' });
+    }
+});
+
+// Endpoint for fetching balance sheet statement growth data
+app.get('/fetchBalanceSheetGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/balance-sheet-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching balance sheet growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch balance sheet growth data' });
     }
 });
 
