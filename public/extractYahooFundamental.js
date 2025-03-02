@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
+    // Read the stock ticker from the URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const stockTicker = urlParams.get('stock');
+
+    // If a stock ticker is provided in the URL, set it in the input field and fetch data
+    if (stockTicker) {
+        document.getElementById('pair').value = stockTicker;
+        fetchData(stockTicker); // Automatically fetch and display data
+    }
+
     // Fetch and display fundamentals using FMP
     async function fetchFundamentals(symbol) {
         try {
@@ -163,6 +173,35 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching data:', error);
         }
     });
+
+    // Function to fetch and display data
+    async function fetchData(symbol) {
+        const period = document.getElementById('period').value;
+        const newsLimit = parseInt(document.getElementById('newsLimit').value, 10);
+
+        try {
+            console.log(`Fetching FX data for pair: ${symbol}, period: ${period}`);
+
+            // Fetch FX data
+            const fxResponse = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${symbol}&period=${period}`);
+            const fxData = await fxResponse.json();
+            console.log('FX Data:', fxData);
+
+            // Fetch fundamentals
+            fetchFundamentals(symbol);
+
+            // Fetch key statistics
+            fetchKeyStatistics(symbol);
+
+            // Fetch income statement
+            fetchIncomeStatement(symbol);
+
+            // Fetch news
+            fetchNews(symbol, newsLimit);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
 
     // Initial load with default pair and limit
     const defaultPair = document.getElementById('pair').value;

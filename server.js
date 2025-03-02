@@ -1,25 +1,31 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 
 // Your FMP API key (for fundamentals)
-//const FMP_API_KEY = 'dJUE3rYqnvX5i2kg0TN7b3XxsVMuOdO5'; // Replace with your FMP API key
-// Your NewsAPI key
-//const NEWS_API_KEY = 'a791888a5f4b4ee0b87a5c40e4b16dcf'; // Replace with your NewsAPI key
 const FMP_API_KEY = process.env.FMP_API_KEY;
+// Your NewsAPI key
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-
+// Serve static files from the 'public' directory
 app.use(express.static('public'));
+
 // Enable CORS for your frontend domain
 app.use(cors({
     origin: 'https://politician-trades-scraper.onrender.com', // Replace with your frontend URL
     methods: ['GET', 'POST'], // Allowed HTTP methods
     credentials: true // Allow cookies and credentials
 }));
+
+// Serve index.html with the stock ticker from the query parameter
+app.get('/', (req, res) => {
+    const stockTicker = req.query.stock || ''; // Get the stock ticker from the URL query parameter
+    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker });
+});
 
 // Existing FX data endpoint (unchanged)
 app.get('/fxdata', async (req, res) => {
@@ -33,6 +39,7 @@ app.get('/fxdata', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch FX data' });
     }
 });
+
 app.get('/fetchKeyStatistics', async (req, res) => {
     const { symbol } = req.query;
     const url = `https://financialmodelingprep.com/api/v3/key-metrics/${symbol}?apikey=${FMP_API_KEY}`;
@@ -59,6 +66,7 @@ app.get('/fetchIncomeStatement', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch income statement' });
     }
 });
+
 // Endpoint for fetching fundamentals using FMP
 app.get('/fetchFundamentals', async (req, res) => {
     const { symbol } = req.query;
