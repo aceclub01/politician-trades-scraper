@@ -1,13 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
+    // Function to parse query parameters from the URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // Automatically populate the input field and trigger button click
+    const stock = getQueryParam('stocks');
+    if (stock) {
+        const pairInput = document.getElementById('pair');
+        pairInput.value = stock;
+
+        // Trigger the "Fetch Data" button click
+        const fetchDataButton = document.getElementById('fetchData');
+        fetchDataButton.click();
+    }
+
+    // Fetch and display news using NewsAPI
     async function fetchNews(query, limit) {
         try {
             console.log(`Fetching news for query: ${query}, limit: ${limit}`);
-
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchNews?symbol=${query}&limit=${limit}`);
             console.log('News API Response:', response);
-
             const data = await response.json();
             console.log('News Data:', data);
 
@@ -42,26 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
-// Function to parse query parameters from the URL
-function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-}
 
-// Automatically populate the input field and trigger button click
-const stock = getQueryParam('stocks');
-if (stock) {
-    const pairInput = document.getElementById('pair');
-    pairInput.value = stock;
-
-    // Trigger the "Fetch Data" button click
-    const fetchDataButton = document.getElementById('fetchData');
-    fetchDataButton.click();
-}
-// Fetch and display news using NewsAPI
-
-    
     // Fetch and display all data
     async function fetchAllData(symbol) {
         try {
@@ -92,21 +89,18 @@ if (stock) {
 
             // Check if all data is available
             if (
-            !quoteData || !quoteData[0] ||
-            !financialGrowthData || !financialGrowthData[0] ||
-            !cashFlowGrowthData || !cashFlowGrowthData[0] ||
-            !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
-            !balanceSheetGrowthData || !balanceSheetGrowthData[0]
-             ) {
-            throw new Error('Incomplete or missing data from API');
-             }
-
+                !quoteData || !quoteData[0] ||
+                !financialGrowthData || !financialGrowthData[0] ||
+                !cashFlowGrowthData || !cashFlowGrowthData[0] ||
+                !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
+                !balanceSheetGrowthData || !balanceSheetGrowthData[0]
+            ) {
+                throw new Error('Incomplete or missing data from API');
+            }
 
             // Update the DOM with all data
             updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
         } catch (error) {
-            // console.error('Error fetching data:', error);
-            // document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
             console.error('Error fetching data:', error);
             const fundamentalsElement = document.getElementById('fundamentals');
             if (fundamentalsElement) {
@@ -114,10 +108,8 @@ if (stock) {
             } else {
                 console.error('Fundamentals element not found in the DOM');
             }
-
         }
     }
-    
 
     // Update the DOM with fetched data
     function updateDOM(quote, financialGrowth, cashFlowGrowth, incomeStatementGrowth, balanceSheetGrowth) {
@@ -178,5 +170,4 @@ if (stock) {
 
     fetchNews(defaultPair, defaultLimit);
     fetchAllData(defaultPair);
-    
 });
