@@ -70,6 +70,20 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchFXData(pair, period);
     });
 
+     // Event listener for the "Fetch Data" button
+     fetchDataButton.addEventListener('click', () => {
+        const pair = pairInput.value;
+        const period = periodInput.value;
+        fetchFXData(pair, period);
+    });
+
+    // Event listener for the "Update Chart" button
+    fetchChartDataButton.addEventListener('click', () => {
+        const pair = pairInput.value;
+        const period = periodInput.value;
+        fetchFXData(pair, period);
+    });
+    
     // Update slider value display
     intervalSlider.addEventListener('input', () => {
         sliderValue.textContent = intervalSlider.value;
