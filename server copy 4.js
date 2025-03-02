@@ -10,27 +10,6 @@ const FMP_API_KEY = process.env.FMP_API_KEY;
 // Serve static files from the "public" directory
 app.use(express.static('public'));
 
-// Endpoint for fetching news using NewsAPI
-app.get('/fetchNews', async (req, res) => {
-    const { symbol, limit } = req.query;
-    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
-
-    try {
-        const url = `https://newsapi.org/v2/everything?q=${symbol}&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
-        const response = await axios.get(url);
-
-        // Check if the API returned an error
-        if (response.data.status !== 'ok') {
-            throw new Error(response.data.message || 'Failed to fetch news');
-        }
-
-        res.json(response.data.articles);
-    } catch (error) {
-        console.error('Error fetching news:', error.message);
-        res.status(500).json({ error: error.message || 'Failed to fetch news' });
-    }
-});
-
 // Endpoint for fetching quote data
 app.get('/fetchQuote', async (req, res) => {
     const { symbol } = req.query;
