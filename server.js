@@ -12,7 +12,9 @@ const FMP_API_KEY = process.env.FMP_API_KEY;
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
 // Serve static files from the 'public' directory
-app.use(express.static('public'));
+// app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Enable CORS for your frontend domain
 app.use(cors({
