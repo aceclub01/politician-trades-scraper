@@ -55,46 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize chart
     createChart();
 
-    // Read the stock ticker from the URL query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const stockTicker = urlParams.get('stock');
-
-    // If a stock ticker is provided in the URL, set it in the input field and fetch data
-    if (stockTicker) {
-        pairInput.value = stockTicker;
-        fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
-    }
-
-    // Event listener for the "Fetch Data" button
-    fetchDataButton.addEventListener('click', () => {
-        const pair = pairInput.value;
-        const period = periodInput.value;
-        fetchFXData(pair, period);
-    });
-
-    // Event listener for the "Update Chart" button
-    fetchChartDataButton.addEventListener('click', () => {
-        const pair = pairInput.value;
-        const period = periodInput.value;
-        fetchFXData(pair, period);
-    });
-
-    // Update slider value display
-    intervalSlider.addEventListener('input', () => {
-        sliderValue.textContent = intervalSlider.value;
-    });
-
-    // Redraw chart when slider value changes
-    intervalSlider.addEventListener('change', () => {
-        const pair = pairInput.value.trim();
-        const period = periodInput.value;
-        if (pair) {
-            fetchFXData(pair, period);
-        }
-    });
-
-    // Fetch FX data from the server
-    const fetchFXData = async (pair, period) => {
+     // Fetch FX data from the server
+     const fetchFXData = async (pair, period) => {
         try {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
@@ -158,6 +120,46 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error fetching FX data:', error);
         }
     };
+    
+    // Read the stock ticker from the URL query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const stockTicker = urlParams.get('stock');
+
+    // If a stock ticker is provided in the URL, set it in the input field and fetch data
+    if (stockTicker) {
+        pairInput.value = stockTicker;
+        fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
+    }
+
+    // Event listener for the "Fetch Data" button
+    fetchDataButton.addEventListener('click', () => {
+        const pair = pairInput.value;
+        const period = periodInput.value;
+        fetchFXData(pair, period);
+    });
+
+    // Event listener for the "Update Chart" button
+    fetchChartDataButton.addEventListener('click', () => {
+        const pair = pairInput.value;
+        const period = periodInput.value;
+        fetchFXData(pair, period);
+    });
+
+    // Update slider value display
+    intervalSlider.addEventListener('input', () => {
+        sliderValue.textContent = intervalSlider.value;
+    });
+
+    // Redraw chart when slider value changes
+    intervalSlider.addEventListener('change', () => {
+        const pair = pairInput.value.trim();
+        const period = periodInput.value;
+        if (pair) {
+            fetchFXData(pair, period);
+        }
+    });
+
+   
 
     // Function to handle null values (interpolation or previous value)
     const handleNullValue = (data, index, field) => {
