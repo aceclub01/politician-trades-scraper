@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
+
     const fetchDataButton = document.getElementById('fetchData');
     const pairInput = document.getElementById('pair');
     const periodInput = document.getElementById('period');
@@ -8,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sliderValue = document.getElementById('sliderValue');
     const chartDiv = document.getElementById('chart');
 
+    // Check if all required elements exist
     if (!fetchDataButton || !pairInput || !periodInput || !fibonacciInput || !elliotInput || !intervalSlider || !sliderValue || !chartDiv) {
         console.error('One or more required elements are missing in the DOM.');
         return;
