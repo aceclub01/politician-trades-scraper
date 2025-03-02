@@ -39,21 +39,93 @@
             height: 400px;
             margin-top: 20px;
         }
-        @media (min-width: 600px) {
-            .controls-fundamentals {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-            .controls {
-                width: 48%;
-            }
-            .fundamentals {
-                width: 48%;
-            }
-        }
-        .column {
-            flex: 1; /* Each column takes equal width */
-        }
+        /* Fundamentals Container */
+/* Fundamentals Container */
+.fundamentals-container {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Fundamentals Header */
+.fundamentals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Last Close Price */
+.last-close-price {
+    text-align: right;
+}
+
+.last-close-price span {
+    display: block;
+}
+
+.last-close-price span:first-child {
+    font-size: 14px;
+    color: #666;
+}
+
+.last-close-price span:last-child {
+    font-size: 24px;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Fundamentals Grid */
+.fundamentals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    gap: 10px; /* Space between items */
+}
+
+/* Responsive Layout */
+@media (min-width: 600px) {
+    .fundamentals-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns for larger screens */
+    }
+}
+
+@media (min-width: 900px) {
+    .fundamentals-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 columns for even larger screens */
+    }
+}
+
+/* Style for each item */
+.fundamentals-grid p {
+    margin: 0;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+/* Responsive Layout */
+@media (min-width: 600px) {
+    .fundamentals-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns for larger screens */
+    }
+}
+
+@media (min-width: 900px) {
+    .fundamentals-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 columns for even larger screens */
+    }
+}
+
+/* Style for each item */
+.fundamentals-grid p {
+    margin: 0;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
     </style>
 </head>
 <body>
@@ -125,28 +197,32 @@
             <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
             <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
         </div> -->
-        <div class="fundamentals">
-            <h2>Fundamentals</h2>
-            <div class="column">
-            <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-            <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
-            <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-            <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-            <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-            <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
-            <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-            <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
+        <div class="fundamentals-container">
+            <div class="fundamentals-header">
+                <h2>Fundamentals</h2>
+                <div class="last-close-price">
+                    <span>Last Close Price:</span>
+                    <span id="lastClosePrice">Loading...</span>
+                </div>
             </div>
-            <div class="column">
-            <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
-            <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
-            <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
-            <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
-            <p><strong>Free Cash Flow Growth:</strong> <span id="freeCashFlowGrowth">Loading...</span></p>
-            <p><strong>Net Income Growth:</strong> <span id="netIncomeGrowth">Loading...</span></p>
-            <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
-            <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
-            <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
+            <div class="fundamentals-grid">
+                <p><strong>Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                <p><strong>Target PE:</strong> <span id="targetPE">Loading...</span></p>
+                <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                <p><strong>1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+                <p><strong>Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+                <p><strong>Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+                <p><strong>52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
+                <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
+                <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
+                <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
+                <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
+                <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
+                <p><strong>Free Cash Flow Growth:</strong> <span id="freeCashFlowGrowth">Loading...</span></p>
+                <p><strong>Net Income Growth:</strong> <span id="netIncomeGrowth">Loading...</span></p>
+                <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
+                <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
+                <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
             </div>
         </div>
     </div>

@@ -5,27 +5,27 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchFundamentals(symbol) {
         try {
             console.log(`Fetching fundamentals for symbol: ${symbol}`);
-
+    
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchFundamentals?symbol=${symbol}`);
             console.log('Fundamentals API Response:', response);
-
+    
             const data = await response.json();
             console.log('Fundamentals Data:', data);
-
+    
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing fundamentals data');
             }
-
+    
             const fundamentals = data[0];
             console.log('Fundamentals Object:', fundamentals);
-
+    
             // Format market cap
             const marketCap = fundamentals.mktCap;
             const formattedMarketCap = marketCap >= 1e12 ? `${(marketCap / 1e12).toFixed(1)}T` :
-                                   marketCap >= 1e9 ? `${(marketCap / 1e9).toFixed(1)}B` :
-                                   marketCap >= 1e6 ? `${(marketCap / 1e6).toFixed(1)}M` :
-                                   marketCap >= 1e3 ? `${(marketCap / 1e3).toFixed(1)}K` : marketCap;
-
+                                       marketCap >= 1e9 ? `${(marketCap / 1e9).toFixed(1)}B` :
+                                       marketCap >= 1e6 ? `${(marketCap / 1e6).toFixed(1)}M` :
+                                       marketCap >= 1e3 ? `${(marketCap / 1e3).toFixed(1)}K` : marketCap;
+    
             // Update the DOM with fundamentals data
             document.getElementById('mktCap').textContent = `$${formattedMarketCap}`;
             document.getElementById('targetPE').textContent = fundamentals.peRatio || 'N/A';
@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('exDividendDate').textContent = fundamentals.exDividendDate || 'N/A';
             document.getElementById('earningsDate').textContent = fundamentals.earningsDate || 'N/A';
             document.getElementById('fiftyTwoWeekRange').textContent = fundamentals.range || 'N/A';
+    
+            // Update last close price
+            document.getElementById('lastClosePrice').textContent = fundamentals.price ? `$${fundamentals.price}` : 'N/A';
         } catch (error) {
             console.error('Error fetching fundamentals:', error);
             document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
