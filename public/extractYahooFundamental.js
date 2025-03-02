@@ -46,11 +46,31 @@ if (stock) {
             const balanceSheetGrowthData = await balanceSheetGrowthResponse.json();
             console.log('Balance Sheet Growth Data:', balanceSheetGrowthData);
 
+            // Check if all data is available
+            if (
+            !quoteData || !quoteData[0] ||
+            !financialGrowthData || !financialGrowthData[0] ||
+            !cashFlowGrowthData || !cashFlowGrowthData[0] ||
+            !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
+            !balanceSheetGrowthData || !balanceSheetGrowthData[0]
+             ) {
+            throw new Error('Incomplete or missing data from API');
+             }
+
+
             // Update the DOM with all data
             updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
         } catch (error) {
+            // console.error('Error fetching data:', error);
+            // document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
             console.error('Error fetching data:', error);
-            document.getElementById('fundamentals').innerHTML = `<p>Error: ${error.message}</p>`;
+            const fundamentalsElement = document.getElementById('fundamentals');
+            if (fundamentalsElement) {
+                fundamentalsElement.innerHTML = `<p>Error: ${error.message}</p>`;
+            } else {
+                console.error('Fundamentals element not found in the DOM');
+            }
+
         }
     }
     // Fetch and display news using NewsAPI
