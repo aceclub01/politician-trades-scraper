@@ -208,17 +208,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const outliers = detectOutliers(chartData, 'close');
         const cleanData = chartData.filter(data => !outliers.includes(data));
 
-        const minPrice = Math.min(...cleanData.map(data => data.low));
-        const maxPrice = Math.max(...cleanData.map(data => data.high));
+        // const minPrice = Math.min(...cleanData.map(data => data.low));
+        // const maxPrice = Math.max(...cleanData.map(data => data.high));
+
+         // Use close prices instead of high and low
+    const minPrice = Math.min(...cleanData.map(data => data.close));
+    const maxPrice = Math.max(...cleanData.map(data => data.close));
 
         const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
         const startTime = cleanData[0].time;
         const endTime = cleanData[cleanData.length - 1].time;
 
-        const priceDiff = maxPrice - minPrice;
+        // const priceDiff = maxPrice - minPrice;
+        const priceDiff = maxPrice - minPrice; // Difference based on close price
 
         fibonacciLevels.forEach(level => {
-            const priceLevel = minPrice + priceDiff * level;
+            // const priceLevel = minPrice + priceDiff * level;
+            const priceLevel = minPrice + priceDiff * level; // Use close prices for levels
 
             const fibLine = chart.addLineSeries({
                 color: 'rgba(96, 99, 99, 0.8)',
