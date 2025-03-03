@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         //     updateElement('exDividendDate', fundamentals.lastDiv || 'N/A');
         //     updateElement('earningsDate', fundamentals.range || 'N/A');
         //     updateElement('fiftyTwoWeekRange', fundamentals.range || 'N/A');
-        // } catch (error) {
+         } catch (error) {
             console.error('Error fetching fundamentals:', error);
             updateElement('fundamentals', `<p>Error: ${error.message}</p>`);
         }
