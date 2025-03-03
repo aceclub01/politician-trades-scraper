@@ -1,83 +1,95 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Fetch and display key statistics
-    async function fetchKeyStatistics(symbol) {
-        try {
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
-            const data = await response.json();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Analyser Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@3.4.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        /* Your existing CSS styles */
+    </style>
+</head>
+<body>
+    <h1 id="title">Auto Analyser Assistant</h1>
+    <div>
+        <label for="language">Language: </label>
+        <select id="language">
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+        </select>
+    </div>
+    <div class="controls-fundamentals">
+        <div class="controls">
+            <!-- Your existing controls -->
+        </div>
+        <div id="fundamentals">
+            <div class="fundamentals">
+                <h2 id="fundamentalsTitle">Fundamentals <span id="lastClosePrice"></span></h2>
+                <div class="fundamentals-container">
+                    <div class="column">
+                        <p><strong id="mktCapLabel">Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                        <p><strong id="targetPELabel">Target PE:</strong> <span id="targetPE">Loading...</span></p>
+                        <p><strong id="epsLabel">EPS:</strong> <span id="epsValue">Loading...</span></p>
+                        <p><strong id="oneYearTargetEstLabel">1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
+                        <p><strong id="exDividendDateLabel">Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
+                        <p><strong id="earningsDateLabel">Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
+                    </div>
+                </div>
+                <div class="fundamentals-grid">
+                    <!-- Light Grey: Quote Data -->
+                    <div class="data-group light-grey">
+                        <h3>Basics</h3>
+                        <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                        <p><strong>PE Ratio:</strong> <span id="pe">Loading...</span></p>
+                        <p><strong>Volume:</strong> <span id="volume">Loading...</span></p>
+                        <p><strong>Avg Volume:</strong> <span id="avgVolume">Loading...</span></p>
+                    </div>
 
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Invalid or missing key statistics data');
-            }
+                    <!-- Light Blue: Financial Growth Data -->
+                    <div class="data-group light-blue">
+                        <h3>Financial Growth</h3>
+                        <p><strong>Revenue Growth:</strong> <span id="revenueGrowth">Loading...</span></p>
+                        <p><strong>Gross Profit Growth:</strong> <span id="grossProfitGrowth">Loading...</span></p>
+                        <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
+                        <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
+                        <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
+                    </div>
 
-            const keyStats = data[0];
-            console.log('Key Statistics:', keyStats);
+                    <!-- Light Green: Cash Flow Growth Data -->
+                    <div class="data-group light-green">
+                        <h3>Cashflow Growth</h3>
+                        <p><strong>Net Income Growth:</strong> <span id="growthNetIncome">Loading...</span></p>
+                        <p><strong>Free Cash Flow Growth:</strong> <span id="growthFreeCashFlow">Loading...</span></p>
+                    </div>
 
-            // Update the DOM with key statistics
-            document.getElementById('profitMargin').textContent = keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A';
-            document.getElementById('quarterlyRevenueGrowth').textContent = keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A';
-            document.getElementById('returnOnEquity').textContent = keyStats.roe ? `${(keyStats.roe * 100).toFixed(2)}%` : 'N/A';
-            document.getElementById('quarterlyEarningsGrowth').textContent = keyStats.netIncomeGrowth ? `${(keyStats.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A';
-            document.getElementById('shortRatio').textContent = keyStats.shortRatio || 'N/A';
-        } catch (error) {
-            console.error('Error fetching key statistics:', error);
-            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
-        }
-    }
+                    <!-- Light Pink: Income Statement Growth Data -->
+                    <div class="data-group light-pink">
+                        <h3>Income Growth</h3>
+                        <p><strong>Revenue Growth:</strong> <span id="growthRevenue">Loading...</span></p>
+                        <p><strong>EBITDA Growth:</strong> <span id="growthEBITDA">Loading...</span></p>
+                        <p><strong>Operating Income Growth:</strong> <span id="growthOperatingIncome">Loading...</span></p>
+                        <p><strong>EPS Growth:</strong> <span id="growthEPS">Loading...</span></p>
+                    </div>
 
-    // Fetch and display income statement
-    async function fetchIncomeStatement(symbol) {
-        try {
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
-            const data = await response.json();
+                    <!-- Light Violet: Balance Sheet Growth Data -->
+                    <div class="data-group light-violet">
+                        <h3>Balance Sheet</h3>
+                        <p><strong>Short-Term Debt Growth:</strong> <span id="growthShortTermDebt">Loading...</span></p>
+                        <p><strong>Net Debt Growth:</strong> <span id="growthNetDebt">Loading...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="top-news">
+        <h2 id="topNewsTitle">Top News</h2>
+        <ul id="newsHeadlines"></ul>
+    </div>
+    <div id="chart" style="height: 400px;"></div>
 
-            if (!Array.isArray(data) || data.length === 0) {
-                throw new Error('Invalid or missing income statement data');
-            }
-
-            const incomeStatement = data[0];
-            console.log('Income Statement:', incomeStatement);
-
-            // Update the DOM with income statement data
-            document.getElementById('eps').textContent = incomeStatement.eps || 'N/A';
-        } catch (error) {
-            console.error('Error fetching income statement:', error);
-            document.getElementById('fundamentals').innerHTML += `<p>Error: ${error.message}</p>`;
-        }
-    }
-
-    // Fetch data when the "Fetch Data" button is clicked
-    document.getElementById('fetchData').addEventListener('click', async () => {
-        const pair = document.getElementById('pair').value;
-        const period = document.getElementById('period').value;
-        const newsLimit = document.getElementById('newsLimit').value;
-
-        try {
-            // Fetch FX data
-            const fxResponse = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-            const fxData = await fxResponse.json();
-            console.log('FX Data:', fxData);
-
-            // Fetch fundamentals
-            fetchFundamentals(pair);
-
-            // Fetch key statistics
-            fetchKeyStatistics(pair);
-
-            // Fetch income statement
-            fetchIncomeStatement(pair);
-
-            // Fetch news
-            fetchNews(pair, parseInt(newsLimit, 10));
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    });
-
-    // Initial load with default pair and limit
-    const defaultPair = document.getElementById('pair').value;
-    const defaultLimit = parseInt(document.getElementById('newsLimit').value, 10);
-    fetchFundamentals(defaultPair);
-    fetchKeyStatistics(defaultPair);
-    fetchIncomeStatement(defaultPair);
-    fetchNews(defaultPair, defaultLimit);
-});
+    <!-- External Scripts -->
+    <script src="/extractYahooFundamental.js"></script>
+    <script src="/script.js"></script>
+</body>
+</html>
