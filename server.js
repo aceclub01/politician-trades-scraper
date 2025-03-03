@@ -66,19 +66,39 @@ app.get('/fetchKeyStatistics', async (req, res) => {
 });
 
 // Endpoint for fetching income statement
+// app.get('/fetchIncomeStatement', async (req, res) => {
+//     const { symbol } = req.query;
+//     const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
+
+//     try {
+//         const response = await axios.get(url);
+//         res.json(response.data);
+//     } catch (error) {
+//         console.error('Error fetching income statement:', error.message);
+//         res.status(500).json({ error: 'Failed to fetch income statement' });
+//     }
+// });
 app.get('/fetchIncomeStatement', async (req, res) => {
     const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
+    console.log(`Fetching income statement for symbol: ${symbol}`);
 
     try {
+        const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
+        console.log('API URL:', url);
+
         const response = await axios.get(url);
+        console.log('API Response:', response.data);
+
+        if (!Array.isArray(response.data) || response.data.length === 0) {
+            return res.status(404).json({ error: 'No data found for the given symbol' });
+        }
+
         res.json(response.data);
     } catch (error) {
         console.error('Error fetching income statement:', error.message);
         res.status(500).json({ error: 'Failed to fetch income statement' });
     }
 });
-
 
 // Endpoint for fetching earnings date
 app.get('/fetchEarningsDate', async (req, res) => {

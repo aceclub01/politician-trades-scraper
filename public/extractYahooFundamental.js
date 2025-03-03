@@ -151,27 +151,55 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Fetch and display income statement
+    // const fetchIncomeStatement = async (symbol) => {
+    //     try {
+    //         console.log(`Fetching income statement for symbol: ${symbol}`);
+
+    //         const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
+    //         console.log('Income Statement API Response:', response);
+
+    //         if (!response.ok) {
+    //             throw new Error(`Failed to fetch income statement: ${response.statusText}`);
+    //         }
+
+    //         const data = await response.json();
+    //         console.log('Income Statement Data:', data);
+
+    //         if (!Array.isArray(data) || data.length === 0) {
+    //             throw new Error('Invalid or missing income statement data');
+    //         }
+
+    //         const incomeStatement = data[0];
+    //         console.log('Income Statement Object:', incomeStatement);
+
+    //         // Update the DOM with income statement data
+    //         updateElement('eps', incomeStatement.eps || 'N/A');
+    //     } catch (error) {
+    //         console.error('Error fetching income statement:', error);
+    //         updateElement('fundamentals', `<p>Error: ${error.message}</p>`);
+    //     }
+    // };
     const fetchIncomeStatement = async (symbol) => {
         try {
             console.log(`Fetching income statement for symbol: ${symbol}`);
-
+    
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatement?symbol=${symbol}`);
             console.log('Income Statement API Response:', response);
-
+    
             if (!response.ok) {
                 throw new Error(`Failed to fetch income statement: ${response.statusText}`);
             }
-
+    
             const data = await response.json();
             console.log('Income Statement Data:', data);
-
+    
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing income statement data');
             }
-
+    
             const incomeStatement = data[0];
             console.log('Income Statement Object:', incomeStatement);
-
+    
             // Update the DOM with income statement data
             updateElement('eps', incomeStatement.eps || 'N/A');
         } catch (error) {
@@ -179,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             updateElement('fundamentals', `<p>Error: ${error.message}</p>`);
         }
     };
-
     // Fetch and display news using NewsAPI
     const fetchNews = async (query, limit) => {
         try {
