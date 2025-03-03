@@ -85,27 +85,59 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Fetch and display key statistics
+    // const fetchKeyStatistics = async (symbol) => {
+    //     try {
+    //         console.log(`Fetching key statistics for symbol: ${symbol}`);
+
+    //         const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
+    //         console.log('Key Statistics API Response:', response);
+
+    //         if (!response.ok) {
+    //             throw new Error(`Failed to fetch key statistics: ${response.statusText}`);
+    //         }
+
+    //         const data = await response.json();
+    //         console.log('Key Statistics Data:', data);
+
+    //         if (!Array.isArray(data) || data.length === 0) {
+    //             throw new Error('Invalid or missing key statistics data');
+    //         }
+
+    //         const keyStats = data[0];
+    //         console.log('Key Statistics Object:', keyStats);
+
+    //         // Update the DOM with key statistics
+    //         updateElement('profitMargin', keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A');
+    //         updateElement('quarterlyRevenueGrowth', keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A');
+    //         updateElement('returnOnEquity', keyStats.roe ? `${(keyStats.roe * 100).toFixed(2)}%` : 'N/A');
+    //         updateElement('quarterlyEarningsGrowth', keyStats.netIncomeGrowth ? `${(keyStats.netIncomeGrowth * 100).toFixed(2)}%` : 'N/A');
+    //         updateElement('shortRatio', keyStats.shortRatio || 'N/A');
+    //     } catch (error) {
+    //         console.error('Error fetching key statistics:', error);
+    //         updateElement('fundamentals', `<p>Error: ${error.message}</p>`);
+    //     }
+    // };
     const fetchKeyStatistics = async (symbol) => {
         try {
             console.log(`Fetching key statistics for symbol: ${symbol}`);
-
+    
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fetchKeyStatistics?symbol=${symbol}`);
             console.log('Key Statistics API Response:', response);
-
+    
             if (!response.ok) {
                 throw new Error(`Failed to fetch key statistics: ${response.statusText}`);
             }
-
+    
             const data = await response.json();
             console.log('Key Statistics Data:', data);
-
+    
             if (!Array.isArray(data) || data.length === 0) {
                 throw new Error('Invalid or missing key statistics data');
             }
-
+    
             const keyStats = data[0];
             console.log('Key Statistics Object:', keyStats);
-
+    
             // Update the DOM with key statistics
             updateElement('profitMargin', keyStats.profitMargin ? `${(keyStats.profitMargin * 100).toFixed(2)}%` : 'N/A');
             updateElement('quarterlyRevenueGrowth', keyStats.revenueGrowth ? `${(keyStats.revenueGrowth * 100).toFixed(2)}%` : 'N/A');
