@@ -67,10 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const quoteData = await quoteResponse.json();
             console.log('Quote Data:', quoteData);
 
-            // Fetch financial growth data
-            const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
-            const financialGrowthData = await financialGrowthResponse.json();
-            console.log('Financial Growth Data:', financialGrowthData);
+            // // Fetch financial growth data
+            // const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
+            // const financialGrowthData = await financialGrowthResponse.json();
+            // console.log('Financial Growth Data:', financialGrowthData);
 
             // Fetch cash flow growth data
             const cashFlowGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchCashFlowGrowth?symbol=${symbol}`);
