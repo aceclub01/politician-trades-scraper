@@ -62,13 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update the DOM with fundamentals data
             updateElement('mktCap', fundamentals.mktCap ? `$${fundamentals.mktCap.toLocaleString()}` : 'N/A');
-            updateElement('targetPE', fundamentals.peRatio || 'N/A');
-            updateElement('eps', fundamentals.eps || 'N/A');
-            updateElement('oneYearTargetEst', fundamentals.price || 'N/A');
-            updateElement('exDividendDate', fundamentals.lastDiv || 'N/A');
-            updateElement('earningsDate', fundamentals.range || 'N/A');
-            updateElement('fiftyTwoWeekRange', fundamentals.range || 'N/A');
-        } catch (error) {
+        //     updateElement('targetPE', fundamentals.peRatio || 'N/A');
+        //     updateElement('eps', fundamentals.eps || 'N/A');
+        //     updateElement('oneYearTargetEst', fundamentals.price || 'N/A');
+        //     updateElement('exDividendDate', fundamentals.lastDiv || 'N/A');
+        //     updateElement('earningsDate', fundamentals.range || 'N/A');
+        //     updateElement('fiftyTwoWeekRange', fundamentals.range || 'N/A');
+        // } catch (error) {
             console.error('Error fetching fundamentals:', error);
             updateElement('fundamentals', `<p>Error: ${error.message}</p>`);
         }
