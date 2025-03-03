@@ -374,12 +374,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const futureTime = significantLows[i + 1].time + 90 * 86400; // 90 days in seconds
             const futureValue = significantLows[i + 1].low + slope * (futureTime - significantLows[i + 1].time);
 
+            // const projectionLine = chart.addLineSeries({
+            //     color: `rgba(0, 255, 0, ${0.8 - i * 0.2})`,
+            //     lineWidth: 1,
+            //     lineStyle: LightweightCharts.LineStyle.Dotted,
+            // });
             const projectionLine = chart.addLineSeries({
-                color: `rgba(0, 255, 0, ${0.8 - i * 0.2})`,
+                color: `rgba(0, 100, 0, ${0.8 - i * 0.2})`, // Dark green color
                 lineWidth: 1,
-                lineStyle: LightweightCharts.LineStyle.Dotted,
+                lineStyle: LightweightCharts.LineStyle.WithSteps, // Stepped line
             });
-
+            
             projectionLine.setData([
                 { time: significantLows[i + 1].time, value: significantLows[i + 1].low },
                 { time: futureTime, value: futureValue }
