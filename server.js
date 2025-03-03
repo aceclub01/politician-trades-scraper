@@ -120,6 +120,21 @@ app.get('/fetchCashFlowGrowth', async (req, res) => {
     }
 });
 
+
+// Endpoint for fetching income statement growth data
+app.get('/fetchIncomeStatementGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    const url = `https://financialmodelingprep.com/api/v3/income-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
+
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching income statement growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch income statement growth data' });
+    }
+});
+
 // Endpoint for fetching balance sheet statement growth data
 app.get('/fetchBalanceSheetGrowth', async (req, res) => {
     const { symbol } = req.query;
