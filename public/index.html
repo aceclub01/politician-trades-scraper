@@ -46,17 +46,67 @@
             height: 400px;
             margin-top: 20px;
         }
+        /* Fundamentals Container */
+.fundamentals-container {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+/* Fundamentals Grid */
+.fundamentals-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    gap: 10px; /* Space between items */
+}
+/* Data Group Styles */
+.data-group {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.light-grey {
+    background-color: #f0f0f0;
+}
+
+.light-blue {
+    background-color: #e0f7fa;
+}
+
+.light-green {
+    background-color: #e8f5e9;
+}
+
+.light-pink {
+    background-color: #fce4ec;
+}
+
+.light-violet {
+    background-color: #f3e5f5;
+}
+
+/* Responsive Layout */
         @media (min-width: 600px) {
-            .controls-fundamentals {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-            .controls {
-                width: 48%;
-            }
-            .fundamentals {
-                width: 48%;
-            }
+    .fundamentals-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 columns for larger screens */
+    }
+}
+
+@media (min-width: 900px) {
+    .fundamentals-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 columns for even larger screens */
+    }
+}
+
+/* Style for each item */
+.fundamentals-grid p {
+    margin: 0;
+    padding: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
         }
     </style>
 </head>
@@ -79,12 +129,13 @@
             <div>
                 <label for="period" id="periodLabel">Period: </label>
                 <select id="period">
-                    <option value="1d">1 Day</option>
                     <option value="1mo">1 Month</option>
                     <option value="3mo">3 Months</option>
                     <option value="6mo">6 Months</option>
                     <option value="1y" selected>1 Year</option>
                     <option value="2y">2 Years</option>
+                    <option value="3y">3 Years</option>
+                    <option value="5y">5 Years</option>
                 </select>
             </div>
             <div>
@@ -140,14 +191,45 @@
                         <p><strong id="exDividendDateLabel">Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
                         <p><strong id="earningsDateLabel">Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
                     </div>
-                    <div class="column">
-                        <p><strong id="fiftyTwoWeekRangeLabel">52-Week Range:</strong> <span id="fiftyTwoWeekRange">Loading...</span></p>
-                        <p><strong id="profitMarginLabel">Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
-                        <p><strong id="quarterlyRevenueGrowthLabel">Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
-                        <p><strong id="returnOnEquityLabel">Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
-                        <p><strong id="quarterlyEarningsGrowthLabel">Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
-                        <p><strong id="shortRatioLabel">Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
-                    </div>
+            </div>
+            <div class="fundamentals-grid">
+                <!-- Light Grey: Quote Data -->
+                <div class="data-group light-grey"> Basics
+                    <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                    <p><strong>PE Ratio:</strong> <span id="pe">Loading...</span></p>
+                    <p><strong>Volume:</strong> <span id="volume">Loading...</span></p>
+                    <p><strong>Avg Volume:</strong> <span id="avgVolume">Loading...</span></p>
+                </div>
+        
+                <!-- Light Blue: Financial Growth Data -->
+                <div class="data-group light-blue"> Financial Growth
+                    <p><strong>Revenue Growth:</strong> <span id="revenueGrowth">Loading...</span></p>
+                    <p><strong>Gross Profit Growth:</strong> <span id="grossProfitGrowth">Loading...</span></p>
+                    <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
+                    <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
+                    <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
+                </div>
+        
+                <!-- Light Green: Cash Flow Growth Data -->
+                <div class="data-group light-green">Cashflow Growth
+                    <p><strong>Net Income Growth:</strong> <span id="growthNetIncome">Loading...</span></p>
+                    <p><strong>Free Cash Flow Growth:</strong> <span id="growthFreeCashFlow">Loading...</span></p>
+                         <div class="data-group light-violet">Balance Sheet
+                        <p><strong>Short-Term Debt Growth:</strong> <span id="growthShortTermDebt">Loading...</span></p>
+                        <p><strong>Net Debt Growth:</strong> <span id="growthNetDebt">Loading...</span></p>
+                        </div>
+                </div>
+        
+                <!-- Light Pink: Income Statement Growth Data -->
+                <div class="data-group light-pink">Income Growth
+                    <p><strong>Revenue Growth:</strong> <span id="growthRevenue">Loading...</span></p>
+                    <p><strong>EBITDA Growth:</strong> <span id="growthEBITDA">Loading...</span></p>
+                    <p><strong>Operating Income Growth:</strong> <span id="growthOperatingIncome">Loading...</span></p>
+                    <p><strong>EPS Growth:</strong> <span id="growthEPS">Loading...</span></p>
+                </div>
+        
+                <!-- Light Violet: Balance Sheet Growth Data -->
+                
                 </div>
             </div>
         </div>
