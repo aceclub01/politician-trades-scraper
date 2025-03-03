@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Draw diagonal lines connecting significant highs
         for (let i = 0; i < significantHighs.length - 1; i++) {
             const highLine = chart.addLineSeries({
-                color: `rgba(255, 0, 0, ${0.8 - i * 0.2})`, // Different opacity for each line
+                color: `rgba(0, 100, 0, ${0.8 - i * 0.2})`, // Dark green color, // Different opacity for each line
                 lineWidth: 2,
             });
 
