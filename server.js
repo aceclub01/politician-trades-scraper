@@ -318,15 +318,16 @@ app.get('/fetchFundamentals', async (req, res) => {
     }
 });
 
+
 // Endpoint for fetching news using NewsAPI
 app.get('/fetchNews', async (req, res) => {
     const { symbol, limit } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
 
-    // If the input is a stock name, fetch the symbol
+    // If the input is not a symbol (e.g., "AVGO"), assume it's a stock name and fetch the symbol
     let stockSymbol = symbol;
     if (!/[A-Z0-9=]+/.test(symbol)) {
-        stockSymbol = await getStockSymbol(symbol);
+        stockSymbol = await getStockSymbolFromYahoo(symbol);
         if (!stockSymbol) {
             return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
         }
@@ -347,7 +348,6 @@ app.get('/fetchNews', async (req, res) => {
         res.status(500).json({ error: error.message || 'Failed to fetch news' });
     }
 });
-
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
