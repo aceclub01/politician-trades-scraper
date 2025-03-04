@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update the DOM with fetched data
     function updateDOM(quote, financialGrowth, cashFlowGrowth, incomeStatementGrowth, balanceSheetGrowth) {
         // Quote Data (Light Grey)
+        document.getElementById('mktCap').textContent = quote.marketCap || 'N/A';
         document.getElementById('eps').textContent = quote.eps || 'N/A';
         document.getElementById('pe').textContent = quote.pe || 'N/A';
         document.getElementById('volume').textContent = quote.volume ? quote.volume.toLocaleString() : 'N/A';
