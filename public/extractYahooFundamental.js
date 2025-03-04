@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Automatically populate the input field and trigger button click
-    const stock = getQueryParam('stock');
+    const stock = getQueryParam('stocks');
     if (stock) {
         const pairInput = document.getElementById('pair');
         pairInput.value = stock;
@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Quote Data:', quoteData);
 
             // // Fetch financial growth data
-             const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
-             const financialGrowthData = await financialGrowthResponse.json();
-             console.log('Financial Growth Data:', financialGrowthData);
+            // const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
+            // const financialGrowthData = await financialGrowthResponse.json();
+            // console.log('Financial Growth Data:', financialGrowthData);
 
             // Fetch cash flow growth data
             const cashFlowGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchCashFlowGrowth?symbol=${symbol}`);
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Check if all data is available
             if (
                 !quoteData || !quoteData[0] ||
-                 !financialGrowthData || !financialGrowthData[0] ||
+                // !financialGrowthData || !financialGrowthData[0] ||
                 !cashFlowGrowthData || !cashFlowGrowthData[0] ||
                 !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
                 !balanceSheetGrowthData || !balanceSheetGrowthData[0]
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Update the DOM with all data
-            updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
-            //updateDOM(quoteData[0],  cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
+            // updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
+            updateDOM(quoteData[0],  cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
         } catch (error) {
             console.error('Error fetching data:', error);
             const fundamentalsElement = document.getElementById('fundamentals');
@@ -115,7 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update the DOM with fetched data
     function updateDOM(quote, financialGrowth, cashFlowGrowth, incomeStatementGrowth, balanceSheetGrowth) {
         // Quote Data (Light Grey)
-        document.getElementById('mktCap').textContent = quote.marketCap || 'N/A';
         document.getElementById('eps').textContent = quote.eps || 'N/A';
         document.getElementById('pe').textContent = quote.pe || 'N/A';
         document.getElementById('volume').textContent = quote.volume ? quote.volume.toLocaleString() : 'N/A';
