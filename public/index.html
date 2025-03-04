@@ -253,6 +253,16 @@
     <div id="chart" style="height: 400px;"></div>
 
     <!-- External Scripts -->
+    <script>
+        // Extract the stock ticker from the URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const stockTicker = urlParams.get('stock');
+    
+        // If a stock ticker is provided, update the input field
+        if (stockTicker) {
+            document.getElementById('pair').value = stockTicker.toUpperCase();
+        }
+    </script>
     <script src="/extractYahooFundamental.js"></script>
     <script src="/script.js"></script>
 </body>

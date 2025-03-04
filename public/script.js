@@ -58,7 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
      // Fetch FX data from the server
      const fetchFXData = async (pair, period) => {
         try {
-            const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
+            //const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
+            const response = await fetch(`/api/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
 
             if (data.error) {
@@ -126,9 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockTicker = urlParams.get('stock');
 
     // If a stock ticker is provided in the URL, set it in the input field and fetch data
+    // if (stockTicker) {
+    //     pairInput.value = stockTicker;
+    //     fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
+    // }
     if (stockTicker) {
         pairInput.value = stockTicker;
         fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
+        //Enable the following if you want stock statistics to be displayed too after clicking on fetch data button
+        //fetchFundamentalsAndNews(stockTicker); // Fetch fundamentals and news
     }
 
     // Event listener for the "Fetch Data" button
