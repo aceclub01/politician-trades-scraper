@@ -2,8 +2,8 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
+
 const app = express();
-const yahooFinance = require('yahoo-finance2').default;
 app.use(cors());
 
 // Your FMP API key (for fundamentals)
@@ -11,23 +11,8 @@ const FMP_API_KEY = process.env.FMP_API_KEY;
 // Your NewsAPI key
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-// const yahooFinance = require ('yahoo-finance2');
-// async function getStockSymbol(companyName){
-//     try {
-//         const results = await yahooFinance.search(companyName);
-//         if( results.quotes.length > 0 ){
-//             return results.quote[0].symbol;            
-//         }
-//     } catch (error){
-//             console.error("Error fetching stock symbol",error);
-//         }
-//         return null;
-
-// }
 // Serve static files from the 'public' directory
-//app.use(express.static('public'));
-// Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 
 // Enable CORS for your frontend domain
 app.use(cors({
@@ -143,19 +128,6 @@ app.get('/fetchCashFlowGrowth', async (req, res) => {
     }
 });
 
-// Endpoint for fetching cash flow statement growth data
-app.get('/fetchFinancialGrowth', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/financial-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
-    
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching Financial growth  data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch financial growth data' });
-    }
-});
 
 // Endpoint for fetching income statement growth data
 app.get('/fetchIncomeStatementGrowth', async (req, res) => {
