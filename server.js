@@ -68,14 +68,24 @@ app.get('/fetchQuote', async (req, res) => {
 
 // Existing FX data endpoint (unchanged)
 app.get('/fxdata', async (req, res) => {
-    const { pair, period } = req.query; // Example: pair=USDSGD=X, period=1mo
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${pair}?interval=1d&range=${period}`;
+    const { pair, period } = req.query;
 
+    // If the input is a stock name, fetch the symbol
+    let symbol = pair;
+    if (!pair.includes('=X')) {
+        symbol = await getStockSymbol(pair);
+        if (!symbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=${period}`;
     try {
         const response = await axios.get(url);
         res.json(response.data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch FX data' });
+        console.error('Error fetching data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch data' });
     }
 });
 

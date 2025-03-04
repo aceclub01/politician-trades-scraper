@@ -1,6 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
+        // Extract the stock ticker from the URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const stockTicker = urlParams.get('stock');
+    
+        // If a stock ticker is provided, update the input field
+        if (stockTicker) {
+            document.getElementById('pair').value = stockTicker.toUpperCase();
+        }
+
+        
     // Get references to DOM elements
     const fetchDataButton = document.getElementById('fetchData');
     const fetchChartDataButton = document.getElementById('fetchChartData');
@@ -126,8 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     // Read the stock ticker from the URL query parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const stockTicker = urlParams.get('stock');
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const stockTicker = urlParams.get('stock');
 
     // If a stock ticker is provided in the URL, set it in the input field and fetch data
     if (stockTicker) {
