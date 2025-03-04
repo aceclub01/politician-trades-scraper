@@ -2,7 +2,6 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const path = require('path');
-
 const app = express();
 app.use(cors());
 
@@ -11,6 +10,19 @@ const FMP_API_KEY = process.env.FMP_API_KEY;
 // Your NewsAPI key
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
+const yahooFinance = require ('yahoo-finance2');
+async function getStockSymbol(companyName){
+    try {
+        const results = await yahooFinance.search(companyName);
+        if( results.quotes.length > 0 ){
+            return results.quote[0].symbol;            
+        }
+    } catch (error){
+            console.error("Error fetching stock symbol",error);
+        }
+        return null;
+
+}
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
 
