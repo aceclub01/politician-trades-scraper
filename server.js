@@ -37,19 +37,9 @@ async function getStockSymbol(stockName) {
 }
 
 // Serve index.html with the stock ticker from the query parameter
-app.get('/', async (req, res) => {
-    const stockTicker = req.query.stock || ''; // Get the stock ticker or name from the URL query parameter
-
-    // If the input is a stock name, fetch the symbol
-    let symbol = stockTicker;
-    if (!/[A-Z0-9=]+/.test(stockTicker)) { // Check if it's not a symbol (e.g., contains letters and numbers)
-        symbol = await getStockSymbol(stockTicker);
-        if (!symbol) {
-            return res.status(404).send('Stock symbol not found for the given name.');
-        }
-    }
-
-    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker: symbol });
+app.get('/', (req, res) => {
+    const stockTicker = req.query.stock || ''; // Get the stock ticker from the URL query parameter
+    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker });
 });
 
 // Endpoint for fetching quote data
@@ -67,7 +57,6 @@ app.get('/fetchQuote', async (req, res) => {
     }
 
     const url = `https://financialmodelingprep.com/api/v3/quote-order/${stockSymbol}?apikey=${FMP_API_KEY}`;
-
     try {
         const response = await axios.get(url);
         res.json(response.data);
@@ -87,6 +76,174 @@ app.get('/fxdata', async (req, res) => {
         res.json(response.data);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch FX data' });
+    }
+});
+
+// Endpoint for fetching financial growth data
+app.get('/fetchFinancialGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/financial-growth/${stockSymbol}?apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching financial growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch financial growth data' });
+    }
+});
+
+// Endpoint for fetching key statistics
+app.get('/fetchKeyStatistics', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/key-metrics/${stockSymbol}?apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching key statistics:', error.message);
+        res.status(500).json({ error: 'Failed to fetch key statistics' });
+    }
+});
+
+// Endpoint for fetching income statement
+app.get('/fetchIncomeStatement', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/income-statement/${stockSymbol}?apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching income statement:', error.message);
+        res.status(500).json({ error: 'Failed to fetch income statement' });
+    }
+});
+
+// Endpoint for fetching earnings date
+app.get('/fetchEarningsDate', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/earning_calendar/${stockSymbol}?apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching earnings date:', error.message);
+        res.status(500).json({ error: 'Failed to fetch earnings date' });
+    }
+});
+
+// Endpoint for fetching cash flow statement growth data
+app.get('/fetchCashFlowGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/cash-flow-statement-growth/${stockSymbol}?period=annual&apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching cash flow growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch cash flow growth data' });
+    }
+});
+
+// Endpoint for fetching income statement growth data
+app.get('/fetchIncomeStatementGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/income-statement-growth/${stockSymbol}?period=annual&apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching income statement growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch income statement growth data' });
+    }
+});
+
+// Endpoint for fetching balance sheet statement growth data
+app.get('/fetchBalanceSheetGrowth', async (req, res) => {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/balance-sheet-statement-growth/${stockSymbol}?period=annual&apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        console.error('Error fetching balance sheet growth data:', error.message);
+        res.status(500).json({ error: 'Failed to fetch balance sheet growth data' });
     }
 });
 

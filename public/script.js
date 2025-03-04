@@ -60,12 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
-
+    
             if (data.error) {
                 alert('Failed to fetch data');
                 return;
             }
-
+    
+            // Check if the expected data structure exists
+            if (!data.chart || !data.chart.result || !data.chart.result[0] || !data.chart.result[0].timestamp) {
+                throw new Error('Invalid data structure received from the API');
+            }
+    
             // Prepare data for chart with null handling and smoothing
             const chartData = data.chart.result[0].timestamp.map((timestamp, index) => {
                 const prevData = data.chart.result[0].indicators.quote[0][index - 1];
@@ -77,14 +82,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     close: handleNullValue(data, index, 'close'),
                 };
                 const nextData = data.chart.result[0].indicators.quote[0][index + 1];
-
+    
                 return preventExtremeSpikes(prevData, currData, nextData);
             });
-
+    
             // Debugging logs
             console.log('Fetched data:', data);
             console.log('Chart data:', chartData);
-
+    
             // Remove old data
             chart.removeSeries(lineSeries);
             fibonacciLines.forEach(line => chart.removeSeries(line));
@@ -95,32 +100,31 @@ document.addEventListener('DOMContentLoaded', () => {
             elliotLines = [];
             highLines = [];
             lowLines = [];
-
+    
             // Add new candlestick series
             lineSeries = chart.addCandlestickSeries();
             lineSeries.setData(chartData);
-
+    
             // Reset chart if no checkbox is active
             if (!fibonacciInput.checked && !elliotInput.checked) {
                 lineSeries.setData(chartData);
                 return;
             }
-
+    
             if (fibonacciInput.checked) {
                 drawDiagonalFibonacci(chartData);
             }
-
+    
             if (elliotInput.checked) {
                 drawDiagonalElliotWave(chartData);
             }
-
+    
             drawHighLowDiagonals(chartData); // Add the high/low diagonal lines
-
+    
         } catch (error) {
             console.error('Error fetching FX data:', error);
         }
     };
-
     // Read the stock ticker from the URL query parameter
     const urlParams = new URLSearchParams(window.location.search);
     const stockTicker = urlParams.get('stock');
