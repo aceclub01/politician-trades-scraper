@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
      if (fetchDataButton) {
          fetchDataButton.click(); // Automatically trigger data fetch
      }
-     
+
     // Function to parse query parameters from the URL
     function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
@@ -75,71 +75,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fetch and display all data
-    const fetchAllData = async (symbol) => {
-        try {
-            // Fetch quote data
-            const quoteResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchQuote?symbol=${symbol}`);
-            if (!quoteResponse.ok) {
-                throw new Error(`Failed to fetch quote data: ${quoteResponse.statusText}`);
-            }
-            const quoteData = await quoteResponse.json();
-            console.log('Quote Data:', quoteData);
-    
-            // Fetch financial growth data
-            const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
-            if (!financialGrowthResponse.ok) {
-                throw new Error(`Failed to fetch financial growth data: ${financialGrowthResponse.statusText}`);
-            }
-            const financialGrowthData = await financialGrowthResponse.json();
-            console.log('Financial Growth Data:', financialGrowthData);
-    
-            // Fetch cash flow growth data
-            const cashFlowGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchCashFlowGrowth?symbol=${symbol}`);
-            if (!cashFlowGrowthResponse.ok) {
-                throw new Error(`Failed to fetch cash flow growth data: ${cashFlowGrowthResponse.statusText}`);
-            }
-            const cashFlowGrowthData = await cashFlowGrowthResponse.json();
-            console.log('Cash Flow Growth Data:', cashFlowGrowthData);
-    
-            // Fetch income statement growth data
-            const incomeStatementGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatementGrowth?symbol=${symbol}`);
-            if (!incomeStatementGrowthResponse.ok) {
-                throw new Error(`Failed to fetch income statement growth data: ${incomeStatementGrowthResponse.statusText}`);
-            }
-            const incomeStatementGrowthData = await incomeStatementGrowthResponse.json();
-            console.log('Income Statement Growth Data:', incomeStatementGrowthData);
-    
-            // Fetch balance sheet growth data
-            const balanceSheetGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchBalanceSheetGrowth?symbol=${symbol}`);
-            if (!balanceSheetGrowthResponse.ok) {
-                throw new Error(`Failed to fetch balance sheet growth data: ${balanceSheetGrowthResponse.statusText}`);
-            }
-            const balanceSheetGrowthData = await balanceSheetGrowthResponse.json();
-            console.log('Balance Sheet Growth Data:', balanceSheetGrowthData);
-    
-            // Check if all data is available
-            if (
-                !quoteData || !quoteData[0] ||
-                !financialGrowthData || !financialGrowthData[0] ||
-                !cashFlowGrowthData || !cashFlowGrowthData[0] ||
-                !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
-                !balanceSheetGrowthData || !balanceSheetGrowthData[0]
-            ) {
-                throw new Error('Incomplete or missing data from API for your input asset');
-            }
-    
-            // Update the DOM with all data
-            updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            const fundamentalsElement = document.getElementById('fundamentals');
-            if (fundamentalsElement) {
-                fundamentalsElement.innerHTML = `<p>Error: ${error.message}</p>`;
-            } else {
-                console.error('Fundamentals element not found in the DOM');
-            }
+   const fetchAllData = async (symbol) => {
+    try {
+        // Fetch quote data
+        const quoteResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchQuote?symbol=${symbol}`);
+        if (!quoteResponse.ok) {
+            throw new Error(`Failed to fetch quote data: ${quoteResponse.statusText}`);
         }
-    };
+        const quoteData = await quoteResponse.json();
+        console.log('Quote Data:', quoteData);
+
+        // Fetch financial growth data
+        const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
+        if (!financialGrowthResponse.ok) {
+            throw new Error(`Failed to fetch financial growth data: ${financialGrowthResponse.statusText}`);
+        }
+        const financialGrowthData = await financialGrowthResponse.json();
+        console.log('Financial Growth Data:', financialGrowthData);
+
+        // Fetch cash flow growth data
+        const cashFlowGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchCashFlowGrowth?symbol=${symbol}`);
+        if (!cashFlowGrowthResponse.ok) {
+            throw new Error(`Failed to fetch cash flow growth data: ${cashFlowGrowthResponse.statusText}`);
+        }
+        const cashFlowGrowthData = await cashFlowGrowthResponse.json();
+        console.log('Cash Flow Growth Data:', cashFlowGrowthData);
+
+        // Fetch income statement growth data
+        const incomeStatementGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchIncomeStatementGrowth?symbol=${symbol}`);
+        if (!incomeStatementGrowthResponse.ok) {
+            throw new Error(`Failed to fetch income statement growth data: ${incomeStatementGrowthResponse.statusText}`);
+        }
+        const incomeStatementGrowthData = await incomeStatementGrowthResponse.json();
+        console.log('Income Statement Growth Data:', incomeStatementGrowthData);
+
+        // Fetch balance sheet growth data
+        const balanceSheetGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchBalanceSheetGrowth?symbol=${symbol}`);
+        if (!balanceSheetGrowthResponse.ok) {
+            throw new Error(`Failed to fetch balance sheet growth data: ${balanceSheetGrowthResponse.statusText}`);
+        }
+        const balanceSheetGrowthData = await balanceSheetGrowthResponse.json();
+        console.log('Balance Sheet Growth Data:', balanceSheetGrowthData);
+
+        // Check if all data is available
+        if (
+            !quoteData || !quoteData[0] ||
+            !financialGrowthData || !financialGrowthData[0] ||
+            !cashFlowGrowthData || !cashFlowGrowthData[0] ||
+            !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
+            !balanceSheetGrowthData || !balanceSheetGrowthData[0]
+        ) {
+            throw new Error('Incomplete or missing data from API for your input asset');
+        }
+
+        // Update the DOM with all data
+        updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        const fundamentalsElement = document.getElementById('fundamentals');
+        if (fundamentalsElement) {
+            fundamentalsElement.innerHTML = `<p>Error: ${error.message}</p>`;
+        } else {
+            console.error('Fundamentals element not found in the DOM');
+        }
+    }
+};
 
     // Update the DOM with fetched data
     function updateDOM(quote, financialGrowth, cashFlowGrowth, incomeStatementGrowth, balanceSheetGrowth) {

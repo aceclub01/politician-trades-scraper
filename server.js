@@ -20,7 +20,25 @@ app.use(cors({
     methods: ['GET', 'POST'], // Allowed HTTP methods
     credentials: true // Allow cookies and credentials
 }));
+// Helper function to fetch stock symbol from stock name using Yahoo Finance
+async function getStockSymbolFromYahoo(stockName) {
+    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(stockName)}&quotesCount=1&newsCount=0`;
+    try {
+        const response = await axios.get(url);
+        const data = response.data;
 
+        console.log('Yahoo Finance Search API Response:', data); // Log the response
+
+        // Check if the API returned valid results
+        if (data.quotes && data.quotes.length > 0) {
+            return data.quotes[0].symbol; // Return the first matching symbol
+        }
+        return null; // No symbol found
+    } catch (error) {
+        console.error('Error fetching stock symbol from Yahoo Finance:', error.message);
+        return null;
+    }
+}
 // Helper function to fetch stock symbol from stock name using FinancialModelingPrep
 async function getStockSymbol(stockName) {
     const url = `https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(stockName)}&limit=1&apikey=${FMP_API_KEY}`;
@@ -70,14 +88,19 @@ app.get('/fetchQuote', async (req, res) => {
 app.get('/fxdata', async (req, res) => {
     const { pair, period } = req.query;
 
-    // If the input is a stock name, fetch the symbol
+    console.log('Fetching data for pair:', pair); // Log the input pair
+
+    // If the input is not an FX pair (e.g., "USDSGD=X"), assume it's a stock name or symbol
     let symbol = pair;
     if (!pair.includes('=X')) {
-        symbol = await getStockSymbol(pair);
+        symbol = await getStockSymbolFromYahoo(pair); // Fetch symbol for stock name
         if (!symbol) {
+            console.error('Stock symbol not found for:', pair); // Log the error
             return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
         }
     }
+
+    console.log('Using symbol:', symbol); // Log the resolved symbol
 
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=${period}`;
     try {
