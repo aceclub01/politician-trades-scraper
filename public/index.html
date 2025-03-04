@@ -47,66 +47,67 @@
             margin-top: 20px;
         }
         /* Fundamentals Container */
-.fundamentals-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-}
+        .fundamentals-container {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
 
-/* Fundamentals Grid */
-.fundamentals-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 columns */
-    gap: 10px; /* Space between items */
-}
-/* Data Group Styles */
-.data-group {
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-}
+        /* Fundamentals Grid */
+        .fundamentals-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 10px; /* Space between items */
+        }
 
-.light-grey {
-    background-color: #f0f0f0;
-}
+        /* Data Group Styles */
+        .data-group {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
 
-.light-blue {
-    background-color: #e0f7fa;
-}
+        .light-grey {
+            background-color: #f0f0f0;
+        }
 
-.light-green {
-    background-color: #e8f5e9;
-}
+        .light-blue {
+            background-color: #e0f7fa;
+        }
 
-.light-pink {
-    background-color: #fce4ec;
-}
+        .light-green {
+            background-color: #e8f5e9;
+        }
 
-.light-violet {
-    background-color: #f3e5f5;
-}
+        .light-pink {
+            background-color: #fce4ec;
+        }
 
-/* Responsive Layout */
+        .light-violet {
+            background-color: #f3e5f5;
+        }
+
+        /* Responsive Layout */
         @media (min-width: 600px) {
-    .fundamentals-grid {
-        grid-template-columns: repeat(3, 1fr); /* 3 columns for larger screens */
-    }
-}
+            .fundamentals-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 columns for larger screens */
+            }
+        }
 
-@media (min-width: 900px) {
-    .fundamentals-grid {
-        grid-template-columns: repeat(4, 1fr); /* 4 columns for even larger screens */
-    }
-}
+        @media (min-width: 900px) {
+            .fundamentals-grid {
+                grid-template-columns: repeat(4, 1fr); /* 4 columns for even larger screens */
+            }
+        }
 
-/* Style for each item */
-.fundamentals-grid p {
-    margin: 0;
-    padding: 8px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
+        /* Style for each item */
+        .fundamentals-grid p {
+            margin: 0;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
         }
     </style>
 </head>
@@ -123,7 +124,7 @@
     <div class="controls-fundamentals">
         <div class="controls">
             <div>
-                <label for="pair" id="pairLabel">FX Pair: </label>
+                <label for="pair" id="pairLabel">Stock/FX Pair: </label>
                 <input type="text" id="pair" value="AVGO" />
             </div>
             <div>
@@ -176,72 +177,52 @@
                 <input type="range" id="alphaSlider" min="0" max="1" step="0.1" value="0.2">
                 <span id="alphaValue">0.2</span>
             </div>
-            <button id="fetchData">Fetch Fundaments and Top News</button>
+            <button id="fetchData">Fetch Fundamentals and Top News</button>
             <button id="fetchChartData">Update Chart</button>
         </div>
         <div id="fundamentals">
             <div class="fundamentals">
                 <h2 id="fundamentalsTitle">Fundamentals <span id="lastClosePrice"></span></h2>
                 <div class="fundamentals-container">
-                    <!-- <div class="column"> -->
-                        <!-- <p><strong id="mktCapLabel">Market Cap:</strong> <span id="mktCap">Loading...</span></p> -->
-                        <!-- <p><strong id="targetPELabel">Target PE:</strong> <span id="targetPE">Loading...</span></p>
-                        <p><strong id="epsLabel">EPS:</strong> <span id="epsValue">Loading...</span></p>
-                        <p><strong id="oneYearTargetEstLabel">1y Target Est:</strong> <span id="oneYearTargetEst">Loading...</span></p>
-                        <p><strong id="exDividendDateLabel">Ex-Dividend Date:</strong> <span id="exDividendDate">Loading...</span></p>
-                        <p><strong id="earningsDateLabel">Earnings Date:</strong> <span id="earningsDate">Loading...</span></p>
-                        
-                        <div class="data-group light-grey">
-                            <h3>Key Statistics</h3>
-                            <p><strong>Profit Margin:</strong> <span id="profitMargin">Loading...</span></p>
-                            <p><strong>Quarterly Revenue Growth:</strong> <span id="quarterlyRevenueGrowth">Loading...</span></p>
-                            <p><strong>Return on Equity:</strong> <span id="returnOnEquity">Loading...</span></p>
-                            <p><strong>Quarterly Earnings Growth:</strong> <span id="quarterlyEarningsGrowth">Loading...</span></p>
-                            <p><strong>Short Ratio:</strong> <span id="shortRatio">Loading...</span></p>
-                        </div> -->
-                    <!-- </div> -->
-            </div>
-            <div class="fundamentals-grid">
-                <!-- Light Grey: Quote Data -->
-                    <div class="data-group light-grey"> Basics
-                    <p><strong id="mktCapLabel">Market Cap:</strong> <span id="mktCap">Loading...</span></p>
-                    <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
-                    <p><strong>PE Ratio:</strong> <span id="pe">Loading...</span></p>
-                    <p><strong>Volume:</strong> <span id="volume">Loading...</span></p>
-                    <p><strong>Avg Volume:</strong> <span id="avgVolume">Loading...</span></p>
-                </div>
-        
-                <!-- Light Blue: Financial Growth Data -->
-                <div class="data-group light-blue"> Financial Growth
-                    <p><strong>Revenue Growth:</strong> <span id="revenueGrowth">Loading...</span></p>
-                    <p><strong>Gross Profit Growth:</strong> <span id="grossProfitGrowth">Loading...</span></p>
-                    <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
-                    <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
-                    <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
-                </div>
-        
-                <!-- Light Green: Cash Flow Growth Data -->
-                <div class="data-group light-green">Cashflow Growth
-                    <p><strong>Net Income Growth:</strong> <span id="growthNetIncome">Loading...</span></p>
-                    <p><strong>Free Cash Flow Growth:</strong> <span id="growthFreeCashFlow">Loading...</span></p>
-                         <!-- <div class="data-group light-violet">Balance Sheet -->
-                            <!-- <span class="data-group light-violet">Balance Sheet -->
-                            <span class="data-group ">Balance Sheet
-                        <p><strong>Short-Term Debt Growth:</strong> <span id="growthShortTermDebt">Loading...</span></p>
-                        <p><strong>Net Debt Growth:</strong> <span id="growthNetDebt">Loading...</span></p>
-                        <!-- </div> -->
-                </div>
-        
-                <!-- Light Pink: Income Statement Growth Data -->
-                <div class="data-group light-pink">Income Growth
-                    <p><strong>Revenue Growth:</strong> <span id="growthRevenue">Loading...</span></p>
-                    <p><strong>EBITDA Growth:</strong> <span id="growthEBITDA">Loading...</span></p>
-                    <p><strong>Operating Income Growth:</strong> <span id="growthOperatingIncome">Loading...</span></p>
-                    <p><strong>EPS Growth:</strong> <span id="growthEPS">Loading...</span></p>
-                </div>
-        
-                <!-- Light Violet: Balance Sheet Growth Data -->
-                
+                    <div class="fundamentals-grid">
+                        <!-- Light Grey: Quote Data -->
+                        <div class="data-group light-grey"> Basics
+                            <p><strong id="mktCapLabel">Market Cap:</strong> <span id="mktCap">Loading...</span></p>
+                            <p><strong>EPS:</strong> <span id="eps">Loading...</span></p>
+                            <p><strong>PE Ratio:</strong> <span id="pe">Loading...</span></p>
+                            <p><strong>Volume:</strong> <span id="volume">Loading...</span></p>
+                            <p><strong>Avg Volume:</strong> <span id="avgVolume">Loading...</span></p>
+                        </div>
+
+                        <!-- Light Blue: Financial Growth Data -->
+                        <div class="data-group light-blue"> Financial Growth
+                            <p><strong>Revenue Growth:</strong> <span id="revenueGrowth">Loading...</span></p>
+                            <p><strong>Gross Profit Growth:</strong> <span id="grossProfitGrowth">Loading...</span></p>
+                            <p><strong>3Y Revenue Growth Per Share:</strong> <span id="threeYRevenueGrowthPerShare">Loading...</span></p>
+                            <p><strong>3Y Operating CF Growth Per Share:</strong> <span id="threeYOperatingCFGrowthPerShare">Loading...</span></p>
+                            <p><strong>3Y Net Income Growth Per Share:</strong> <span id="threeYNetIncomeGrowthPerShare">Loading...</span></p>
+                        </div>
+
+                        <!-- Light Green: Cash Flow Growth Data -->
+                        <div class="data-group light-green">Cashflow Growth
+                            <p><strong>Net Income Growth:</strong> <span id="growthNetIncome">Loading...</span></p>
+                            <p><strong>Free Cash Flow Growth:</strong> <span id="growthFreeCashFlow">Loading...</span></p>
+                        </div>
+
+                        <!-- Light Pink: Income Statement Growth Data -->
+                        <div class="data-group light-pink">Income Growth
+                            <p><strong>Revenue Growth:</strong> <span id="growthRevenue">Loading...</span></p>
+                            <p><strong>EBITDA Growth:</strong> <span id="growthEBITDA">Loading...</span></p>
+                            <p><strong>Operating Income Growth:</strong> <span id="growthOperatingIncome">Loading...</span></p>
+                            <p><strong>EPS Growth:</strong> <span id="growthEPS">Loading...</span></p>
+                        </div>
+
+                        <!-- Light Violet: Balance Sheet Growth Data -->
+                        <div class="data-group light-violet">Balance Sheet
+                            <p><strong>Short-Term Debt Growth:</strong> <span id="growthShortTermDebt">Loading...</span></p>
+                            <p><strong>Net Debt Growth:</strong> <span id="growthNetDebt">Loading...</span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -257,7 +238,7 @@
         // Extract the stock ticker from the URL query parameter
         const urlParams = new URLSearchParams(window.location.search);
         const stockTicker = urlParams.get('stock');
-    
+
         // If a stock ticker is provided, update the input field
         if (stockTicker) {
             document.getElementById('pair').value = stockTicker.toUpperCase();

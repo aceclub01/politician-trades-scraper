@@ -55,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize chart
     createChart();
 
-     // Fetch FX data from the server
-     const fetchFXData = async (pair, period) => {
+    // Fetch FX data from the server
+    const fetchFXData = async (pair, period) => {
         try {
             const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
@@ -126,15 +126,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const stockTicker = urlParams.get('stock');
 
     // If a stock ticker is provided in the URL, set it in the input field and fetch data
-    // if (stockTicker) {
-    //     pairInput.value = stockTicker;
-    //     fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
-    // }
     if (stockTicker) {
         pairInput.value = stockTicker;
         fetchFXData(stockTicker, periodInput.value); // Automatically fetch and display data
-        //Enable the following if you want stock statistics to be displayed too after clicking on fetch data button
-        //fetchFundamentalsAndNews(stockTicker); // Fetch fundamentals and news
     }
 
     // Event listener for the "Fetch Data" button
@@ -164,8 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchFXData(pair, period);
         }
     });
-
-   
 
     // Function to handle null values (interpolation or previous value)
     const handleNullValue = (data, index, field) => {
@@ -214,22 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const outliers = detectOutliers(chartData, 'close');
         const cleanData = chartData.filter(data => !outliers.includes(data));
 
-        // const minPrice = Math.min(...cleanData.map(data => data.low));
-        // const maxPrice = Math.max(...cleanData.map(data => data.high));
-
-         // Use close prices instead of high and low
-    const minPrice = Math.min(...cleanData.map(data => data.close));
-    const maxPrice = Math.max(...cleanData.map(data => data.close));
+        // Use close prices instead of high and low
+        const minPrice = Math.min(...cleanData.map(data => data.close));
+        const maxPrice = Math.max(...cleanData.map(data => data.close));
 
         const fibonacciLevels = [0.0, 0.236, 0.382, 0.5, 0.618, 1.0];
         const startTime = cleanData[0].time;
         const endTime = cleanData[cleanData.length - 1].time;
 
-        // const priceDiff = maxPrice - minPrice;
         const priceDiff = maxPrice - minPrice; // Difference based on close price
 
         fibonacciLevels.forEach(level => {
-            // const priceLevel = minPrice + priceDiff * level;
             const priceLevel = minPrice + priceDiff * level; // Use close prices for levels
 
             const fibLine = chart.addLineSeries({
@@ -326,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Draw diagonal lines connecting significant highs
         for (let i = 0; i < significantHighs.length - 1; i++) {
             const highLine = chart.addLineSeries({
-                color: `rgba(0, 100, 0, ${0.8 - i * 0.2})`, // Dark green color, // Different opacity for each line
+                color: `rgba(0, 100, 0, ${0.8 - i * 0.2})`, // Dark green color
                 lineWidth: 2,
             });
 
@@ -380,17 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const futureTime = significantLows[i + 1].time + 90 * 86400; // 90 days in seconds
             const futureValue = significantLows[i + 1].low + slope * (futureTime - significantLows[i + 1].time);
 
-            // const projectionLine = chart.addLineSeries({
-            //     color: `rgba(0, 255, 0, ${0.8 - i * 0.2})`,
-            //     lineWidth: 1,
-            //     lineStyle: LightweightCharts.LineStyle.Dotted,
-            // });
             const projectionLine = chart.addLineSeries({
                 color: `rgba(0, 100, 0, ${0.8 - i * 0.2})`, // Dark green color
                 lineWidth: 1,
                 lineStyle: LightweightCharts.LineStyle.WithSteps, // Stepped line
             });
-            
+
             projectionLine.setData([
                 { time: significantLows[i + 1].time, value: significantLows[i + 1].low },
                 { time: futureTime, value: futureValue }

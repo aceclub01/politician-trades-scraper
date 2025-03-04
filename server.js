@@ -21,15 +21,52 @@ app.use(cors({
     credentials: true // Allow cookies and credentials
 }));
 
+// Helper function to fetch stock symbol from stock name using FinancialModelingPrep
+async function getStockSymbol(stockName) {
+    const url = `https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(stockName)}&limit=1&apikey=${FMP_API_KEY}`;
+    try {
+        const response = await axios.get(url);
+        if (response.data && response.data.length > 0) {
+            return response.data[0].symbol; // Return the first matching symbol
+        }
+        return null; // No symbol found
+    } catch (error) {
+        console.error('Error fetching stock symbol:', error.message);
+        return null;
+    }
+}
+
 // Serve index.html with the stock ticker from the query parameter
-app.get('/', (req, res) => {
-    const stockTicker = req.query.stock || ''; // Get the stock ticker from the URL query parameter
-    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker });
+app.get('/', async (req, res) => {
+    const stockTicker = req.query.stock || ''; // Get the stock ticker or name from the URL query parameter
+
+    // If the input is a stock name, fetch the symbol
+    let symbol = stockTicker;
+    if (!/[A-Z0-9=]+/.test(stockTicker)) { // Check if it's not a symbol (e.g., contains letters and numbers)
+        symbol = await getStockSymbol(stockTicker);
+        if (!symbol) {
+            return res.status(404).send('Stock symbol not found for the given name.');
+        }
+    }
+
+    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker: symbol });
 });
+
 // Endpoint for fetching quote data
 app.get('/fetchQuote', async (req, res) => {
     const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/quote-order/${symbol}?apikey=${FMP_API_KEY}`;
+    if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
+
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
+    const url = `https://financialmodelingprep.com/api/v3/quote-order/${stockSymbol}?apikey=${FMP_API_KEY}`;
 
     try {
         const response = await axios.get(url);
@@ -39,6 +76,7 @@ app.get('/fetchQuote', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch quote data' });
     }
 });
+
 // Existing FX data endpoint (unchanged)
 app.get('/fxdata', async (req, res) => {
     const { pair, period } = req.query; // Example: pair=USDSGD=X, period=1mo
@@ -52,139 +90,29 @@ app.get('/fxdata', async (req, res) => {
     }
 });
 
-app.get('/fetchfinancialgrowth', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/financial-growth/${symbol}?apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching key statistics:', error.message);
-        res.status(500).json({ error: 'Failed to fetch key financial growth data' });
-    }
-});
-
-app.get('/fetchKeyStatistics', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/key-metrics/${symbol}?apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching key statistics:', error.message);
-        res.status(500).json({ error: 'Failed to fetch key statistics' });
-    }
-});
-
-// Endpoint for fetching income statement
-// app.get('/fetchIncomeStatement', async (req, res) => {
-//     const { symbol } = req.query;
-//     const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
-
-//     try {
-//         const response = await axios.get(url);
-//         res.json(response.data);
-//     } catch (error) {
-//         console.error('Error fetching income statement:', error.message);
-//         res.status(500).json({ error: 'Failed to fetch income statement' });
-//     }
-// });
-app.get('/fetchIncomeStatement', async (req, res) => {
-    const { symbol } = req.query;
-    console.log(`Fetching income statement for symbol: ${symbol}`);
-
-    try {
-        const url = `https://financialmodelingprep.com/api/v3/income-statement/${symbol}?apikey=${FMP_API_KEY}`;
-        console.log('API URL:', url);
-
-        const response = await axios.get(url);
-        console.log('API Response:', response.data);
-
-        if (!Array.isArray(response.data) || response.data.length === 0) {
-            return res.status(404).json({ error: 'No data found for the given symbol' });
-        }
-
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching income statement:', error.message);
-        res.status(500).json({ error: 'Failed to fetch income statement' });
-    }
-});
-
-// Endpoint for fetching earnings date
-app.get('/fetchEarningsDate', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/earning_calendar/${symbol}?apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching earnings date:', error.message);
-        res.status(500).json({ error: 'Failed to fetch earnings date' });
-    }
-});
-
-// Endpoint for fetching cash flow statement growth data
-app.get('/fetchCashFlowGrowth', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/cash-flow-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching cash flow growth data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch cash flow growth data' });
-    }
-});
-
-
-// Endpoint for fetching income statement growth data
-app.get('/fetchIncomeStatementGrowth', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/income-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching income statement growth data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch income statement growth data' });
-    }
-});
-
-// Endpoint for fetching balance sheet statement growth data
-app.get('/fetchBalanceSheetGrowth', async (req, res) => {
-    const { symbol } = req.query;
-    const url = `https://financialmodelingprep.com/api/v3/balance-sheet-statement-growth/${symbol}?period=annual&apikey=${FMP_API_KEY}`;
-
-    try {
-        const response = await axios.get(url);
-        res.json(response.data);
-    } catch (error) {
-        console.error('Error fetching balance sheet growth data:', error.message);
-        res.status(500).json({ error: 'Failed to fetch balance sheet growth data' });
-    }
-});
-
-
 // Endpoint for fetching fundamentals using FMP
 app.get('/fetchFundamentals', async (req, res) => {
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
 
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
     // Check if the symbol is an FX pair
-    if (symbol.includes('=X')) {
+    if (stockSymbol.includes('=X')) {
         return res.json([{
-            symbol,
+            symbol: stockSymbol,
             message: 'Fundamentals not available for FX pairs.'
         }]);
     }
 
-    const url = `https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=${FMP_API_KEY}`;
+    const url = `https://financialmodelingprep.com/api/v3/profile/${stockSymbol}?apikey=${FMP_API_KEY}`;
     try {
         const response = await axios.get(url);
 
@@ -205,8 +133,17 @@ app.get('/fetchNews', async (req, res) => {
     const { symbol, limit } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
 
+    // If the input is a stock name, fetch the symbol
+    let stockSymbol = symbol;
+    if (!/[A-Z0-9=]+/.test(symbol)) {
+        stockSymbol = await getStockSymbol(symbol);
+        if (!stockSymbol) {
+            return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
+        }
+    }
+
     try {
-        const url = `https://newsapi.org/v2/everything?q=${symbol}&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
+        const url = `https://newsapi.org/v2/everything?q=${stockSymbol}&pageSize=${limit}&apiKey=${NEWS_API_KEY}`;
         const response = await axios.get(url);
 
         // Check if the API returned an error

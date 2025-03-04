@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const quoteData = await quoteResponse.json();
             console.log('Quote Data:', quoteData);
 
-            // // Fetch financial growth data
+            // Fetch financial growth data
             const financialGrowthResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchFinancialGrowth?symbol=${symbol}`);
             const financialGrowthData = await financialGrowthResponse.json();
             console.log('Financial Growth Data:', financialGrowthData);
@@ -95,12 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 !incomeStatementGrowthData || !incomeStatementGrowthData[0] ||
                 !balanceSheetGrowthData || !balanceSheetGrowthData[0]
             ) {
-                throw new Error('Incomplete or missing data from API');
+                throw new Error('Incomplete or missing data from API for your input asset ');
             }
 
             // Update the DOM with all data
-             updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
-            //updateDOM(quoteData[0],  cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
+            updateDOM(quoteData[0], financialGrowthData[0], cashFlowGrowthData[0], incomeStatementGrowthData[0], balanceSheetGrowthData[0]);
         } catch (error) {
             console.error('Error fetching data:', error);
             const fundamentalsElement = document.getElementById('fundamentals');
