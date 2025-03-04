@@ -37,55 +37,10 @@ app.use(cors({
 }));
 
 // Serve index.html with the stock ticker from the query parameter
-// app.get('/', (req, res) => {
-//     const stockTicker = req.query.stock || ''; // Get the stock ticker from the URL query parameter
-//     res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker });
-// });
-// Serve index.html with the stock ticker from the query parameter
-app.get('/', async (req, res) => {
-    const companyName = req.query.stock || ''; // Get the company name from the URL query parameter
-
-    if (!companyName) {
-        return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    }
-
-    try {
-        // Fetch the stock symbol using the company name
-        const stockSymbol = await getStockSymbol(companyName);
-
-        if (stockSymbol) {
-            // Pass the stockSymbol to the frontend (index.html) via a query parameter
-            res.redirect(`/?stock=${stockSymbol}`);
-        } else {
-            // If no stock symbol is found, serve the index.html with an error message
-            res.sendFile(path.join(__dirname, 'public', 'index.html'), {
-                headers: {
-                    'X-Stock-Error': 'Stock symbol not found',
-                },
-            });
-        }
-    } catch (error) {
-        console.error('Error fetching stock symbol:', error);
-        res.sendFile(path.join(__dirname, 'public', 'index.html'), {
-            headers: {
-                'X-Stock-Error': 'Error fetching stock symbol',
-            },
-        });
-    }
+app.get('/', (req, res) => {
+    const stockTicker = req.query.stock || ''; // Get the stock ticker from the URL query parameter
+    res.sendFile(path.join(__dirname, 'public', 'index.html'), { stockTicker });
 });
-
-// Function to fetch the stock symbol using Yahoo Finance API
-async function getStockSymbol(companyName) {
-    try {
-        const results = await yahooFinance.search(companyName);
-        if (results.quotes.length > 0) {
-            return results.quotes[0].symbol;
-        }
-    } catch (error) {
-        console.error('Error fetching stock symbol:', error);
-    }
-    return null;
-}
 // Endpoint for fetching quote data
 app.get('/fetchQuote', async (req, res) => {
     const { symbol } = req.query;

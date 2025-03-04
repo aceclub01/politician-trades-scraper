@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Automatically populate the input field and trigger button click
-    const stock = getQueryParam('stocks');
+    const stock = getQueryParam('stock');
     if (stock) {
         const pairInput = document.getElementById('pair');
         pairInput.value = stock;

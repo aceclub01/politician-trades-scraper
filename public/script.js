@@ -58,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
      // Fetch FX data from the server
      const fetchFXData = async (pair, period) => {
         try {
-            //const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
-            const response = await fetch(`/api/fxdata?pair=${pair}&period=${period}`);
+            const response = await fetch(`https://politician-trades-scraper.onrender.com/fxdata?pair=${pair}&period=${period}`);
             const data = await response.json();
 
             if (data.error) {
