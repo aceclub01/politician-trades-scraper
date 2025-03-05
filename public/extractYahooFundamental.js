@@ -20,6 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Helper function to abbreviate market cap
+    function abbreviateMarketCap(marketCap) {
+        if (!marketCap) return 'N/A';
+
+        const num = parseFloat(marketCap);
+        if (num >= 1e12) {
+            return `$${(num / 1e12).toFixed(2)}T`; // Trillions
+        } else if (num >= 1e9) {
+            return `$${(num / 1e9).toFixed(2)}B`; // Billions
+        } else if (num >= 1e6) {
+            return `$${(num / 1e6).toFixed(2)}M`; // Millions
+        } else {
+            return `$${num.toLocaleString()}`; // Less than a million
+        }
+    }
+
     // Fetch and display news using NewsAPI
     async function fetchNews(query, limit) {
         try {
@@ -132,8 +148,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update the DOM with fetched data
     function updateDOM(quote, financialGrowth, cashFlowGrowth, incomeStatementGrowth, balanceSheetGrowth) {
+        // Update the "Fundamentals" heading with the last close price
+        const lastClosePrice = quote.price || 'N/A';
+        document.getElementById('fundamentalsTitle').innerHTML = `Fundamentals <span style="color: green;">($${lastClosePrice})</span>`;
+
         // Quote Data (Light Grey)
-        document.getElementById('mktCap').textContent = quote.marketCap || 'N/A';
+        // document.getElementById('mktCap').textContent = quote.marketCap || 'N/A';
+        document.getElementById('mktCap').textContent = abbreviateMarketCap(quote.marketCap);
         document.getElementById('eps').textContent = quote.eps || 'N/A';
         document.getElementById('pe').textContent = quote.pe || 'N/A';
         document.getElementById('volume').textContent = quote.volume ? quote.volume.toLocaleString() : 'N/A';
