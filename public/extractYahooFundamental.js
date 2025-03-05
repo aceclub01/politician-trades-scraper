@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fetch quote data
             const quoteResponse = await fetch(`https://politician-trades-scraper.onrender.com/fetchQuote?symbol=${symbol}`);
             if (!quoteResponse.ok) {
-                throw new Error(`Failed to fetch quote data: ${quoteResponse.statusText}`);
+                throw new Error(`Failed to fetch quote data or free tier API limit exceeded  : ${quoteResponse.statusText}`);
             }
             const quoteData = await quoteResponse.json();
             console.log('Quote Data:', quoteData);
