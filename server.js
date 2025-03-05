@@ -61,14 +61,15 @@ app.get('/', (req, res) => {
 });
 
 // Endpoint for fetching quote data
+// Endpoint for fetching quote data
 app.get('/fetchQuote', async (req, res) => {
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Symbol is required' });
 
-    // If the input is a stock name, fetch the symbol
+    // If the input is not a symbol (e.g., "TSLA"), assume it's a stock name and fetch the symbol
     let stockSymbol = symbol;
     if (!/[A-Z0-9=]+/.test(symbol)) {
-        stockSymbol = await getStockSymbol(symbol);
+        stockSymbol = await getStockSymbolFromYahoo(symbol);
         if (!stockSymbol) {
             return res.status(404).json({ error: 'Stock symbol not found for the given name.' });
         }
