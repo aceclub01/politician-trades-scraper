@@ -122,3 +122,47 @@ const translations = {
         epsGrowth: "EPS 成長:"
     }
 };
+
+// language.js
+
+function updateLanguage(lang) {
+    // Update general text
+    document.getElementById('title').textContent = translations[lang].title;
+    document.getElementById('pairLabel').textContent = translations[lang].pairLabel;
+    document.getElementById('periodLabel').textContent = translations[lang].periodLabel;
+    document.getElementById('newsLimitLabel').textContent = translations[lang].newsLimitLabel;
+    document.getElementById('intervalSliderLabel').textContent = translations[lang].intervalSliderLabel;
+    document.getElementById('fibonacci').nextSibling.textContent = translations[lang].fibonacci;
+    document.getElementById('elliot').nextSibling.textContent = translations[lang].elliot;
+    document.getElementById('diagonalLinesLabel').textContent = translations[lang].diagonalLinesLabel;
+    document.getElementById('historyBarsLabel').textContent = translations[lang].historyBarsLabel;
+    document.getElementById('resolutionLabel').textContent = translations[lang].resolutionLabel;
+    document.getElementById('alphaSliderLabel').textContent = translations[lang].alphaSliderLabel;
+    document.getElementById('fetchData').textContent = translations[lang].fetchData;
+    document.getElementById('fetchChartData').textContent = translations[lang].fetchChartData;
+    document.getElementById('fundamentalsTitle').textContent = translations[lang].fundamentalsTitle;
+    document.getElementById('topNewsTitle').textContent = translations[lang].topNewsTitle;
+
+    // Update fundamentals section
+    document.querySelector('.data-group.light-grey p:first-child strong').textContent = translations[lang].marketCap;
+    document.querySelector('.data-group.light-grey p:nth-child(2) strong').textContent = translations[lang].eps;
+    document.querySelector('.data-group.light-grey p:nth-child(3) strong').textContent = translations[lang].peRatio;
+    document.querySelector('.data-group.light-grey p:nth-child(4) strong').textContent = translations[lang].volume;
+    document.querySelector('.data-group.light-grey p:nth-child(5) strong').textContent = translations[lang].avgVolume;
+
+    document.querySelector('.data-group.light-blue p:first-child strong').textContent = translations[lang].revenueGrowth;
+    document.querySelector('.data-group.light-blue p:nth-child(2) strong').textContent = translations[lang].grossProfitGrowth;
+    document.querySelector('.data-group.light-blue p:nth-child(3) strong').textContent = translations[lang].threeYRevenueGrowthPerShare;
+    document.querySelector('.data-group.light-blue p:nth-child(4) strong').textContent = translations[lang].threeYOperatingCFGrowthPerShare;
+    document.querySelector('.data-group.light-blue p:nth-child(5) strong').textContent = translations[lang].threeYNetIncomeGrowthPerShare;
+
+    document.querySelector('.data-group.light-green p:first-child strong').textContent = translations[lang].netIncomeGrowth;
+    document.querySelector('.data-group.light-green p:nth-child(2) strong').textContent = translations[lang].freeCashFlowGrowth;
+    document.querySelector('.data-group.light-green p:nth-child(3) strong').textContent = translations[lang].shortTermDebtGrowth;
+    document.querySelector('.data-group.light-green p:nth-child(4) strong').textContent = translations[lang].netDebtGrowth;
+
+    document.querySelector('.data-group.light-pink p:first-child strong').textContent = translations[lang].revenueGrowthIncome;
+    document.querySelector('.data-group.light-pink p:nth-child(2) strong').textContent = translations[lang].ebitdaGrowth;
+    document.querySelector('.data-group.light-pink p:nth-child(3) strong').textContent = translations[lang].operatingIncomeGrowth;
+    document.querySelector('.data-group.light-pink p:nth-child(4) strong').textContent = translations[lang].epsGrowth;
+}
