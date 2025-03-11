@@ -125,7 +125,12 @@ const translations = {
 
 // language.js
 
+// language.js
+
 function updateLanguage(lang) {
+    // Extract the stock name from the input field or URL
+    const stockName = document.getElementById('pair').value || new URLSearchParams(window.location.search).get('stock') || '';
+
     // Update general text
     document.getElementById('title').textContent = translations[lang].title;
     document.getElementById('pairLabel').textContent = translations[lang].pairLabel;
@@ -140,10 +145,13 @@ function updateLanguage(lang) {
     document.getElementById('alphaSliderLabel').textContent = translations[lang].alphaSliderLabel;
     document.getElementById('fetchData').textContent = translations[lang].fetchData;
     document.getElementById('fetchChartData').textContent = translations[lang].fetchChartData;
-    document.getElementById('fundamentalsTitle').textContent = translations[lang].fundamentalsTitle;
+
+    // Update fundamentals title with stock name
+    document.getElementById('fundamentalsTitle').innerHTML = `${stockName} ${translations[lang].fundamentalsTitle} <span id="lastClosePrice"></span>`;
+
     document.getElementById('topNewsTitle').textContent = translations[lang].topNewsTitle;
 
-    // Update fundamentals section
+    // Update fundamentals section (as before)
     document.querySelector('.data-group.light-grey p:first-child strong').textContent = translations[lang].marketCap;
     document.querySelector('.data-group.light-grey p:nth-child(2) strong').textContent = translations[lang].eps;
     document.querySelector('.data-group.light-grey p:nth-child(3) strong').textContent = translations[lang].peRatio;
