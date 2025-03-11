@@ -56,7 +56,7 @@ const translations = {
         fetchData: "获取基本面和顶部新闻",
         fetchChartData: "更新图表",
         fundamentalsTitle: "基本面",
-        topNewsTitle: "顶部新闻",
+        topNewsTitle: "最新要闻",
         basics: "基础数据",
         marketCap: "市值:",
         eps: "每股收益:",
