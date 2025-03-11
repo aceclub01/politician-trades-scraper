@@ -166,3 +166,11 @@ function updateLanguage(lang) {
     document.querySelector('.data-group.light-pink p:nth-child(3) strong').textContent = translations[lang].operatingIncomeGrowth;
     document.querySelector('.data-group.light-pink p:nth-child(4) strong').textContent = translations[lang].epsGrowth;
 }
+// Event listener for language change
+document.getElementById('language').addEventListener('change', function() {
+    const selectedLanguage = this.value;
+    updateLanguage(selectedLanguage);
+});
+
+// Initialize with default language
+updateLanguage('en');
